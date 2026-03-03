@@ -12,6 +12,7 @@ class ennemi_debutant:
         self.frames_droite = []
         self.frames_gauche = []
         for i in range(8): 
+            # stocker les frames d'animation dans des listes pour la droite et la gauche
             frame = self.changer_frame(i, 70, 50)
             self.frames_droite.append(frame)
             self.frames_gauche.append(pygame.transform.flip(frame, True, False))
@@ -20,7 +21,7 @@ class ennemi_debutant:
         self.vitesse_animation = 0.1
         self.direction = 1  # 1 pour droite, -1 pour gauche
         self.vitesse_deplacement = 1.70
-        self.position_initiale_x = 100
+        self.position_initiale_x = 100 # Position de départ de l'ennemi sur l'axe x
         self.distance_patrouille = 400 # Distance max avant de faire demi-tour
 
         # définir coordonnées de l'ennemi
@@ -50,14 +51,14 @@ class ennemi_debutant:
         return frame
     
     def gestion_animation(self):
+        # Mettre à jour l'index de la frame pour l'animation
         self.index_image += self.vitesse_animation
         if self.index_image >= len(self.frames_droite):
+            # Réinitialiser l'index pour recommencer l'animation
             self.index_image = 0.0
-        centre_actuel = self.rect.center
         self.image = self.frames_droite[int(self.index_image)] if self.direction == 1 else self.frames_gauche[int(self.index_image)]
-        self.rect = self.image.get_rect(center=centre_actuel)
         self.rect.x += self.vitesse_deplacement * self.direction
-        # Vérifier si l'ennemi a atteint la distance de patrouille
+        # Vérifier si l'ennemi a atteint la distance de patrouille et changer de direction si nécessaire
         if self.rect.x >= self.position_initiale_x + self.distance_patrouille:
             self.direction = -1
         elif self.rect.x <= self.position_initiale_x:
