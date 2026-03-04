@@ -18,29 +18,45 @@ class Player(pygame.sprite.Sprite):
         self.attack = 8
         self.jump_strength = -14
 
+        # PHYSIQUE DU JOUEUR
+        self.direction = 1 # 1 pour droite, -1 pour gauche
         self.position = pygame.math.Vector2(x, y) 
         self.velocity = pygame.math.Vector2(0, 0)
         self.acceleration = pygame.math.Vector2(0, 0)
 
+        # VARIABLES DE GESTION DU SAUT A INITIALISER
         self.on_ground = False
         self.is_jumping = False
         self.jump_button_pressed = False
         self.coyote_timer = -1000
         self.jump_buffer_timer = -1000
 
-        # HITBOX
+        # VARIABLES DE GESTION DE L'ATTAQUE A INITIALISER
+        self.is_attacking = False
+        self.attack_duration = 100
+        self.attack_timer = 0
+        self.attack_cooldown = 350
+        self.last_attack_time = -1000
+        self.attack_direction = "SIDE" #"UP", "DOWN" ou "SIDE"
+        self.hitstop_timer = 0
+        self.screen_shake_timer = 0
+
+        # HITBOX ET IMAGE DU JOUEUR
         self.rect = pygame.Rect(x, y, 60, 90)
         original_image = pygame.image.load('player.png').convert_alpha()
         self.image = pygame.transform.scale(original_image, (75, 90))
+        self.attack_rect = pygame.Rect(0, 0, 0, 0) # Hitbox de l'attaque initialisée vide
 
     def update(self, platforms):
         self.acceleration = pygame.math.Vector2(0, GRAVITY)
 
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]and not keys[pygame.K_RIGHT]:
+        if keys[pygame.K_q]and not keys[pygame.K_d]:
             self.acceleration.x = -ACCELERATION
-        elif keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]:
+            self.direction = -1
+        elif keys[pygame.K_d] and not keys[pygame.K_q]:
             self.acceleration.x = ACCELERATION
+            self.direction = 1
 
         self.acceleration.x += self.velocity.x * FRICTION
         self.velocity += self.acceleration
@@ -80,8 +96,6 @@ class Player(pygame.sprite.Sprite):
                     self.velocity.y = 0
                 self.position.y = self.rect.bottom
 
-        
-
         # GESTION DES TIMERS (COYOTE TIME ET JUMP BUFFER)
         now = pygame.time.get_ticks()
 
@@ -93,6 +107,23 @@ class Player(pygame.sprite.Sprite):
             self.execute_jump() # Exécuter le saut si le jump buffer est actif (c-à-d que le joeur a préssé le bouton de saut) et que le joueur peut sauter (c-à-d que le joueur est dans la fenêtre de coyote time)
             if not self.jump_button_pressed:
                 self.stop_jump()
+
+        now = pygame.time.get_ticks()
+
+        if self.is_attacking:
+            if now - self.attack_timer >= self.attack_duration: # Si la durée de l'attaque est écoulée
+                self.is_attacking = False
+                self.attack_rect = pygame.Rect(0, 0, 0, 0) # Réinitialiser la hitbox de l'attaque lorsque l'attaque est terminée
+            else :
+                if self.attack_direction == "UP":
+                    self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.top - 70, 50, 70)
+                elif self.attack_direction == "DOWN":
+                    self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.bottom, 50, 70)
+                else : #direction "SIDE"
+                    if self.direction == 1: # Attaque vers la droite
+                        self.attack_rect = pygame.Rect(self.rect.right, self.rect.centery - 20, 70, 50)
+                    else: # Attaque vers la gauche
+                        self.attack_rect = pygame.Rect(self.rect.left - 70, self.rect.centery - 20, 70, 50)
 
     def press_jump(self):
         self.jump_button_pressed = True
@@ -114,7 +145,25 @@ class Player(pygame.sprite.Sprite):
         if self.is_jumping and self.velocity.y < 0:
             self.velocity.y = 0
             self.is_jumping = False
-        
+    
+    #GESTION DE L'ATTAQUE
+    def press_attack(self):
+        now = pygame.time.get_ticks()
+        if not self.is_attacking and now - self.last_attack_time >= self.attack_cooldown:
+            keys = pygame.key.get_pressed()
+            self.is_attacking = True
+            self.attack_timer = now
+            self.last_attack_time = now
+            self.ennemis_touches = [] # On vide la liste dpour ne pas toucher plusieurs fois le même ennemi avec une seule attaque
+            print ("SLASH !") # A remplacer par le son de l'attaque et l'animation d'attaque
+
+            if keys[pygame.K_z]: # Attaque vers le haut
+                self.attack_direction = "UP"
+            elif keys[pygame.K_s] and not self.on_ground: # Attaque vers le bas uniquement si le joueur est en l'air
+                self.attack_direction = "DOWN"
+            else:
+                self.attack_direction = "SIDE"
+
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height):
         super().__init__()
