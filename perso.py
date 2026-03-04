@@ -1,24 +1,23 @@
 import pygame 
 pygame.init()
 
-window = pygame.display.set_mode((800, 600))
-window.fill((200, 200, 200))
-
 # PARAMETRES MONDE
 GRAVITY = 0.4
 FRICTION = -0.15
 ACCELERATION = 0.7
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, fenetre):
         super().__init__()
+        self.window = fenetre
+        self.window.fill((200, 200, 200))
 
         # STATS DU JOUEUR
         self.health = 5
         self.max_health = 5
         self.attack = 8
 
-        self.position = pygame.math.Vector2(x, y)
+        self.position = pygame.math.Vector2(x, y) 
         self.velocity = pygame.math.Vector2(0, 0)
         self.acceleration = pygame.math.Vector2(0, 0)
 
@@ -82,37 +81,5 @@ class Platform(pygame.sprite.Sprite):
         self.image = pygame.Surface((width, height))
         self.image.fill((100, 100, 100))
         self.rect = self.image.get_rect(topleft=(x, y))
-
-clock = pygame.time.Clock()
-player = Player(100, 100)
-
-platforms = [
-    Platform(0, 500, 800, 100),
-    Platform(200, 400, 200, 20),
-    Platform(500, 300, 200, 20)
-]
-
-run = True
-while run:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: 
-            run = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                player.jump()
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_SPACE:
-                player.stop_jump()
-    player.update(platforms)
-
-    window.fill((200, 200, 200))
-    for platform in platforms:
-        window.blit(platform.image, platform.rect)
-    
-    image_rect = player.image.get_rect(midbottom=player.rect.midbottom)
-    window.blit(player.image, image_rect)
-    
-    pygame.display.flip()
-    clock.tick(60)
     
 

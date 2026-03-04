@@ -2,10 +2,9 @@ import pygame
 
 pygame.init()
 
-class ennemi_debutant:
-    def __init__(self):
-        # Créer une fenêtre
-        self.ecran = pygame.display.set_mode((800, 600))
+class ennemi_debutant():
+    def __init__(self, fenetre):
+        self.ecran = fenetre
         self.clock = pygame.time.Clock()
         # Charger une image d'ennemi
         self.sheet = pygame.image.load('insecte_sheet2.png').convert_alpha()
@@ -16,7 +15,8 @@ class ennemi_debutant:
             frame = self.changer_frame(i, 70, 50)
             self.frames_droite.append(frame)
             self.frames_gauche.append(pygame.transform.flip(frame, True, False))
-
+        
+        # variable d'aniamtion
         self.index_image = 0.0
         self.vitesse_animation = 0.1
         self.direction = 1  # 1 pour droite, -1 pour gauche
@@ -27,22 +27,6 @@ class ennemi_debutant:
         # définir coordonnées de l'ennemi
         self.image = self.frames_droite[0]
         self.rect = self.image.get_rect(center=(self.position_initiale_x, 300))
-        self.afficher()
-
-    def afficher(self):
-        continuer = True
-        while continuer:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    continuer = False
-            self.gestion_animation()
-            # Remplir le fond 
-            self.ecran.fill((30, 30, 30))
-            # Dessiner le personnage
-            self.ecran.blit(self.image, self.rect)
-            # Mettre à jour l'affichage
-            pygame.display.flip()
-            self.clock.tick(60)
     
     def changer_frame(self, index, width, height):
         # Extraire une frame de la feuille de sprite
@@ -65,5 +49,7 @@ class ennemi_debutant:
             self.direction = 1
 
 if __name__ == "__main__":
-    ennemi_debutant()
+     # Créer une fenêtre de jeu
+    ecran = pygame.display.set_mode((800, 600))
+    ennemi = ennemi_debutant(ecran)
     pygame.quit()
