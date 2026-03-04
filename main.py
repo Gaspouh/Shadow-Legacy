@@ -1,6 +1,7 @@
 import pygame
 from perso import Player, Platform
 from ennemi import ennemi_debutant, Araignee, Volant
+from map import platforms
 
 pygame.init()
 # Créer une fenêtre de jeu
@@ -10,14 +11,9 @@ clock = pygame.time.Clock()
 pygame.display.set_caption("Shadow Legacy")
  
 # Création des objets du jeu
-araignee1 = Araignee(fenetre, 470, 280)
+araignee1 = Araignee(fenetre, 300, 10)
 volant1 = Volant(fenetre, 400, 200)
 player = Player(100, 100, fenetre)
-platforms = [
-    Platform(0, 500, 800, 100),
-    Platform(200, 400, 200, 20),
-    Platform(500, 300, 200, 20)
-]
 
 # Liste des ennemis
 araignee = [araignee1]

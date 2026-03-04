@@ -1,5 +1,6 @@
 import pygame
-
+from map import platforms
+from perso import Platform, Player
 pygame.init()
 
 class ennemi_debutant(pygame.sprite.Sprite):
@@ -46,19 +47,53 @@ class Araignee(ennemi_debutant):
         self.direction = 1  # 1 pour droite, -1 pour gauche
         self.vitesse_deplacement = 1.7
         self.position_initiale_x = x # Position de départ de l'ennemi sur l'axe x
-        self.distance_patrouille = 200 # Distance max avant de faire demi-tour
+        self.gravité = 0.4
+        self.velocity_y = 0
 
     def patrouille(self):
         ennemi_debutant.gestion_animation(self)
+        self.mur = False
+        self.on_ground = False
+
+        if self.direction == 1:
+            devant = self.rect.right
+        else:
+            devant = self.rect.left
         # Afficher la bonne frame en fonction de la direction (orientation perso)
         self.image = self.frames_droite[int(self.index_image)] if self.direction == 1 else self.frames_gauche[int(self.index_image)]
-        self.rect.x += self.vitesse_deplacement * self.direction
-        # Vérifier si l'ennemi a atteint la distance de patrouille et changer de direction si nécessaire
-        if self.rect.x >= self.position_initiale_x + self.distance_patrouille:
-            self.direction = -1
-        elif self.rect.x <= self.position_initiale_x:
-            self.direction = 1
+
+        # Capteur de mur : juste devant le sprite
+        test_mur = pygame.Rect(0, 0, 10, 10)
+        test_mur.center = (devant + (self.direction * 5), self.rect.centery)
+
+        # Capteur de vide : juste devant le sprite et un peu en dessous pour détecter les plateformes
+        capteur_vide = pygame.Rect(0, 0, 10, 10)
+        capteur_vide.center = (devant + (self.direction * 5), self.rect.bottom + 5)
+
+        self.velocity_y += self.gravité # L'araignée accélère vers le bas
+        self.rect.y += self.velocity_y  # On applique la chute
+
+        # Gérer les collisions avec les plateformes après la chute
+        for platform in platforms:
+            if self.rect.colliderect(platform.rect):
+                if self.velocity_y > 0: # Si elle tombe
+                    self.rect.bottom = platform.rect.top
+                    self.velocity_y = 0
+                    self.on_ground = True
+
+        for platform in platforms:
+            # Si le capteur de MUR touche une plateforme
+            if test_mur.colliderect(platform.rect):
+                self.mur = True
+            if capteur_vide.colliderect(platform.rect):
+                self.on_ground = True
     
+        if self.mur or not self.on_ground:
+            self.direction *= -1
+            self.rect.x += self.direction * 2 # Reculer légèrement pour éviter de rester coincé contre le mur
+        else:
+            self.rect.x += self.vitesse_deplacement * self.direction
+
 class Volant(ennemi_debutant):
     def __init__(self, fenetre, x, y):
         # On applique les caractéristique de l'ennemi débutant au volant
