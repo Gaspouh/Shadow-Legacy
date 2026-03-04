@@ -54,6 +54,7 @@ class Araignee(ennemi_debutant):
         ennemi_debutant.gestion_animation(self)
         self.mur = False
         self.on_ground = False
+        self.capteur_on_ground = False
 
         if self.direction == 1:
             devant = self.rect.right
@@ -86,13 +87,14 @@ class Araignee(ennemi_debutant):
             if test_mur.colliderect(platform.rect):
                 self.mur = True
             if capteur_vide.colliderect(platform.rect):
-                self.on_ground = True
+                self.capteur_on_ground = True
     
-        if self.mur or not self.on_ground:
-            self.direction *= -1
-            self.rect.x += self.direction * 2 # Reculer légèrement pour éviter de rester coincé contre le mur
-        else:
-            self.rect.x += self.vitesse_deplacement * self.direction
+        if self.on_ground:
+            if self.mur or not self.capteur_on_ground :
+                self.direction *= -1
+                self.rect.x += self.direction * 2 # Reculer légèrement pour éviter de rester coincé contre le mur
+            else:
+                self.rect.x += self.vitesse_deplacement * self.direction
 
 class Volant(ennemi_debutant):
     def __init__(self, fenetre, x, y):

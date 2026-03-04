@@ -28,11 +28,11 @@ while continuer:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 # faire sauter le joueur
-                player.jump()
+                player.press_jump()
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:
                 # arrêter le saut du joueur pour permettre un saut plus court
-                player.stop_jump()
+                player.release_jump()
 
     player.update(platforms)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
     
