@@ -1,6 +1,6 @@
 import pygame
-from map import platforms
-from perso import Platform, Player
+from map import Platform, platforms
+from perso import Player
 pygame.init()
 
 class ennemi_debutant(pygame.sprite.Sprite):

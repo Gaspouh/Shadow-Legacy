@@ -1,5 +1,6 @@
 import pygame 
 pygame.init()
+from player_abilities import Dash
 
 # PARAMETRES MONDE
 GRAVITY = 0.4
@@ -37,7 +38,7 @@ class Player(pygame.sprite.Sprite):
         self.attack_timer = 0
         self.attack_cooldown = 350
         self.last_attack_time = -1000
-        self.attack_direction = "SIDE" #"UP", "DOWN" ou "SIDE"
+        self.attack_direction = None #"UP", "DOWN", "RIGHT" ou "LEFT"
         self.hitstop_timer = 0
         self.screen_shake_timer = 0
 
@@ -55,6 +56,9 @@ class Player(pygame.sprite.Sprite):
         # blocage des touches pendant recul apres avoir été touché
         self.stun_timer = 0
         self.stun_duration = 100 # Durée pendant laquelle les touches sont bloquées
+
+        #abilités du personnage
+        self.dash = Dash()
 
 
     def update(self, platforms):
@@ -76,8 +80,8 @@ class Player(pygame.sprite.Sprite):
             self.acceleration.x += self.velocity.x * FRICTION
             self.velocity += self.acceleration
 
-            if self.velocity.y > 10:
-                self.velocity.y = 10
+            if self.velocity.y > 15: # Limiter la vitesse de chute du joueur
+                self.velocity.y = 15
 
             # COLLISION HORIZONTALE (AXE X)
 
@@ -134,8 +138,8 @@ class Player(pygame.sprite.Sprite):
                         self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.top - 70, 50, 70)
                     elif self.attack_direction == "DOWN":
                         self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.bottom, 50, 70)
-                    else : #direction "SIDE"
-                        if self.direction == 1: # Attaque vers la droite
+                    else : #direction "RIGHT" ou "LEFT"
+                        if self.attack_direction == "RIGHT": # Attaque vers la droite
                             self.attack_rect = pygame.Rect(self.rect.right, self.rect.centery - 20, 70, 50)
                         else: # Attaque vers la gauche
                             self.attack_rect = pygame.Rect(self.rect.left - 70, self.rect.centery - 20, 70, 50)
@@ -144,6 +148,12 @@ class Player(pygame.sprite.Sprite):
                 time = pygame.time.get_ticks()
                 if time - self.invincibility_timer >= self.invincibility_duration: # Si la durée d'invincibilité est écoulée
                     self.invincible = False
+
+            self.dash.update(self) # Mettre à jour l'état du dash et appliquer les effets de dash sur le joueur
+
+            if not self.dash.in_use : # Si le dash n'est pas déjà en cours et que le joueur appuie sur la touche de dash
+                self.acceleration = pygame.math.Vector2(0, GRAVITY) # Annuler l'accélération normale pendant le dash pour permettre un contrôle total de la vitesse de dash
+            
         else:
             self.acceleration.x = 0 # Ne pas permettre au joueur de se déplacer pendant le stun
 
@@ -167,6 +177,9 @@ class Player(pygame.sprite.Sprite):
         if self.is_jumping and self.velocity.y < 0:
             self.velocity.y = 0
             self.is_jumping = False
+
+    def press_dash(self):
+        self.dash.start_dash(self)
     
     #GESTION DE L'ATTAQUE
     def press_attack(self):
@@ -184,7 +197,10 @@ class Player(pygame.sprite.Sprite):
             elif keys[pygame.K_s] and not self.on_ground: # Attaque vers le bas uniquement si le joueur est en l'air
                 self.attack_direction = "DOWN"
             else:
-                self.attack_direction = "SIDE"
+                if self.direction == 1:
+                    self.attack_direction = "RIGHT"
+                else:
+                    self.attack_direction = "LEFT"
     
     def toucher(self, player_rect, ennemi_rect):
         if not self.invincible:
@@ -201,11 +217,6 @@ class Player(pygame.sprite.Sprite):
             self.velocity.x = 90 * recul_direction # Reculer le joueur dans la direction opposée à laquelle il fait face lorsqu'il est touché
             self.velocity.y = -4 # faire sauter légerement le joueur si touché
 
-class Platform(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height):
-        super().__init__()
-        self.image = pygame.Surface((width, height))
-        self.image.fill((100, 100, 100))
-        self.rect = self.image.get_rect(topleft=(x, y))
-    
+
+
 
