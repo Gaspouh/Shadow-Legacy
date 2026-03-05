@@ -47,83 +47,105 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(original_image, (75, 90))
         self.attack_rect = pygame.Rect(0, 0, 0, 0) # Hitbox de l'attaque initialisée vide
 
+        # invincibilité après avoir été touché
+        self.invincible = False
+        self.invincibility_duration = 2000 # Durée de l'invincibilité 
+        self.invincibility_timer = 0
+
+        # blocage des touches pendant recul apres avoir été touché
+        self.stun_timer = 0
+        self.stun_duration = 100 # Durée pendant laquelle les touches sont bloquées
+
+
     def update(self, platforms):
         self.acceleration = pygame.math.Vector2(0, GRAVITY)
+        time = pygame.time.get_ticks()
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_q]and not keys[pygame.K_d]:
-            self.acceleration.x = -ACCELERATION
-            self.direction = -1
-        elif keys[pygame.K_d] and not keys[pygame.K_q]:
-            self.acceleration.x = ACCELERATION
-            self.direction = 1
+        istunned = time - self.stun_timer < self.stun_duration # Vérifier si le joueur est encore en état de stun
+   
+        if not istunned:
+            keys = pygame.key.get_pressed()
 
-        self.acceleration.x += self.velocity.x * FRICTION
-        self.velocity += self.acceleration
+            if keys[pygame.K_q]and not keys[pygame.K_d]:
+                self.acceleration.x = -ACCELERATION
+                self.direction = -1
+            elif keys[pygame.K_d] and not keys[pygame.K_q]:
+                self.acceleration.x = ACCELERATION
+                self.direction = 1
 
-        if self.velocity.y > 10:
-            self.velocity.y = 10
+            self.acceleration.x += self.velocity.x * FRICTION
+            self.velocity += self.acceleration
 
-        # COLLISION HORIZONTALE (AXE X)
+            if self.velocity.y > 10:
+                self.velocity.y = 10
 
-        self.position.x += self.velocity.x + 0.5 * self.acceleration.x
-        self.rect.centerx = self.position.x
+            # COLLISION HORIZONTALE (AXE X)
 
-        for platform in platforms:
-            if self.rect.colliderect(platform.rect):
-                if self.velocity.x > 0: # Se déplace vers la droite
-                    self.rect.right = platform.rect.left
-                elif self.velocity.x < 0: # Se déplace vers la gauche
-                    self.rect.left = platform.rect.right
-                self.position.x = self.rect.centerx
-                self.velocity.x = 0 # Arrêter le mouvement horizontal en cas de collision
+            self.position.x += self.velocity.x + 0.5 * self.acceleration.x
+            self.rect.centerx = self.position.x
 
-        # COLLISION VERTICALE (AXE Y)
+            for platform in platforms:
+                if self.rect.colliderect(platform.rect):
+                    if self.velocity.x > 0: # Se déplace vers la droite
+                        self.rect.right = platform.rect.left
+                    elif self.velocity.x < 0: # Se déplace vers la gauche
+                        self.rect.left = platform.rect.right
+                    self.position.x = self.rect.centerx
+                    self.velocity.x = 0 # Arrêter le mouvement horizontal en cas de collision
 
-        self.position.y += self.velocity.y + 0.5 * self.acceleration.y
-        self.rect.bottom = self.position.y
+            # COLLISION VERTICALE (AXE Y)
 
-        self.on_ground = False
-        for platform in platforms:
-            if self.rect.colliderect(platform.rect):
-                if self.velocity.y > 0: # Se déplace vers le bas
-                    self.rect.bottom = platform.rect.top
-                    self.on_ground = True
-                    self.is_jumping = False
-                    self.velocity.y = 0
-                elif self.velocity.y < 0: # Se déplace vers le haut
-                    self.rect.top = platform.rect.bottom
-                    self.velocity.y = 0
-                self.position.y = self.rect.bottom
+            self.position.y += self.velocity.y + 0.5 * self.acceleration.y
+            self.rect.bottom = self.position.y
 
-        # GESTION DES TIMERS (COYOTE TIME ET JUMP BUFFER)
-        now = pygame.time.get_ticks()
+            self.on_ground = False
+            for platform in platforms:
+                if self.rect.colliderect(platform.rect):
+                    if self.velocity.y > 0: # Se déplace vers le bas
+                        self.rect.bottom = platform.rect.top
+                        self.on_ground = True
+                        self.is_jumping = False
+                        self.velocity.y = 0
+                    elif self.velocity.y < 0: # Se déplace vers le haut
+                        self.rect.top = platform.rect.bottom
+                        self.velocity.y = 0
+                    self.position.y = self.rect.bottom
 
-        if self.on_ground:
-            self.coyote_timer = now # Réinitialiser le timer de coyote lorsque le joueur est au sol
-        can_jump = now - self.coyote_timer <= 150
-        want_to_jump = now - self.jump_buffer_timer <= 150
-        if can_jump and want_to_jump:
-            self.execute_jump() # Exécuter le saut si le jump buffer est actif (c-à-d que le joeur a préssé le bouton de saut) et que le joueur peut sauter (c-à-d que le joueur est dans la fenêtre de coyote time)
-            if not self.jump_button_pressed:
-                self.stop_jump()
+            # GESTION DES TIMERS (COYOTE TIME ET JUMP BUFFER)
+            now = pygame.time.get_ticks()
 
-        now = pygame.time.get_ticks()
+            if self.on_ground:
+                self.coyote_timer = now # Réinitialiser le timer de coyote lorsque le joueur est au sol
+            can_jump = now - self.coyote_timer <= 150
+            want_to_jump = now - self.jump_buffer_timer <= 150
+            if can_jump and want_to_jump:
+                self.execute_jump() # Exécuter le saut si le jump buffer est actif (c-à-d que le joeur a préssé le bouton de saut) et que le joueur peut sauter (c-à-d que le joueur est dans la fenêtre de coyote time)
+                if not self.jump_button_pressed:
+                    self.stop_jump()
 
-        if self.is_attacking:
-            if now - self.attack_timer >= self.attack_duration: # Si la durée de l'attaque est écoulée
-                self.is_attacking = False
-                self.attack_rect = pygame.Rect(0, 0, 0, 0) # Réinitialiser la hitbox de l'attaque lorsque l'attaque est terminée
-            else :
-                if self.attack_direction == "UP":
-                    self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.top - 70, 50, 70)
-                elif self.attack_direction == "DOWN":
-                    self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.bottom, 50, 70)
-                else : #direction "SIDE"
-                    if self.direction == 1: # Attaque vers la droite
-                        self.attack_rect = pygame.Rect(self.rect.right, self.rect.centery - 20, 70, 50)
-                    else: # Attaque vers la gauche
-                        self.attack_rect = pygame.Rect(self.rect.left - 70, self.rect.centery - 20, 70, 50)
+            now = pygame.time.get_ticks()
+
+            if self.is_attacking:
+                if now - self.attack_timer >= self.attack_duration: # Si la durée de l'attaque est écoulée
+                    self.is_attacking = False
+                    self.attack_rect = pygame.Rect(0, 0, 0, 0) # Réinitialiser la hitbox de l'attaque lorsque l'attaque est terminée
+                else :
+                    if self.attack_direction == "UP":
+                        self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.top - 70, 50, 70)
+                    elif self.attack_direction == "DOWN":
+                        self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.bottom, 50, 70)
+                    else : #direction "SIDE"
+                        if self.direction == 1: # Attaque vers la droite
+                            self.attack_rect = pygame.Rect(self.rect.right, self.rect.centery - 20, 70, 50)
+                        else: # Attaque vers la gauche
+                            self.attack_rect = pygame.Rect(self.rect.left - 70, self.rect.centery - 20, 70, 50)
+            
+            if self.invincible:
+                time = pygame.time.get_ticks()
+                if time - self.invincibility_timer >= self.invincibility_duration: # Si la durée d'invincibilité est écoulée
+                    self.invincible = False
+        else:
+            self.acceleration.x = 0 # Ne pas permettre au joueur de se déplacer pendant le stun
 
     def press_jump(self):
         self.jump_button_pressed = True
@@ -163,6 +185,21 @@ class Player(pygame.sprite.Sprite):
                 self.attack_direction = "DOWN"
             else:
                 self.attack_direction = "SIDE"
+    
+    def toucher(self, player_rect, ennemi_rect):
+        if not self.invincible:
+            time = pygame.time.get_ticks()
+            self.invincible = True
+            self.invincibility_timer = time
+            self.stun_timer = time
+            self.health -= 1 # Réduire la santé du joueur lorsqu'il est touché
+
+            if player_rect.centerx > ennemi_rect.centerx:
+                recul_direction = 1 # Reculer vers la gauche si le joueur est à droite de l'ennemi
+            else:
+                recul_direction = -1
+            self.velocity.x = 90 * recul_direction # Reculer le joueur dans la direction opposée à laquelle il fait face lorsqu'il est touché
+            self.velocity.y = -4 # faire sauter légerement le joueur si touché
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height):

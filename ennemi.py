@@ -61,6 +61,7 @@ class Araignee(ennemi_debutant):
         self.direction = 1  # 1 pour droite, -1 pour gauche
         self.vitesse_deplacement = 1.7
         self.position_initiale_x = x # Position de départ de l'ennemi sur l'axe x
+        self.position_initiale_y = y # Position de départ de l'ennemi sur l'axe y
         self.gravité = 0.4
         self.velocity_y = 0
         self.velocity_x = 0
@@ -129,6 +130,7 @@ class Volant(ennemi_debutant):
         self.direction = 1  # 1 pour droite, -1 pour gauche
         self.vitesse_deplacement = 1.7
         self.position_initiale_x = x # Position de départ de l'ennemi sur l'axe x
+        self.position_initiale_y = y # Position de départ de l'ennemi sur l'axe y
         
     def poursuite(self, player_rect):
             ennemi_debutant.gestion_animation(self)
