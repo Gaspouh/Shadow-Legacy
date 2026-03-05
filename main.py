@@ -1,13 +1,23 @@
 import pygame
-import random 
+import random
 from perso import Player, Platform
 from ennemi import ennemi_debutant, Araignee, Volant
 from map import platforms
+from camera import Camera
 
 pygame.init()
 # Créer une fenêtre de jeu
-fenetre = pygame.display.set_mode((800, 600))
+fenetre = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+SCREEN_WIDTH, SCREEN_HEIGHT = fenetre.get_size()
+
+GAME_WIDTH, GAME_HEIGHT = 1920, 1080
+virtuelle = pygame.Surface((GAME_WIDTH, GAME_HEIGHT))
+
+MAP_WIDTH, MAP_HEIGHT = 5000, 2000
+camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT)
+
 clock = pygame.time.Clock()
+
 # Définir le titre de la fenêtre
 pygame.display.set_caption("Shadow Legacy")
  
@@ -23,6 +33,7 @@ liste_ennemis = araignee + volant
 # Variables pour le screen shake et le hitstop à initialiser
 hitstop_until = -1 # Temps jusqu'auquel le hitstop est actif (initialisé à une valur passée)
 shake_amount = 0 # Intensité du screen shake
+
 
 def reset():
         # Fonction de réinitialisation du jeu après la mort du joueur
@@ -43,7 +54,7 @@ def reset():
 
 continuer = True
 while continuer:
-        
+    virtuelle.fill((135, 206, 235)) 
     if player.health > 0:
         now = pygame.time.get_ticks()
         if now < hitstop_until:
@@ -66,7 +77,8 @@ while continuer:
                     player.release_jump()
 
         player.update(platforms)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
-        
+        camera.update(player) # Mettre à jour la caméra pour suivre le joueur
+
         for elem in araignee:
             #lancer la fonction de patrouille pour chaque araignée
             elem.patrouille()
@@ -107,34 +119,30 @@ while continuer:
             render_offset = [random.randint(-shake_amount, shake_amount), \
                             random.randint(-shake_amount, shake_amount)] # Appliquer un décalage aléatoire pour créer l'effet de tremblement
             shake_amount -= 1 # Réduire progressivement l'intensité du screen shake
-        
-        # Remplir le fond 
-        fenetre.fill((135, 206, 235))  # Couleur de fond (ciel bleu)
 
         for platform in platforms:
         # Dessiner les plateformes
-            fenetre.blit(platform.image, platform.rect.move(render_offset)) # Appliquer le décalage de rendu pour le screen shake
+            virtuelle.blit(platform.image, camera.apply(platform.rect).move(render_offset)) # Appliquer le décalage de rendu pour le screen shake
 
         # Dessiner les personnages
         for elem in araignee:
-            fenetre.blit(elem.image, elem.rect)
+            virtuelle.blit(elem.image, camera.apply(elem.rect.move(render_offset))) # Appliquer le décalage de rendu pour le screen shake
         for elem in volant:
-            fenetre.blit(elem.image, elem.rect)
+            virtuelle.blit(elem.image, camera.apply(elem.rect.move(render_offset))) # Appliquer le décalage de rendu pour le screen shake
         image_rect = player.image.get_rect(midbottom=player.rect.midbottom)
 
-        if player.invincible: # Si le joueur est invincible, appliquer un effet de clignotement
-            if (pygame.time.get_ticks() // 100) % 2 == 0: # Clignoter 
-                fenetre.blit(player.image, image_rect)
-        else:
-            fenetre.blit(player.image, image_rect)
+        if not player.invincible or (pygame.time.get_ticks() // 100) % 2 == 0: # Clignoter le sprite du joueur lorsqu'il est invincible
+            virtuelle.blit(player.image, camera.apply(image_rect.move(render_offset)))
 
         if player.is_attacking:
-            pygame.draw.rect(fenetre, (255, 0, 0), player.attack_rect) # Afficher la hitbox de l'attaque pour les tests
+            pygame.draw.rect(virtuelle, (255, 0, 0), player.attack_rect.move(render_offset)) # Afficher la hitbox de l'attaque pour les tests
     else:
-        fenetre.fill((0, 0, 0)) # Afficher un écran noir lorsque le joueur n'a plus de santé
+        virtuelle.fill((0, 0, 0)) # Afficher un écran noir lorsque le joueur n'a plus de santé
         reset() # Réinitialiser le jeu lorsque la santé du joueur atteint 0
 
 # Mettre à jour l'affichage
+    image_ecran = pygame.transform.scale(virtuelle, (SCREEN_WIDTH, SCREEN_HEIGHT)) # Redimensionner la surface virtuelle pour l'adapter à la taille de l'écran
+    fenetre.blit(image_ecran, (0, 0)) # Afficher la surface
     pygame.display.flip()
     clock.tick(60)
 
