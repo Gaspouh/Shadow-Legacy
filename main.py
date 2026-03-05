@@ -64,6 +64,7 @@ while continuer:
             if enemi in player.ennemis_touches: # Si l'ennemi a déjà été touché par cette attaque, ne pas le toucher à nouveau
                 continue
             player.ennemis_touches.append(enemi) # Ajouter l'ennemi à la liste des ennemis déjà touchés
+            enemi.toucher(player.rect) # Appliquer les effets de toucher à l'ennemi (par exemple, réduire sa vie ou le faire reculer)
 
             hitstop_until = now + 100 # Activer le hitstop pendant 50ms
             shake_amount = 3 # Définir l'intensité du screen shake 

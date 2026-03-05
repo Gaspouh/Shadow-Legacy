@@ -8,6 +8,7 @@ class ennemi_debutant(pygame.sprite.Sprite):
         super().__init__()
         self.ecran = fenetre
         self.clock = pygame.time.Clock()
+
         # Charger une image d'ennemi
         self.sheet = pygame.image.load(sprite_sheet).convert_alpha()
         self.frames_droite = []
@@ -26,6 +27,10 @@ class ennemi_debutant(pygame.sprite.Sprite):
         self.image = self.frames_droite[0]
         self.rect = self.image.get_rect(center=(x, y))
 
+        # mouvement de l'ennemi
+        self.velocity_x = 0
+        self.velocity_y = 0
+
     def changer_frame(self, index, width, height, marge):
         # Extraire une frame de la feuille de sprite
         frame = pygame.Surface((width, height), pygame.SRCALPHA)
@@ -38,17 +43,28 @@ class ennemi_debutant(pygame.sprite.Sprite):
         if self.index_image >= len(self.frames_droite):
             # Réinitialiser l'index pour recommencer l'animation
             self.index_image = 0.0
+    
+    def toucher(self,player_rect):
+        if player_rect.centerx > self.rect.centerx:
+            recul_direction = -1 # Reculer vers la gauche si le joueur est à droite de l'ennemi
+        else:
+            recul_direction = 1
+        self.velocity_x += 10 * recul_direction # Reculer l'ennemi dans la direction opposée à laquelle il fait face lorsqu'il est touché
+        self.velocity_y = -5 # faire sauter légerement l'ennemi si touché
 
 class Araignee(ennemi_debutant):
     def __init__(self, fenetre, x, y):
         # On applique les caractéristique de l'ennemi débutant à l'araignée
         super().__init__(fenetre, x, y, 'insecte_sheet2.png', 8, 70, 50, 1.7, 13)
 
+        #caracteristique deplacement de l'araignée
         self.direction = 1  # 1 pour droite, -1 pour gauche
         self.vitesse_deplacement = 1.7
         self.position_initiale_x = x # Position de départ de l'ennemi sur l'axe x
         self.gravité = 0.4
         self.velocity_y = 0
+        self.velocity_x = 0
+        self.friction = 0.8
 
     def patrouille(self):
         ennemi_debutant.gestion_animation(self)
@@ -56,10 +72,18 @@ class Araignee(ennemi_debutant):
         self.on_ground = False
         self.capteur_on_ground = False
 
-        if self.direction == 1:
+        self.rect.x += self.velocity_x # on rajoute la vitesse horizontale à la position de l'araignée
+        
+        # On applique la friction pour que l'araignée s'arrête petit à petit
+        self.velocity_x *= self.friction
+
+        if abs(self.velocity_x) < 0.2:# Si la vitesse est très faible, on la met à zéro pour éviter les mouvements de glissement infinis
+            self.velocity_x = 0
+
+        if self.direction == 1: # Si l'araignée va vers la droite, le capteur de mur est devant elle à droite
             devant = self.rect.right
         else:
-            devant = self.rect.left
+            devant = self.rect.left # Si l'araignée va vers la gauche, le capteur de mur est devant elle à gauche
         # Afficher la bonne frame en fonction de la direction (orientation perso)
         self.image = self.frames_droite[int(self.index_image)] if self.direction == 1 else self.frames_gauche[int(self.index_image)]
 
@@ -90,11 +114,12 @@ class Araignee(ennemi_debutant):
                 self.capteur_on_ground = True
     
         if self.on_ground:
-            if self.mur or not self.capteur_on_ground :
-                self.direction *= -1
-                self.rect.x += self.direction * 2 # Reculer légèrement pour éviter de rester coincé contre le mur
-            else:
-                self.rect.x += self.vitesse_deplacement * self.direction
+            if self.velocity_x == 0:
+                if self.mur or not self.capteur_on_ground :
+                    self.direction *= -1
+                    self.rect.x += self.direction * 2 # Reculer légèrement pour éviter de rester coincé contre le mur
+                else:
+                    self.rect.x += self.vitesse_deplacement * self.direction
 
 class Volant(ennemi_debutant):
     def __init__(self, fenetre, x, y):
