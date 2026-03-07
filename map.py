@@ -11,7 +11,7 @@ platforms = [
     Platform(0, 500, 8000, 100),
     Platform(300, 350, 200, 20),
     Platform(500, 200, 200, 20),
-    Platform(800, 100, 20, 500),
+    Platform(800, 0, 20, 350),
     Platform(1100, 300, 200, 20),
     Platform(1400, 400, 200, 20),
 ]

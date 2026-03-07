@@ -150,9 +150,6 @@ class Player(pygame.sprite.Sprite):
                     self.invincible = False
 
             self.dash.update(self) # Mettre à jour l'état du dash et appliquer les effets de dash sur le joueur
-
-            if not self.dash.in_use : # Si le dash n'est pas déjà en cours et que le joueur appuie sur la touche de dash
-                self.acceleration = pygame.math.Vector2(0, GRAVITY) # Annuler l'accélération normale pendant le dash pour permettre un contrôle total de la vitesse de dash
             
         else:
             self.acceleration.x = 0 # Ne pas permettre au joueur de se déplacer pendant le stun

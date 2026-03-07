@@ -1,21 +1,21 @@
 import pygame
 import random
+import os
 from perso import Player
 from ennemi import ennemi_debutant, Araignee, Volant
 from map import Platform, platforms
 from camera import Camera
 
+os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
 pygame.init()
+
 # Créer une fenêtre de jeu
-fenetre = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-SCREEN_WIDTH, SCREEN_HEIGHT = fenetre.get_size()
+fenetre = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN | pygame.SCALED | pygame.DOUBLEBUF, vsync=1) # Créer une fenêtre en plein écran avec double buffering et accélération matérielle
 
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
-virtuelle = pygame.Surface((GAME_WIDTH, GAME_HEIGHT))
-
 MAP_WIDTH, MAP_HEIGHT = 5000, 2000
-camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT)
 
+camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT)
 clock = pygame.time.Clock()
 
 # Définir le titre de la fenêtre
@@ -31,7 +31,7 @@ araignee = [araignee1]
 volant = [volant1]
 liste_ennemis = araignee + volant
 # Variables pour le screen shake et le hitstop à initialiser
-hitstop_until = -1 # Temps jusqu'auquel le hitstop est actif (initialisé à une valur passée)
+hitstop_until = -1 # Temps jusqu'auquel le hitstop est actif (initialisé à une valeur passée)
 shake_amount = 0 # Intensité du screen shake
 
 
@@ -91,55 +91,53 @@ while continuer:
         # Gestion du recul et du pogo après une attaque
         for ennemi in liste_ennemis:
             if player.is_attacking and player.attack_rect.colliderect(ennemi.rect):
-                if ennemi in player.ennemis_touches: # Si l'ennemi a déjà été touché par cette attaque, ne pas le toucher à nouveau
-                    continue
+                if ennemi not in player.ennemis_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque
+                    player.ennemis_touches.append(ennemi) # Ajouter l'ennemi à la liste des ennemis déjà touchés
+                    ennemi.toucher(player.rect) # Appliquer les effets de toucher à l'ennemi 
 
-                player.ennemis_touches.append(ennemi) # Ajouter l'ennemi à la liste des ennemis déjà touchés
-                ennemi.toucher(player.rect) # Appliquer les effets de toucher à l'ennemi 
+                    hitstop_until = now + 50 # Activer le hitstop pendant 50ms
+                    shake_amount = 5 # Définir l'intensité du screen shake 
 
-                hitstop_until = now + 50 # Activer le hitstop pendant 50ms
-                shake_amount = 5 # Définir l'intensité du screen shake 
-
-                if player.attack_direction == "DOWN": 
-                    player.velocity.y = -10 # Rebondir vers le haut après une attaque vers le bas
-                else :
-                    knockback_force = 40
-                    if player.direction == 1: # Reculer vers la droite
-                        player.velocity.x = -knockback_force
-                    else: # Reculer vers la gauche
-                        player.velocity.x = knockback_force
-        
-            elif ennemi.rect.colliderect(player.rect):
+                    if player.attack_direction == "DOWN": 
+                        player.velocity.y = -10 # Rebondir vers le haut après une attaque vers le bas
+                    else :
+                        knockback_force = 40
+                        if player.direction == 1: # Reculer vers la droite
+                            player.velocity.x = -knockback_force
+                        else: # Reculer vers la gauche
+                            player.velocity.x = knockback_force
+            
+            if ennemi.rect.colliderect(player.rect):
                 player.toucher(player.rect, ennemi.rect) # Appliquer les effets de toucher au joueur si un ennemi le touche
     else :
         reset() # Réinitialiser le jeu si le joueur n'a plus de vie
    
-    # Dessiner les plateformes
+    # Dessiner les éléments du jeu sur la fenêtre
     if player.health > 0 :
-        virtuelle.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
-
+        fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
+        
+        # Plateformes
         for platform in platforms:
-            virtuelle.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
+            fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
 
-        # Dessiner les personnages
+        # Ennemis
         for elem in araignee:
-            virtuelle.blit(elem.image, camera.apply(elem.rect)) # Appliquer le décalage de rendu pour le screen shake
+            fenetre.blit(elem.image, camera.apply(elem.rect)) # Appliquer le décalage de rendu pour le screen shake
         for elem in volant:
-            virtuelle.blit(elem.image, camera.apply(elem.rect)) # Appliquer le décalage de rendu pour le screen shake
+            fenetre.blit(elem.image, camera.apply(elem.rect)) # Appliquer le décalage de rendu pour le screen shake
 
+        # Joueur
         image_rect = player.image.get_rect(midbottom=player.rect.midbottom)
         if not player.invincible or (pygame.time.get_ticks() // 100) % 2 == 0: # Clignoter le sprite du joueur lorsqu'il est invincible
-            virtuelle.blit(player.image, camera.apply(image_rect))
+            fenetre.blit(player.image, camera.apply(image_rect))
 
         if player.is_attacking:
-            pygame.draw.rect(virtuelle, (255, 0, 0), camera.apply(player.attack_rect)) # Afficher la hitbox de l'attaque pour les tests
+            pygame.draw.rect(fenetre, (255, 0, 0), camera.apply(player.attack_rect)) # Afficher la hitbox de l'attaque pour les tests
     else:
-        virtuelle.fill((0, 0, 0)) # Afficher un écran noir lorsque le joueur n'a plus de santé
+        fenetre.fill((0, 0, 0)) # Afficher un écran noir lorsque le joueur n'a plus de santé
 
 # Mettre à jour l'affichage
-    image_ecran = pygame.transform.scale(virtuelle, (SCREEN_WIDTH, SCREEN_HEIGHT)) # Redimensionner la surface virtuelle pour l'adapter à la taille de l'écran
-    fenetre.blit(image_ecran, (0, 0)) # Afficher la surface
-    pygame.display.flip()
+    pygame.display.update()
     clock.tick(60)
 
 pygame.quit()
