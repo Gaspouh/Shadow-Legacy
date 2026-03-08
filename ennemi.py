@@ -97,6 +97,8 @@ class Araignee(ennemi_debutant):
         capteur_vide.center = (devant + (self.direction * 5), self.rect.bottom + 5)
 
         self.velocity_y += self.gravité # L'araignée accélère vers le bas
+        if self.velocity_y > 20: # Limite la vitesse de chute des ennemis
+            self.velocity_y = 20
         self.rect.y += self.velocity_y  # On applique la chute
 
         # Gérer les collisions avec les plateformes après la chute

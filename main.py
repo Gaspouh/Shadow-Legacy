@@ -10,10 +10,10 @@ os.environ['SDL_RENDER_SCALE_QUALITY'] = '0'
 pygame.init()
 
 # Créer une fenêtre de jeu
-fenetre = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN | pygame.SCALED | pygame.DOUBLEBUF, vsync=1) # Créer une fenêtre en plein écran avec double buffering et accélération matérielle
-
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
 MAP_WIDTH, MAP_HEIGHT = 5000, 2000
+
+fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.SCALED | pygame.DOUBLEBUF, vsync=1) # Créer une fenêtre en plein écran avec double buffering et accélération matérielle
 
 camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT)
 clock = pygame.time.Clock()
@@ -43,9 +43,11 @@ def reset():
         player.acceleration = pygame.math.Vector2(0, 0)
         player.invincible = False
         for ennemi in liste_ennemis:
-            # Chaque ennemi retourne à sa position de départ
+            # Chaque ennemi retourne à sa position de départ et reinitialise sa vitesse
             ennemi.rect.x = ennemi.position_initiale_x
             ennemi.rect.y = ennemi.position_initiale_y
+            ennemi.velocity_y = 0
+            ennemi.velocity_x = 0
 
 continuer = True
 while continuer:
@@ -62,7 +64,7 @@ while continuer:
                     player.press_jump()
                 if event.key == pygame.K_LSHIFT:
                     # faire dasher le joueur
-                    player.press_dash()
+                    player.dash.start_dash(player) # Dash dans la direction du joueur
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Clic gauche
                     # faire attaquer le joueur
@@ -70,7 +72,7 @@ while continuer:
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
                     # arrêter le saut du joueur pour permettre un saut plus court
-                    player.release_jump()
+                    player.stop_jump()
 
     if player.health > 0:
         if now > hitstop_until :
@@ -91,7 +93,7 @@ while continuer:
         # Gestion du recul et du pogo après une attaque
         for ennemi in liste_ennemis:
             if player.is_attacking and player.attack_rect.colliderect(ennemi.rect):
-                if ennemi not in player.ennemis_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque
+                if ennemi not in player.ennemis_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaquedddddddddddddddd
                     player.ennemis_touches.append(ennemi) # Ajouter l'ennemi à la liste des ennemis déjà touchés
                     ennemi.toucher(player.rect) # Appliquer les effets de toucher à l'ennemi 
 
@@ -100,6 +102,7 @@ while continuer:
 
                     if player.attack_direction == "DOWN": 
                         player.velocity.y = -10 # Rebondir vers le haut après une attaque vers le bas
+                        player.double_jump.reset()
                     else :
                         knockback_force = 40
                         if player.direction == 1: # Reculer vers la droite

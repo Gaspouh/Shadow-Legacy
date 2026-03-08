@@ -1,6 +1,6 @@
 import pygame 
 pygame.init()
-from player_abilities import Dash
+from player_abilities import Dash, Double_jump
 
 # PARAMETRES MONDE
 GRAVITY = 0.4
@@ -28,7 +28,6 @@ class Player(pygame.sprite.Sprite):
         # VARIABLES DE GESTION DU SAUT A INITIALISER
         self.on_ground = False
         self.is_jumping = False
-        self.jump_button_pressed = False
         self.coyote_timer = -1000
         self.jump_buffer_timer = -1000
 
@@ -39,8 +38,6 @@ class Player(pygame.sprite.Sprite):
         self.attack_cooldown = 350
         self.last_attack_time = -1000
         self.attack_direction = None #"UP", "DOWN", "RIGHT" ou "LEFT"
-        self.hitstop_timer = 0
-        self.screen_shake_timer = 0
 
         # HITBOX ET IMAGE DU JOUEUR
         self.rect = pygame.Rect(x, y, 60, 90)
@@ -59,6 +56,7 @@ class Player(pygame.sprite.Sprite):
 
         #abilités du personnage
         self.dash = Dash()
+        self.double_jump = Double_jump()
 
 
     def update(self, platforms):
@@ -80,8 +78,8 @@ class Player(pygame.sprite.Sprite):
             self.acceleration.x += self.velocity.x * FRICTION
             self.velocity += self.acceleration
 
-            if self.velocity.y > 15: # Limiter la vitesse de chute du joueur
-                self.velocity.y = 15
+            if self.velocity.y > 20 and not self.dash.in_use: # Limiter la vitesse de chute du joueur sauf en cas de dash vers le bas
+                self.velocity.y = 20
 
             # COLLISION HORIZONTALE (AXE X)
 
@@ -110,6 +108,7 @@ class Player(pygame.sprite.Sprite):
                         self.on_ground = True
                         self.is_jumping = False
                         self.velocity.y = 0
+                        self.double_jump.reset() # Recharger le double saut
                     elif self.velocity.y < 0: # Se déplace vers le haut
                         self.rect.top = platform.rect.bottom
                         self.velocity.y = 0
@@ -120,12 +119,15 @@ class Player(pygame.sprite.Sprite):
 
             if self.on_ground:
                 self.coyote_timer = now # Réinitialiser le timer de coyote lorsque le joueur est au sol
+
             can_jump = now - self.coyote_timer <= 150
             want_to_jump = now - self.jump_buffer_timer <= 150
-            if can_jump and want_to_jump:
-                self.execute_jump() # Exécuter le saut si le jump buffer est actif (c-à-d que le joeur a préssé le bouton de saut) et que le joueur peut sauter (c-à-d que le joueur est dans la fenêtre de coyote time)
-                if not self.jump_button_pressed:
-                    self.stop_jump()
+
+            if want_to_jump:
+                if can_jump:
+                    self.execute_jump(jump_type="simple") # Exécuter le saut si le jump buffer est actif (c-à-d que le joeur a préssé le bouton de saut) et que le joueur peut sauter (c-à-d que le joueur est dans la fenêtre de coyote time)
+                elif self.double_jump.can_execute(self):
+                    self.execute_jump(jump_type="double")
 
             now = pygame.time.get_ticks()
 
@@ -155,28 +157,25 @@ class Player(pygame.sprite.Sprite):
             self.acceleration.x = 0 # Ne pas permettre au joueur de se déplacer pendant le stun
 
     def press_jump(self):
-        self.jump_button_pressed = True
         self.jump_buffer_timer = pygame.time.get_ticks() # Enregistrer le moment où le bouton de saut est préssé
 
-    def execute_jump(self):
+    def execute_jump(self, jump_type="simple"):
             self.on_ground = False
             self.is_jumping = True
-            self.velocity.y = self.jump_strength # Appliquer du saut
+            
+            if jump_type == "simple" :
+                self.velocity.y = self.jump_strength
+            elif jump_type == "double" :
+                self.velocity.y = self.double_jump.strength
+                self.double_jump.used =True
 
             self.coyote_timer = -1000 # Réinitialisation des timers pour ne pas sauter 2 fois
             self.jump_buffer_timer = -1000
-
-    def release_jump(self):
-        self.jump_button_pressed = False
-        self.stop_jump() # Appeler la fonction pour arrêter le saut lorsque le bouton de saut est relâché
 
     def stop_jump(self):
         if self.is_jumping and self.velocity.y < 0:
             self.velocity.y = 0
             self.is_jumping = False
-
-    def press_dash(self):
-        self.dash.start_dash(self)
     
     #GESTION DE L'ATTAQUE
     def press_attack(self):
@@ -187,7 +186,6 @@ class Player(pygame.sprite.Sprite):
             self.attack_timer = now
             self.last_attack_time = now
             self.ennemis_touches = [] # On vide la liste dpour ne pas toucher plusieurs fois le même ennemi avec une seule attaque
-            print ("SLASH !") # A remplacer par le son de l'attaque et l'animation d'attaque
 
             if keys[pygame.K_z]: # Attaque vers le haut
                 self.attack_direction = "UP"
