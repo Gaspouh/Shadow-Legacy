@@ -5,6 +5,7 @@ from perso import Player
 from ennemi import ennemi_debutant, Araignee, Volant
 from map import Platform, platforms
 from camera import Camera
+from vfx import particles, Particle
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
 pygame.init()
@@ -88,14 +89,18 @@ while continuer:
             """
             for elem in volant:
                 #lancer la fonction de poursuite pour chaque volant
-                elem.poursuite(player.rect)"""
+                elem.poursuite(player.rect)
+            """
         
         # Gestion du recul et du pogo après une attaque
         for ennemi in liste_ennemis:
             if player.is_attacking and player.attack_rect.colliderect(ennemi.rect):
-                if ennemi not in player.ennemis_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaquedddddddddddddddd
+                if ennemi not in player.ennemis_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque
                     player.ennemis_touches.append(ennemi) # Ajouter l'ennemi à la liste des ennemis déjà touchés
                     ennemi.toucher(player.rect) # Appliquer les effets de toucher à l'ennemi 
+
+                    for _ in range(15): # 15 étincelles par coup
+                        particles.append(Particle(ennemi.rect.centerx, ennemi.rect.centery))
 
                     hitstop_until = now + 50 # Activer le hitstop pendant 50ms
                     shake_amount = 5 # Définir l'intensité du screen shake 
@@ -136,8 +141,19 @@ while continuer:
 
         if player.is_attacking:
             pygame.draw.rect(fenetre, (255, 0, 0), camera.apply(player.attack_rect)) # Afficher la hitbox de l'attaque pour les tests
+
+        # Particules
+        for p in particles[:]: # On utilise [:] pour copier la liste et éviter les erreurs de suppression
+            p.update()
+            if p.life <= 0:
+                particles.remove(p)
+            else:
+                p.draw(fenetre, camera)
+
     else:
         fenetre.fill((0, 0, 0)) # Afficher un écran noir lorsque le joueur n'a plus de santé
+
+        
 
 # Mettre à jour l'affichage
     pygame.display.update()
