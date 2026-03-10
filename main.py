@@ -6,6 +6,7 @@ from ennemi import ennemi_debutant, Araignee, Volant
 from map import Platform, platforms
 from camera import Camera
 from vfx import particles, Particle
+from spike import Spike
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
 pygame.init()
@@ -30,7 +31,8 @@ player = Player(100, 100, fenetre)
 # Liste des ennemis
 araignee = [araignee1]
 volant = [volant1]
-liste_ennemis = araignee + volant
+spike = []
+liste_ennemis = araignee + volant + spike
 # Variables pour le screen shake et le hitstop à initialiser
 hitstop_until = -1 # Temps jusqu'auquel le hitstop est actif (initialisé à une valeur passée)
 shake_amount = 0 # Intensité du screen shake
@@ -79,6 +81,7 @@ while continuer:
         if now > hitstop_until :
             player.update(platforms)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
+            spike.last_ground(player)
             
             if shake_amount > 0:
                 shake_amount -= 1 # Réduire progressivement l'intensité du screen shake
@@ -97,7 +100,7 @@ while continuer:
             if player.is_attacking and player.attack_rect.colliderect(ennemi.rect):
                 if ennemi not in player.ennemis_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque
                     player.ennemis_touches.append(ennemi) # Ajouter l'ennemi à la liste des ennemis déjà touchés
-                    ennemi.toucher(player.rect) # Appliquer les effets de toucher à l'ennemi 
+                    ennemi.knockback(player.rect) # Appliquer les effets de recul à l'ennemi 
 
                     for _ in range(15): # 15 étincelles par coup
                         particles.append(Particle(ennemi.rect.centerx, ennemi.rect.centery))
@@ -116,7 +119,10 @@ while continuer:
                             player.velocity.x = knockback_force
             
             if ennemi.rect.colliderect(player.rect):
-                player.toucher(player.rect, ennemi.rect) # Appliquer les effets de toucher au joueur si un ennemi le touche
+                if spike.is_spike :
+                    spike.reset(player)
+                else :
+                    player.knockback(player.rect, ennemi.rect) # Appliquer les effets de recul au joueur si un ennemi le touche
     else :
         reset() # Réinitialiser le jeu si le joueur n'a plus de vie
    

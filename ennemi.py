@@ -44,7 +44,7 @@ class ennemi_debutant(pygame.sprite.Sprite):
             # Réinitialiser l'index pour recommencer l'animation
             self.index_image = 0.0
     
-    def toucher(self,player_rect):
+    def knockback(self,player_rect):
         if player_rect.centerx > self.rect.centerx:
             recul_direction = -1 # Reculer vers la gauche si le joueur est à droite de l'ennemi
         else:

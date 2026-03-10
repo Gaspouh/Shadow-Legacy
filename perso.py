@@ -197,7 +197,7 @@ class Player(pygame.sprite.Sprite):
                 else:
                     self.attack_direction = "LEFT"
     
-    def toucher(self, player_rect, ennemi_rect):
+    def knockback(self, player_rect, ennemi_rect):
         if not self.invincible:
             time = pygame.time.get_ticks()
             self.invincible = True
@@ -206,10 +206,10 @@ class Player(pygame.sprite.Sprite):
             self.health -= 1 # Réduire la santé du joueur lorsqu'il est touché
 
             if player_rect.centerx > ennemi_rect.centerx:
-                recul_direction = 1 # Reculer vers la gauche si le joueur est à droite de l'ennemi
+                knockback_direction = 1 # Reculer vers la gauche si le joueur est à droite de l'ennemi
             else:
-                recul_direction = -1
-            self.velocity.x = 90 * recul_direction # Reculer le joueur dans la direction opposée à laquelle il fait face lorsqu'il est touché
+                knockback_direction = -1
+            self.velocity.x = 90 * knockback_direction # Reculer le joueur dans la direction opposée à laquelle il fait face lorsqu'il est touché
             self.velocity.y = -4 # faire sauter légerement le joueur si touché
 
 
