@@ -7,6 +7,7 @@ from map import Platform, platforms
 from camera import Camera
 from vfx import particles, Particle
 from traps import Spike
+from animation_coeur import Coeur
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
 pygame.init()
@@ -27,6 +28,7 @@ pygame.display.set_caption("Shadow Legacy")
 araignee1 = Araignee(fenetre, 300, 10)
 volant1 = Volant(fenetre, 400, 200)
 player = Player(100, 100, fenetre)
+hearts = [Coeur(20 + i*110, 20) for i in range(player.max_health)]
 
 # Liste des ennemis
 araignee = [araignee1]
@@ -54,6 +56,10 @@ def reset():
             ennemi.rect.y = ennemi.position_initiale_y 
             ennemi.velocity_y = 0
             ennemi.velocity_x = 0
+        # Réinitialiser les cœurs
+        for heart in hearts:
+            heart.state = "ALIVE"
+            heart.index_anim = 0
 
 continuer = True
 while continuer:
@@ -81,6 +87,11 @@ while continuer:
                     player.stop_jump()
 
     if player.health > 0:
+
+        # Mise à jour des cœurs
+        for i, heart in enumerate(hearts):
+            heart.update(player.health, i)
+
         if now > hitstop_until :
             player.update(platforms)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
@@ -161,6 +172,10 @@ while continuer:
                 particles.remove(p)
             else:
                 p.draw(fenetre, camera)
+        
+         # Afficher les cœurs
+        for heart in hearts:
+            fenetre.blit(heart.image, heart.rect) # Les cœurs sont fixes à l'écran, pas besoin d'appliquer le décalage de la caméra
 
     else:
         fenetre.fill((0, 0, 0)) # Afficher un écran noir lorsque le joueur n'a plus de santé
@@ -170,7 +185,7 @@ while continuer:
 
         
 
-# Mettre à jour l'affichageddd
+# Mettre à jour l'affichage
     pygame.display.update()
     clock.tick(60)
 
