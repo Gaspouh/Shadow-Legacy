@@ -6,7 +6,7 @@ from ennemi import ennemi_debutant, Araignee, Volant
 from map import Platform, platforms
 from camera import Camera
 from vfx import particles, Particle
-from spike import Spike
+from traps import Spike
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
 pygame.init()
@@ -31,8 +31,11 @@ player = Player(100, 100, fenetre)
 # Liste des ennemis
 araignee = [araignee1]
 volant = [volant1]
-spike = []
-liste_ennemis = araignee + volant + spike
+liste_ennemis = araignee + volant
+
+# Liste des pièges
+spikes = [Spike(300, 300), Spike(1560, 950)]
+
 # Variables pour le screen shake et le hitstop à initialiser
 hitstop_until = -1 # Temps jusqu'auquel le hitstop est actif (initialisé à une valeur passée)
 shake_amount = 0 # Intensité du screen shake
@@ -48,7 +51,7 @@ def reset():
         for ennemi in liste_ennemis:
             # Chaque ennemi retourne à sa position de départ et reinitialise sa vitesse
             ennemi.rect.x = ennemi.position_initiale_x
-            ennemi.rect.y = ennemi.position_initiale_y
+            ennemi.rect.y = ennemi.position_initiale_y 
             ennemi.velocity_y = 0
             ennemi.velocity_x = 0
 
@@ -81,7 +84,6 @@ while continuer:
         if now > hitstop_until :
             player.update(platforms)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
-            spike.last_ground(player)
             
             if shake_amount > 0:
                 shake_amount -= 1 # Réduire progressivement l'intensité du screen shake
@@ -119,13 +121,13 @@ while continuer:
                             player.velocity.x = knockback_force
             
             if ennemi.rect.colliderect(player.rect):
-                if spike.is_spike :
-                    spike.reset(player)
-                else :
-                    player.knockback(player.rect, ennemi.rect) # Appliquer les effets de recul au joueur si un ennemi le touche
-    else :
-        reset() # Réinitialiser le jeu si le joueur n'a plus de vie
-   
+                player.knockback(player.rect, ennemi.rect) # Appliquer les effets de recul au joueur si un ennemi le touche
+        
+        for spike in spikes :
+            if spike.rect.colliderect(player.rect):
+                spike.handle_collision(player)
+                hitstop_until = pygame.time.get_ticks() + 100
+
     # Dessiner les éléments du jeu sur la fenêtre
     if player.health > 0 :
         fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
@@ -134,11 +136,15 @@ while continuer:
         for platform in platforms:
             fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
 
-        # Ennemis
+        # Ennemis                                            
         for elem in araignee:
             fenetre.blit(elem.image, camera.apply(elem.rect)) # Appliquer le décalage de rendu pour le screen shake
         for elem in volant:
             fenetre.blit(elem.image, camera.apply(elem.rect)) # Appliquer le décalage de rendu pour le screen shake
+
+        # Pièges
+        for spike in spikes:
+            fenetre.blit(spike.image, camera.apply(spike.rect)) 
 
         # Joueur
         image_rect = player.image.get_rect(midbottom=player.rect.midbottom)
@@ -158,10 +164,13 @@ while continuer:
 
     else:
         fenetre.fill((0, 0, 0)) # Afficher un écran noir lorsque le joueur n'a plus de santé
+        pygame.display.update()
+        pygame.time.delay(1000)
+        reset()
 
         
 
-# Mettre à jour l'affichage
+# Mettre à jour l'affichageddd
     pygame.display.update()
     clock.tick(60)
 

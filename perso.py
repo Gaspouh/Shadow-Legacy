@@ -58,14 +58,20 @@ class Player(pygame.sprite.Sprite):
         self.dash = Dash()
         self.double_jump = Double_jump()
 
+        #dernier sol si collision avec pique
+        self.last_safe_position = pygame.math.Vector2(x,y)
+        self.safe_position_timer = 0
 
     def update(self, platforms):
         self.acceleration = pygame.math.Vector2(0, GRAVITY)
-        time = pygame.time.get_ticks()
+        now = pygame.time.get_ticks()
 
-        istunned = time - self.stun_timer < self.stun_duration # Vérifier si le joueur est encore en état de stun
-   
-        if not istunned:
+        if self.on_ground and now - self.safe_position_timer > 500 : #enregistrement du dernier sol safe (toutes les 500ms pour éviter les surcharge de données)
+            self.last_safe_position = pygame.math.Vector2(self.position.x, self.position.y)
+            self.safe_position_timer = now
+
+        is_stunned = now - self.stun_timer < self.stun_duration # Vérifier si le joueur est encore en état de stun
+        if not is_stunned:
             keys = pygame.key.get_pressed()
 
             if keys[pygame.K_q]and not keys[pygame.K_d]:
@@ -147,8 +153,8 @@ class Player(pygame.sprite.Sprite):
                             self.attack_rect = pygame.Rect(self.rect.left - 70, self.rect.centery - 20, 70, 50)
             
             if self.invincible:
-                time = pygame.time.get_ticks()
-                if time - self.invincibility_timer >= self.invincibility_duration: # Si la durée d'invincibilité est écoulée
+                now = pygame.time.get_ticks()
+                if now - self.invincibility_timer >= self.invincibility_duration: # Si la durée d'invincibilité est écoulée
                     self.invincible = False
 
             self.dash.update(self) # Mettre à jour l'état du dash et appliquer les effets de dash sur le joueur
@@ -199,10 +205,9 @@ class Player(pygame.sprite.Sprite):
     
     def knockback(self, player_rect, ennemi_rect):
         if not self.invincible:
-            time = pygame.time.get_ticks()
+            now = pygame.time.get_ticks()
             self.invincible = True
-            self.invincibility_timer = time
-            self.stun_timer = time
+            self.invincibility_timer = now
             self.health -= 1 # Réduire la santé du joueur lorsqu'il est touché
 
             if player_rect.centerx > ennemi_rect.centerx:
