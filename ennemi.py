@@ -1,13 +1,10 @@
 import pygame
 from map import Platform, platforms
-from perso import Player
-pygame.init()
 
 class ennemi_debutant(pygame.sprite.Sprite):
     def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, vitesse, marge):
         super().__init__()
         self.ecran = fenetre
-        self.clock = pygame.time.Clock()
 
         # Charger une image d'ennemi
         self.sheet = pygame.image.load(sprite_sheet).convert_alpha()
@@ -66,6 +63,12 @@ class Araignee(ennemi_debutant):
         self.velocity_y = 0
         self.velocity_x = 0
         self.friction = 0.8
+
+        self.attack_data = {
+            "damage" : 1,
+            "knockback_x" : 80,
+            "knockback_y" : -4
+        }
 
     def patrouille(self):
         ennemi_debutant.gestion_animation(self)

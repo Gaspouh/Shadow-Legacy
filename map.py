@@ -22,7 +22,7 @@ class Spike(pygame.sprite.Sprite):
         img_width = 324
         img_height = 484
         Facteur = 8.5
-        self.image = pygame.image.load('spike2.png')
+        self.image = pygame.image.load('player.png')
         self.image = pygame.transform.scale(self.image, (img_width//Facteur, img_height//Facteur))
         self.rect = self.image.get_rect(topleft=(x, y))
 spikes = [

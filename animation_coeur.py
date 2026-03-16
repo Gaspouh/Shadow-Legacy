@@ -1,6 +1,4 @@
 import pygame
-from ennemi import ennemi_debutant
-from perso import Player
  
 class Coeur(pygame.sprite.Sprite):
     def __init__(self, x, y):

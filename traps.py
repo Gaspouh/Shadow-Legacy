@@ -8,15 +8,8 @@ class Spike :
         self.image = pygame.transform.scale(self.sheet, (40, 40))
         self.rect = self.image.get_rect(topleft=(x,y))
 
-    def handle_collision(self, player):
-        now = pygame.time.get_ticks()
-        player.invincible = True
-        player.invincibility_timer = now
-        player.health -= 1 # Réduire la santé du joueur lorsqu'il est touché
-        player.stun_timer = now
-        player.stun_duration = 500
-
-        if player.health > 0:
-            player.position = pygame.math.Vector2(player.last_safe_position.x, player.last_safe_position.y)
-            player.velocity = pygame.math.Vector2(0, 0)
-            player.rect.midbottom = player.position
+        self.attack_data = {
+            "damage" : 1,
+            "knockback_x" : 0,
+            "knockback_y" : 0
+        }

@@ -1,5 +1,4 @@
 import pygame 
-pygame.init()
 from player_abilities import Dash, Double_jump
 
 # PARAMETRES MONDE
@@ -11,7 +10,6 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, fenetre):
         super().__init__()
         self.window = fenetre
-        self.window.fill((200, 200, 200))
 
         # STATS DU JOUEUR
         self.health = 5
@@ -203,20 +201,41 @@ class Player(pygame.sprite.Sprite):
                 else:
                     self.attack_direction = "LEFT"
     
-    def knockback(self, player_rect, ennemi_rect):
-        if not self.invincible:
-            now = pygame.time.get_ticks()
-            self.invincible = True
-            self.invincibility_timer = now
-            self.health -= 1 # Réduire la santé du joueur lorsqu'il est touché
+    def take_damage(self, attack_data, source_rect, source_type):
+        now = pygame.time.get_ticks()
 
-            if player_rect.centerx > ennemi_rect.centerx:
-                knockback_direction = 1 # Reculer vers la gauche si le joueur est à droite de l'ennemi
-            else:
+        if self.invincible and source_type not in ["SPIKE"]: #liste des objets infligeant des dégats même en période d'invincibilté
+            return 0, 0
+        
+        damage_amount = attack_data["damage"]
+
+        self.health -= damage_amount # Réduire la santé du joueur lorsqu'il est touché
+
+        self.invincible = True
+        self.invincibility_timer = now
+        self.stun_timer = now
+
+        if damage_amount == 2:
+            hitstop_duration = 200
+            shake_amount = 10
+        else :
+            hitstop_duration = 100
+            shake_amount = 5
+
+        if source_type in ["SPIKE"]:
+            if self.health > 0:
+                self.position = self.last_safe_position.copy()
+                self.velocity = pygame.math.Vector2(0, 0)
+                self.rect.midbottom = self.position
+        else : #si c'est un ennemi
+            if source_rect.centerx > self.rect.centerx:
                 knockback_direction = -1
-            self.velocity.x = 90 * knockback_direction # Reculer le joueur dans la direction opposée à laquelle il fait face lorsqu'il est touché
-            self.velocity.y = -4 # faire sauter légerement le joueur si touché
+            else :
+                knockback_direction = 1
+            self.velocity.x = attack_data["knockback_x"] * knockback_direction # Reculer le joueur dans la direction opposée à laquelle il fait face lorsqu'il est touché
+            self.velocity.y = attack_data["knockback_y"]  # faire sauter légerement le joueur si touché
 
+        return hitstop_duration, shake_amount
 
 
 
