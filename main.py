@@ -6,8 +6,7 @@ from ennemi import ennemi_debutant, Araignee, Volant
 from map import Platform, platforms
 from camera import Camera
 from vfx import particles, Particle
-from traps import Spike
-from animation_coeur import Coeur
+from map import Platform, platforms, Spike, spikes
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
 pygame.init()
@@ -28,16 +27,11 @@ pygame.display.set_caption("Shadow Legacy")
 araignee1 = Araignee(fenetre, 300, 10)
 volant1 = Volant(fenetre, 400, 200)
 player = Player(100, 100, fenetre)
-hearts = [Coeur(20 + i*110, 20) for i in range(player.max_health)]
 
 # Liste des ennemis
 araignee = [araignee1]
 volant = [volant1]
 liste_ennemis = araignee + volant
-
-# Liste des pièges
-spikes = [Spike(300, 300), Spike(1560, 950)]
-
 # Variables pour le screen shake et le hitstop à initialiser
 hitstop_until = -1 # Temps jusqu'auquel le hitstop est actif (initialisé à une valeur passée)
 shake_amount = 0 # Intensité du screen shake
@@ -53,13 +47,9 @@ def reset():
         for ennemi in liste_ennemis:
             # Chaque ennemi retourne à sa position de départ et reinitialise sa vitesse
             ennemi.rect.x = ennemi.position_initiale_x
-            ennemi.rect.y = ennemi.position_initiale_y 
+            ennemi.rect.y = ennemi.position_initiale_y
             ennemi.velocity_y = 0
             ennemi.velocity_x = 0
-        # Réinitialiser les cœurs
-        for heart in hearts:
-            heart.state = "ALIVE"
-            heart.index_anim = 0
 
 continuer = True
 while continuer:
@@ -87,11 +77,6 @@ while continuer:
                     player.stop_jump()
 
     if player.health > 0:
-
-        # Mise à jour des cœurs
-        for i, heart in enumerate(hearts):
-            heart.update(player.health, i)
-
         if now > hitstop_until :
             player.update(platforms)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
@@ -113,7 +98,7 @@ while continuer:
             if player.is_attacking and player.attack_rect.colliderect(ennemi.rect):
                 if ennemi not in player.ennemis_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque
                     player.ennemis_touches.append(ennemi) # Ajouter l'ennemi à la liste des ennemis déjà touchés
-                    ennemi.knockback(player.rect) # Appliquer les effets de recul à l'ennemi 
+                    ennemi.toucher(player.rect) # Appliquer les effets de toucher à l'ennemi 
 
                     for _ in range(15): # 15 étincelles par coup
                         particles.append(Particle(ennemi.rect.centerx, ennemi.rect.centery))
@@ -132,31 +117,34 @@ while continuer:
                             player.velocity.x = knockback_force
             
             if ennemi.rect.colliderect(player.rect):
-                player.knockback(player.rect, ennemi.rect) # Appliquer les effets de recul au joueur si un ennemi le touche
-        
-        for spike in spikes :
-            if spike.rect.colliderect(player.rect):
-                spike.handle_collision(player)
-                hitstop_until = pygame.time.get_ticks() + 100
-
+                player.toucher(player.rect, ennemi.rect) # Appliquer les effets de toucher au joueur si un ennemi le touche
+    else :
+        reset() # Réinitialiser le jeu si le joueur n'a plus de vie
+   
     # Dessiner les éléments du jeu sur la fenêtre
     if player.health > 0 :
         fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
-        
+        """ map """
         # Plateformes
         for platform in platforms:
             fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
 
-        # Ennemis                                            
+        # Spikes
+        for spike in spikes:
+            fenetre.blit(spike.image, camera.apply(spike.rect))
+            
+        """ ennemis et joueur """
+        # Ennemis
         for elem in araignee:
             fenetre.blit(elem.image, camera.apply(elem.rect)) # Appliquer le décalage de rendu pour le screen shake
+
         for elem in volant:
-            fenetre.blit(elem.image, camera.apply(elem.rect)) # Appliquer le décalage de rendu pour le screen shake
-
-        # Pièges
+            fenetre.blit(elem.image, camera.apply(elem.rect))
+        
+        # Affiner la collision du spike (de carre à triangle forme du spike)
         for spike in spikes:
-            fenetre.blit(spike.image, camera.apply(spike.rect)) 
-
+            if spike.rect.colliderect(player.rect):
+                player.toucher(player.rect, spike.rect)
         # Joueur
         image_rect = player.image.get_rect(midbottom=player.rect.midbottom)
         if not player.invincible or (pygame.time.get_ticks() // 100) % 2 == 0: # Clignoter le sprite du joueur lorsqu'il est invincible
@@ -172,16 +160,9 @@ while continuer:
                 particles.remove(p)
             else:
                 p.draw(fenetre, camera)
-        
-         # Afficher les cœurs
-        for heart in hearts:
-            fenetre.blit(heart.image, heart.rect) # Les cœurs sont fixes à l'écran, pas besoin d'appliquer le décalage de la caméra
 
     else:
         fenetre.fill((0, 0, 0)) # Afficher un écran noir lorsque le joueur n'a plus de santé
-        pygame.display.update()
-        pygame.time.delay(1000)
-        reset()
 
         
 
