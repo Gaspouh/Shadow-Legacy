@@ -11,6 +11,7 @@ class Dash:
         self.in_use = False
         self.dash_timer = 0
         self.last_dash = -1000
+        self.dash_invincible = False # Flag pour savoir si l'invincibilité vient du dash
 
     def start_dash(self, player):
         now = pygame.time.get_ticks()
@@ -25,6 +26,12 @@ class Dash:
             
             keys = pygame.key.get_pressed()
             self.is_dash_down = keys[pygame.K_s] and not player.on_ground
+
+            # Invincibilité juste pour le dash vers le bas
+            if self.is_dash_down:
+                player.invincible = True
+                self.dash_invincible = True
+
             return True
         return False
     
@@ -35,13 +42,20 @@ class Dash:
                 self.in_use = False
                 player.velocity.x *= 0.5 # Ralentir le joueur après le dash
                 player.velocity.y *= 0.7
+
+                # Retirer l'invincibilité du dash seulement si c'est le dash qui l'avait activée
+                # (et non une invincibilité due à des dégâts reçus)
+                if self.dash_invincible:
+                    player.invincible = False
+                    self.dash_invincible = False
+
             else :
                 if self.is_dash_down:
                     player.velocity.x = 0 # Ne pas permettre au joueur de se déplacer horizontalement pendant le dash vers le bas
                     player.velocity.y = self.vitesse_dash*0.3 # Appliquer la vitesse de dash vers le bas plus lente vers le bas car il n'y a pas de force qui compense le dash sur l'axe des y
                 else:
                     player.velocity.x = self.vitesse_dash * player.direction # Appliquer la vitesse de dash dans la direction du joueur
-                    player.velocity.y = 0 # Ne pas permettre au joueur de monter ou descendre pendant le dash5
+                    player.velocity.y = 0 # Ne pas permettre au joueur de monter ou descendre pendant le dash
 
 class Double_jump:
     def __init__ (self):
