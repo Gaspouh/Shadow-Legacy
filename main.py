@@ -1,5 +1,4 @@
 import pygame
-import random
 import os
 from perso import Player
 from ennemi import ennemi_debutant, Araignee, Volant
@@ -7,7 +6,8 @@ from map import Platform, platforms
 from camera import Camera
 from vfx import particles, Particle
 from traps import Spike
-from animation_coeur import Coeur
+from interface import Coeur
+from sprite_sheet import *
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
 pygame.init()
@@ -36,7 +36,7 @@ volant = [volant1]
 liste_ennemis = araignee + volant
 
 # Liste des pièges
-spikes = [Spike(300, 300), Spike(1560, 950)]
+spikes = [Spike(300, 300, 40), Spike(1560, 950, 40)]
 
 # Variables pour le screen shake et le hitstop à initialiser
 hitstop_until = -1 # Temps jusqu'auquel le hitstop est actif (initialisé à une valeur passée)

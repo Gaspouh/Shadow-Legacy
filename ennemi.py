@@ -1,45 +1,11 @@
 import pygame
 from map import Platform, platforms
+from sprite_sheet import *
 
 class ennemi_debutant(pygame.sprite.Sprite):
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, vitesse, marge):
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, vitesse, marge, charger_sprite):
         super().__init__()
-        self.ecran = fenetre
-
-        # Charger une image d'ennemi
-        self.sheet = pygame.image.load(sprite_sheet).convert_alpha()
-        self.frames_droite = []
-        self.frames_gauche = []
-        for i in range(nb_frames): 
-            # stocker les frames d'animation dans des listes pour la droite et la gauche
-            frame = self.changer_frame(i, width, height, marge)
-            self.frames_droite.append(frame)
-            self.frames_gauche.append(pygame.transform.flip(frame, True, False))
-        
-        # variable d'animation
-        self.index_image = 0.0
-        self.vitesse_animation = 0.1
-
-        # définir coordonnées de l'ennemi
-        self.image = self.frames_droite[0]
-        self.rect = self.image.get_rect(center=(x, y))
-
-        # mouvement de l'ennemi
-        self.velocity_x = 0
-        self.velocity_y = 0
-
-    def changer_frame(self, index, width, height, marge):
-        # Extraire une frame de la feuille de sprite
-        frame = pygame.Surface((width, height), pygame.SRCALPHA)
-        frame.blit(self.sheet, (0, 0), (marge + (index * width), 250 , width, height))
-        return frame
-    
-    def gestion_animation(self):
-        # Mettre à jour l'index de la frame pour l'animation
-        self.index_image += self.vitesse_animation
-        if self.index_image >= len(self.frames_droite):
-            # Réinitialiser l'index pour recommencer l'animation
-            self.index_image = 0.0
+        charger_sprite(fenetre, x, y, sprite_sheet, nb_frames, width, height, vitesse, marge)
     
     def knockback(self,player_rect):
         if player_rect.centerx > self.rect.centerx:
@@ -50,7 +16,7 @@ class ennemi_debutant(pygame.sprite.Sprite):
         self.velocity_y = -5 # faire sauter légerement l'ennemi si touché
 
 class Araignee(ennemi_debutant):
-    def __init__(self, fenetre, x, y):
+    def __init__(self, fenetre, x, y, gestion_animation):
         # On applique les caractéristique de l'ennemi débutant à l'araignée
         super().__init__(fenetre, x, y, 'insecte_sheet2.png', 8, 70, 50, 1.7, 13)
 
@@ -70,8 +36,8 @@ class Araignee(ennemi_debutant):
             "knockback_y" : -4
         }
 
-    def patrouille(self):
-        ennemi_debutant.gestion_animation(self)
+    def patrouille(self, gestion_animation):
+        ennemi_debutant.gestion_animation()
         self.mur = False
         self.on_ground = False
         self.capteur_on_ground = False
@@ -128,7 +94,7 @@ class Araignee(ennemi_debutant):
                     self.rect.x += self.vitesse_deplacement * self.direction
 
 class Volant(ennemi_debutant):
-    def __init__(self, fenetre, x, y):
+    def __init__(self, fenetre, x, y, gestion_animation):
         # On applique les caractéristique de l'ennemi débutant au volant
         super().__init__(fenetre, x, y, 'sprit_sheet_volant.png', 4, 50, 50, 1.7, 5)
 
@@ -137,8 +103,8 @@ class Volant(ennemi_debutant):
         self.position_initiale_x = x # Position de départ de l'ennemi sur l'axe x
         self.position_initiale_y = y # Position de départ de l'ennemi sur l'axe y
         
-    def poursuite(self, player_rect):
-            ennemi_debutant.gestion_animation(self)
+    def poursuite(self, player_rect, gestion_animation):
+            gestion_animation()
             # Afficher la bonne frame en fonction de la direction (orientation perso)
             self.image = self.frames_droite[int(self.index_image)] if self.direction == 1 else self.frames_gauche[int(self.index_image)]
             if player_rect.x > self.rect.x:
