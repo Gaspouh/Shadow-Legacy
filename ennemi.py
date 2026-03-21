@@ -2,10 +2,9 @@ import pygame
 from map import Platform, platforms
 from sprite_sheet import *
 
-class ennemi_debutant(pygame.sprite.Sprite):
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, vitesse, marge, charger_sprite):
-        super().__init__()
-        charger_sprite(fenetre, x, y, sprite_sheet, nb_frames, width, height, vitesse, marge)
+class ennemi_debutant(Animation):
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge):
+        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge)
     
     def knockback(self,player_rect):
         if player_rect.centerx > self.rect.centerx:
@@ -16,9 +15,9 @@ class ennemi_debutant(pygame.sprite.Sprite):
         self.velocity_y = -5 # faire sauter légerement l'ennemi si touché
 
 class Araignee(ennemi_debutant):
-    def __init__(self, fenetre, x, y, gestion_animation):
+    def __init__(self, fenetre, x, y):
         # On applique les caractéristique de l'ennemi débutant à l'araignée
-        super().__init__(fenetre, x, y, 'insecte_sheet2.png', 8, 70, 50, 1.7, 13)
+        super().__init__(fenetre, x, y, 'insecte_sheet2.png', 8, 70, 50, 13)
 
         #caracteristique deplacement de l'araignée
         self.direction = 1  # 1 pour droite, -1 pour gauche
@@ -36,8 +35,8 @@ class Araignee(ennemi_debutant):
             "knockback_y" : -4
         }
 
-    def patrouille(self, gestion_animation):
-        ennemi_debutant.gestion_animation()
+    def patrouille(self):
+        Animation.gestion_animation(self)
         self.mur = False
         self.on_ground = False
         self.capteur_on_ground = False
@@ -94,17 +93,26 @@ class Araignee(ennemi_debutant):
                     self.rect.x += self.vitesse_deplacement * self.direction
 
 class Volant(ennemi_debutant):
-    def __init__(self, fenetre, x, y, gestion_animation):
+    def __init__(self, fenetre, x, y):
         # On applique les caractéristique de l'ennemi débutant au volant
-        super().__init__(fenetre, x, y, 'sprit_sheet_volant.png', 4, 50, 50, 1.7, 5)
+        super().__init__(fenetre, x, y, 'sprit_sheet_volant.png', 4, 50, 50, 5)
 
         self.direction = 1  # 1 pour droite, -1 pour gauche
         self.vitesse_deplacement = 1.7
         self.position_initiale_x = x # Position de départ de l'ennemi sur l'axe x
         self.position_initiale_y = y # Position de départ de l'ennemi sur l'axe y
+        self.image = self.frames_droite[0]
+        self.velocity_y = 0
+        self.velocity_x = 0
+
+        self.attack_data = {
+            "damage" : 1,
+            "knockback_x" : 80,
+            "knockback_y" : -4
+        }
         
-    def poursuite(self, player_rect, gestion_animation):
-            gestion_animation()
+    def poursuite(self, player_rect):
+            Animation.gestion_animation(self)
             # Afficher la bonne frame en fonction de la direction (orientation perso)
             self.image = self.frames_droite[int(self.index_image)] if self.direction == 1 else self.frames_gauche[int(self.index_image)]
             if player_rect.x > self.rect.x:

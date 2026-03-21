@@ -1,10 +1,9 @@
 import pygame
 
-class animation:
+class Animation:
     def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge):
-            
-        ecran = fenetre
-        
+        self.ecran = fenetre
+
         # Charger une image d'ennemi
         sheet = pygame.image.load(sprite_sheet).convert_alpha()
         frames_droite = []
@@ -36,10 +35,10 @@ class animation:
             frame.blit(sheet, (0, 0), (marge + (index * width), 250 , width, height))
             return frame
         
-    def gestion_animation(self, index_image, vitesse_animation, frames_droite):
+    def gestion_animation(self):
             # Mettre à jour l'index de la frame pour l'animation
-            index_image += vitesse_animation
-            if index_image >= len(frames_droite):
+            self.index_image += self.vitesse_animation
+            if self.index_image >= len(self.frames_droite):
                 # Réinitialiser l'index pour recommencer l'animation
-                index_image = 0.0
-            return index_image
+                self.index_image = 0.0
+            return self.index_image
