@@ -1,0 +1,22 @@
+{
+    "player": {
+        "health": 5,
+        "max_health": 5,
+        "jump_strength": -14,
+        "attack": 1,
+        "attack_cooldown": 350,
+        "attack_duration": 100,
+        "invincibility_duration": 2000,
+        "stun_duration": 100
+    },
+    "abilities": {
+        "dash": {
+            "vitesse_dash": 80,
+            "duree": 100,
+            "cooldown": 1000
+        },
+        "double_jump": {
+            "strength": -12
+        }
+    }
+}

@@ -8,7 +8,6 @@ from vfx import particles, Particle
 from traps import *
 from objets import Coeur
 from sprite_sheet import *
-from save import sauvegarder, charger, get_spawn_from_checkpoints
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
 pygame.init()
@@ -20,7 +19,9 @@ set_spawn_sound = pygame.mixer.Sound("set_spawn_sound.mp3")
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
 MAP_WIDTH, MAP_HEIGHT = 5000, 2000
 
-fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.SCALED | pygame.DOUBLEBUF, vsync=1) # Créer une fenêtre en plein écran avec double buffering et accélération matérielle
+fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.SCALED | pygame.DOUBLEBUF, vsync=1)
+
+spawn_point = pygame.math.Vector2(100, 100)  # point de spawn par défaut
 
 camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT)
 clock = pygame.time.Clock()
@@ -192,11 +193,9 @@ while continuer:
             fenetre.blit(cp.image, camera.apply(cp.rect))
             if cp.rect.colliderect(player.rect) and not cp.activated:
                 cp.activated = True
-                spawn_point = get_spawn_from_checkpoints(checkpoints)   # recalcul depuis les checkpoints
-                sauvegarder(player, checkpoints)    # sauvegarde automatique
-                set_spawn_sound.play()
+                spawn_point = pygame.math.Vector2(cp.rect.x, cp.rect.y)
 
-        # Ennemis                                            
+        # Ennemis
         for elem in araignee:
             fenetre.blit(elem.image, camera.apply(elem.rect)) # Appliquer le décalage de rendu pour le screen shake
         for elem in volant:
