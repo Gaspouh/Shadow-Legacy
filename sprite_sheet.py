@@ -1,7 +1,7 @@
 import pygame
 
 class Animation:
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge):
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne):
         self.ecran = fenetre
 
         # Charger une image d'ennemi
@@ -10,7 +10,7 @@ class Animation:
         frames_gauche = []
         for i in range(nb_frames): 
             # stocker les frames d'animation dans des listes pour la droite et la gauche
-            frame = self.changer_frame(i, width, height, marge, sheet)
+            frame = self.changer_frame(i, width, height, marge, sheet, ligne)
             frames_droite.append(frame)
             frames_gauche.append(pygame.transform.flip(frame, True, False))
         
@@ -29,10 +29,10 @@ class Animation:
         self.index_image = index_image
         self.vitesse_animation = vitesse_animation
 
-    def changer_frame(self, index, width, height, marge, sheet ):
+    def changer_frame(self, index, width, height, marge, sheet, ligne):
             # Extraire une frame de la feuille de sprite
             frame = pygame.Surface((width, height), pygame.SRCALPHA)
-            frame.blit(sheet, (0, 0), (marge + (index * width), 250 , width, height))
+            frame.blit(sheet, (0, 0), (marge + (index * width), ligne * height , width, height))
             return frame
         
     def gestion_animation(self):

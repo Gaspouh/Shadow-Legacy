@@ -3,9 +3,9 @@ from map import Platform, platforms
 from sprite_sheet import *
 
 class ennemi_debutant(Animation):
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge):
-        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge)
-    
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne):
+        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne)
+
     def knockback(self,player_rect):
         if player_rect.centerx > self.rect.centerx:
             recul_direction = -1 # Reculer vers la gauche si le joueur est à droite de l'ennemi
@@ -17,7 +17,7 @@ class ennemi_debutant(Animation):
 class Araignee(ennemi_debutant):
     def __init__(self, fenetre, x, y):
         # On applique les caractéristique de l'ennemi débutant à l'araignée
-        super().__init__(fenetre, x, y, 'insecte_sheet2.png', 8, 70, 50, 13)
+        super().__init__(fenetre, x, y, 'insecte_sheet2.png', 8, 70, 50, 13, 5)
 
         #caracteristique deplacement de l'araignée
         self.direction = 1  # 1 pour droite, -1 pour gauche
@@ -95,7 +95,7 @@ class Araignee(ennemi_debutant):
 class Volant(ennemi_debutant):
     def __init__(self, fenetre, x, y):
         # On applique les caractéristique de l'ennemi débutant au volant
-        super().__init__(fenetre, x, y, 'sprit_sheet_volant.png', 4, 50, 50, 5)
+        super().__init__(fenetre, x, y, 'sprit_sheet_volant.png', 4, 50, 50, 5, 3)
 
         self.direction = 1  # 1 pour droite, -1 pour gauche
         self.vitesse_deplacement = 1.7

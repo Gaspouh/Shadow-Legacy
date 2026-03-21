@@ -6,7 +6,7 @@ from map import Platform, platforms
 from camera import Camera
 from vfx import particles, Particle
 from traps import Spike
-from interface import Coeur
+from objets import Coeur
 from sprite_sheet import *
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
@@ -28,7 +28,7 @@ pygame.display.set_caption("Shadow Legacy")
 araignee1 = Araignee(fenetre, 300, 10)
 volant1 = Volant(fenetre, 400, 200)
 player = Player(100, 100, fenetre)
-hearts = [Coeur(20 + i*110, 20) for i in range(player.max_health)]
+hearts = [Coeur(fenetre, 100 + i*110, 20) for i in range(player.max_health)]
 
 # Liste des ennemis
 araignee = [araignee1]
