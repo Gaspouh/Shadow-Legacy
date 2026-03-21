@@ -14,7 +14,7 @@ class Player(pygame.sprite.Sprite):
         # STATS DU JOUEUR
         self.health = 5
         self.max_health = 5
-        self.attack = 8
+        self.attack = 1
         self.jump_strength = -14
 
         # PHYSIQUE DU JOUEUR
