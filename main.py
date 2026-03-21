@@ -27,7 +27,7 @@ clock = pygame.time.Clock()
 
 # Image
 ui_reposer = pygame.image.load("UI_'Pressez_E'.png").convert_alpha()
-ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /5, ui_reposer.get_height() / 5))
+ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /5.15, ui_reposer.get_height() / 5.15))
 
 # Sons
 set_spawn_sound = pygame.mixer.Sound("set_spawn_sound.mp3")
