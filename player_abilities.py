@@ -1,12 +1,15 @@
 import pygame
-
+from save import load_config
+#cfg signifie "configuration"
 class Dash:
-    def __init__(self):
+    def __init__(self, cfg={}):
         self.unlocked = True # Permet de débloquer le dash plus tard dans le jeu
 
-        self.vitesse_dash = 80
-        self.duree = 100
-        self.cooldown = 1000
+        cfg_dash = cfg if cfg else load_config()["abilities"]["dash"]
+
+        self.vitesse_dash = cfg_dash.get("vitesse_dash", 80)
+        self.duree        = cfg_dash.get("duree", 100)
+        self.cooldown     = cfg_dash.get("cooldown", 1000)
 
         self.in_use = False
         self.dash_timer = 0
@@ -58,11 +61,13 @@ class Dash:
                     player.velocity.y = 0 # Ne pas permettre au joueur de monter ou descendre pendant le dash
 
 class Double_jump:
-    def __init__ (self):
+    def __init__(self, cfg={}):
         self.unlocked = True # Permet de débloquer le double saut plus tard dans le jeu
 
-        self.strength = -12
-        self.used= False
+        cfg_dj = cfg if cfg else load_config()["abilities"]["double_jump"]
+
+        self.strength = cfg_dj.get("strength", -12)
+        self.used = False
     
     def reset(self): # Appelé quand le joueur touche le sol ou fait un pogo
         self.used = False

@@ -8,9 +8,14 @@ from vfx import particles, Particle
 from traps import Spike
 from objets import Coeur
 from sprite_sheet import *
+from save import sauvegarder, charger, get_spawn_from_checkpoints
+
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
 pygame.init()
+
+# Sons
+set_spawn_sound = pygame.mixer.Sound("set_spawn_sound.mp3")
 
 # Créer une fenêtre de jeu
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
@@ -18,7 +23,6 @@ MAP_WIDTH, MAP_HEIGHT = 5000, 2000
 
 fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.SCALED | pygame.DOUBLEBUF, vsync=1)
 
-spawn_point = pygame.math.Vector2(100, 100)  # point de spawn par défaut
 
 camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT)
 clock = pygame.time.Clock()
@@ -30,6 +34,10 @@ araignee1 = Araignee(fenetre, 300, 10)
 volant1 = Volant(fenetre, 400, 200)
 player = Player(100, 100, fenetre)
 hearts = [Coeur(fenetre, 100 + i*110, 20) for i in range(player.max_health)]
+
+spawn_point = charger(player, checkpoints)  # charge la save si elle existe, sinon spawn par défaut
+player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
+player.rect.midbottom = player.position # pareil avec la hitbox
 
 # Liste des ennemis
 araignee = [araignee1]
@@ -146,8 +154,10 @@ while continuer:
             fenetre.blit(cp.image, camera.apply(cp.rect))
             if cp.rect.colliderect(player.rect) and not cp.activated:
                 cp.activated = True
-                spawn_point = pygame.math.Vector2(cp.rect.x, cp.rect.y)
-
+                spawn_point = get_spawn_from_checkpoints(checkpoints)   # recalcul depuis les checkpoints
+                sauvegarder(player, checkpoints)    # sauvegarde automatique
+                set_spawn_sound.play()
+                
         # Ennemis
         for elem in araignee:
             fenetre.blit(elem.image, camera.apply(elem.rect))

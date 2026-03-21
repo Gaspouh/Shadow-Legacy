@@ -43,5 +43,6 @@ class Checkpoint(pygame.sprite.Sprite):
         #pygame.draw.rect(self.image, (0, 255, 0), self.image.get_rect(), 2) # hitbox pour test du gameplay
 
 checkpoints = [
-    Checkpoint(600, 417)
+    Checkpoint(600, 417),
+    Checkpoint(1155, 217)
 ]

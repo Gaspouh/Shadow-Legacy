@@ -1,5 +1,6 @@
 import pygame 
 from player_abilities import Dash, Double_jump
+from save import load_config
 
 # PARAMETRES MONDE
 GRAVITY = 0.4
@@ -11,11 +12,14 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         self.window = fenetre
 
+        
+        p = load_config().get("player", {}) if load_config() else {}
+        
         # STATS DU JOUEUR
-        self.health = 5
-        self.max_health = 5
-        self.attack = 1
-        self.jump_strength = -14
+        self.health = p.get("health", 5) # Le 2eme argument est un fallback au cas ou la clé n'existe pas dans le json
+        self.max_health = p.get("max_health", 5)
+        self.attack = p.get("attack", 1)
+        self.jump_strength = p.get("jump_strength", -14)
 
         # PHYSIQUE DU JOUEUR
         self.direction = 1 # 1 pour droite, -1 pour gauche
@@ -31,9 +35,9 @@ class Player(pygame.sprite.Sprite):
 
         # VARIABLES DE GESTION DE L'ATTAQUE A INITIALISER
         self.is_attacking = False
-        self.attack_duration = 100
+        self.attack_duration = p.get("attack_duration", 100)
         self.attack_timer = 0
-        self.attack_cooldown = 350
+        self.attack_cooldown = p.get("attack_cooldown", 350)
         self.last_attack_time = -1000
         self.attack_direction = None #"UP", "DOWN", "RIGHT" ou "LEFT"
 
@@ -45,12 +49,12 @@ class Player(pygame.sprite.Sprite):
 
         # invincibilité après avoir été touché
         self.invincible = False
-        self.invincibility_duration = 2000 # Durée de l'invincibilité 
+        self.invincibility_duration = p.get("invincibility_duration", 2000) # Durée de l'invincibilité 
         self.invincibility_timer = 0
 
         # blocage des touches pendant recul apres avoir été touché
         self.stun_timer = 0
-        self.stun_duration = 100 # Durée pendant laquelle les touches sont bloquées
+        self.stun_duration = p.get("stun_duration", 100) # Durée pendant laquelle les touches sont bloquées
 
         #abilités du personnage
         self.dash = Dash()
