@@ -8,6 +8,7 @@ from vfx import particles, Particle
 from traps import *
 from objets import Coeur
 from sprite_sheet import *
+from save import sauvegarder, charger, get_spawn_from_checkpoints
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
 pygame.init()

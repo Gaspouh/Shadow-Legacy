@@ -1,8 +1,8 @@
 import pygame
 from save import load_config
-#cfg signifie "configuration"
+
 class Dash:
-    def __init__(self, cfg={}):
+    def __init__(self, cfg={}): #cfg signifie "configuration"
         self.unlocked = True # Permet de débloquer le dash plus tard dans le jeu
 
         cfg_dash = cfg if cfg else load_config()["abilities"]["dash"]
