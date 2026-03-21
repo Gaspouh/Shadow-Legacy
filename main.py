@@ -10,11 +10,9 @@ from objets import Coeur
 from sprite_sheet import *
 from save import sauvegarder, charger, get_spawn_from_checkpoints
 
+
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
 pygame.init()
-
-# Sons
-set_spawn_sound = pygame.mixer.Sound("set_spawn_sound.mp3")
 
 # Créer une fenêtre de jeu
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
@@ -26,6 +24,14 @@ spawn_point = pygame.math.Vector2(100, 100)  # point de spawn par défaut
 
 camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT)
 clock = pygame.time.Clock()
+
+# Image
+ui_reposer = pygame.image.load("UI_'Pressez_E'.png").convert_alpha()
+ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /5, ui_reposer.get_height() / 5))
+
+# Sons
+set_spawn_sound = pygame.mixer.Sound("set_spawn_sound.mp3")
+
 
 # Définir le titre de la fenêtre
 pygame.display.set_caption("Shadow Legacy")
@@ -58,11 +64,13 @@ hitstop_until = -1 # Temps jusqu'auquel le hitstop est actif (initialisé à une
 shake_amount = 0 # Intensité du screen shake
 
 
+
 def reset():
         # Fonction de réinitialisation du jeu après la mort du joueur
     global spawn_point
     player.health = player.max_health
-    player.position = pygame.math.Vector2(100, 400)
+    player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)
+    player.rect.midbottom = player.position
     player.velocity = pygame.math.Vector2(0, 0)
     player.acceleration = pygame.math.Vector2(0, 0)
     player.invincible = False
@@ -189,12 +197,26 @@ while continuer:
         for platform in platforms:
             fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
 
-        # Checkpoints (avant le joueur pour qu'il passe devant)
+        # Checkpoints
         for cp in checkpoints:
-            fenetre.blit(cp.image, camera.apply(cp.rect))
+            # 1. On calcule la position à l'écran UNE SEULE FOIS
+            cp_screen_rect = camera.apply(cp.rect)
+            fenetre.blit(cp.image, cp_screen_rect)
+
+            # Quand le joueur est proche du banc
             if cp.rect.colliderect(player.rect) and not cp.activated:
-                cp.activated = True
-                spawn_point = pygame.math.Vector2(cp.rect.x, cp.rect.y)
+                
+                # UI (centrage)
+                ui_x = cp_screen_rect.centerx - (ui_reposer.get_width() // 2)
+                ui_y = cp_screen_rect.top - ui_reposer.get_height() - 10
+                fenetre.blit(ui_reposer, (ui_x, ui_y)) 
+
+                # Au lieu de juste "if 'E' pressed" qui appuierai 60 fois/s :
+                if pygame.key.get_pressed()[pygame.K_e]:
+                    cp.activated = True
+                    spawn_point = pygame.math.Vector2(cp.rect.topleft)
+                    sauvegarder(player, checkpoints)
+                    set_spawn_sound.play()
 
         # Ennemis
         for elem in araignee:
