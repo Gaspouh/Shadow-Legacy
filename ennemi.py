@@ -1,18 +1,28 @@
 import pygame
 from map import Platform, platforms
 from sprite_sheet import *
+from perso import Player
 
 class ennemi_debutant(Animation):
     def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne):
         super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne)
 
-    def knockback(self,player_rect):
+        self.alive = True
+
+
+    def knockback(self,player_rect, player):
         if player_rect.centerx > self.rect.centerx:
             recul_direction = -1 # Reculer vers la gauche si le joueur est à droite de l'ennemi
         else:
             recul_direction = 1
         self.velocity_x += 10 * recul_direction # Reculer l'ennemi dans la direction opposée à laquelle il fait face lorsqu'il est touché
         self.velocity_y = -5 # faire sauter légerement l'ennemi si touché
+        self.pv_ennemi -=  player.attack
+        if self.pv_ennemi <= 0:
+            self.alive = False
+    
+        
+        
 
 class Araignee(ennemi_debutant):
     def __init__(self, fenetre, x, y):
@@ -34,6 +44,8 @@ class Araignee(ennemi_debutant):
             "knockback_x" : 80,
             "knockback_y" : -4
         }
+
+        self.pv_ennemi = 3
 
     def patrouille(self):
         Animation.gestion_animation(self)
@@ -111,6 +123,8 @@ class Volant(ennemi_debutant):
             "knockback_y" : -4
         }
         
+        self.pv_ennemi = 5
+
     def poursuite(self, player_rect):
             Animation.gestion_animation(self)
             # Afficher la bonne frame en fonction de la direction (orientation perso)

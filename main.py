@@ -100,8 +100,9 @@ while continuer:
                 shake_amount -= 1 # Réduire progressivement l'intensité du screen shake
 
             for elem in araignee:
+                if elem.alive: # Vérifier que l'ennemi est vivant avant de le mettre à jour
                 #lancer la fonction de patrouille pour chaque araignée
-                elem.patrouille()
+                    elem.patrouille()
             """
             for elem in volant:
                 #lancer la fonction de poursuite pour chaque volant
@@ -113,7 +114,7 @@ while continuer:
             if player.is_attacking and player.attack_rect.colliderect(ennemi.rect):
                 if ennemi not in player.ennemis_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque
                     player.ennemis_touches.append(ennemi) # Ajouter l'ennemi à la liste des ennemis déjà touchés
-                    ennemi.knockback(player.rect) # Appliquer les effets de recul à l'ennemi 
+                    ennemi.knockback(player.rect, player) # Appliquer les effets de recul à l'ennemi 
 
                     for _ in range(15): # 15 étincelles par coup
                         particles.append(Particle(ennemi.rect.centerx, ennemi.rect.centery))
