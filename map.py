@@ -16,32 +16,18 @@ platforms = [
     Platform(1400, 400, 200, 20)
 ]
 
-class Spike(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        img_width = 324
-        img_height = 484
-        Facteur = 8.5
-        self.image = pygame.image.load('player.png')
-        self.image = pygame.transform.scale(self.image, (img_width//Facteur, img_height//Facteur))
-        self.rect = self.image.get_rect(topleft=(x, y))
-spikes = [
-    Spike(400, 445), # à mettre directement sur le sol pour éviter les pb de collision
-    Spike(540, 445), 
-    Spike(500, 445)
-]
-
 class Checkpoint(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         scale_x = scale_y = 85
-        self.image = pygame.image.load('banc.png')  # sans fill
+        self.image = pygame.image.load('coeur.png')  # sans fill
         self.image = pygame.transform.scale(self.image, (scale_x, scale_y))  # adapter la taille
         self.rect = self.image.get_rect(topleft=(x, y))
         self.activated = False  # devient True quand le joueur passe dessus
 
-        pygame.draw.rect(self.image, (0, 255, 0), self.image.get_rect(), 2) # hitbox pour test du gameplay
+        #pygame.draw.rect(self.image, (0, 255, 0), self.image.get_rect(), 2) # hitbox pour test du gameplay
 
 checkpoints = [
-    Checkpoint(600, 417)
+    Checkpoint(600, 417),
+    Checkpoint(1155, 217)
 ]

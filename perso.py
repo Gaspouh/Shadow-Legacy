@@ -60,11 +60,26 @@ class Player(pygame.sprite.Sprite):
         self.last_safe_position = pygame.math.Vector2(x,y)
         self.safe_position_timer = 0
 
+        # Variables sable mouvant
+        self.quicksand_timer = 0
+        self.quicksand_sink = 0
+
     def update(self, platforms):
         self.acceleration = pygame.math.Vector2(0, GRAVITY)
         now = pygame.time.get_ticks()
 
-        if self.on_ground and now - self.safe_position_timer > 500 : #enregistrement du dernier sol safe (toutes les 500ms pour éviter les surcharge de données)
+        # Variables de ralentissement
+        self.current_slow_factor = 1
+        self.current_jump_factor = 1
+
+        # Variables de vent
+        self.wind_force_x = 0
+        self.wind_force_y = 0
+
+        # Variable de sable mouvant
+        self.in_quicksand = False
+
+        if self.on_ground and not self.in_quicksand and now - self.safe_position_timer > 500:  # enregistrement du dernier sol safe (toutes les 500ms pour éviter les surcharge de données)
             self.last_safe_position = pygame.math.Vector2(self.position.x, self.position.y)
             self.safe_position_timer = now
 
@@ -79,11 +94,42 @@ class Player(pygame.sprite.Sprite):
                 self.acceleration.x = ACCELERATION
                 self.direction = 1
 
-            self.acceleration.x += self.velocity.x * FRICTION
-            self.velocity += self.acceleration
+            self.acceleration.x += self.velocity.x * FRICTION 
+            self.velocity.x += self.acceleration.x * self.current_slow_factor
+            self.velocity.y += self.acceleration.y
 
-            if self.velocity.y > 20 and not self.dash.in_use: # Limiter la vitesse de chute du joueur sauf en cas de dash vers le bas
+            # Gestion du vent
+            if not self.on_ground :
+                self.velocity.x += self.wind_force_x
+            else :
+                self.velocity.x += self.wind_force_x * 0.2
+            self.velocity.y += self.wind_force_y
+
+            # Limiter la vitesse de chute du joueur sauf en cas de dash vers le bas
+            if self.velocity.y > 20 and not self.dash.in_use: 
                 self.velocity.y = 20
+
+            # Gestion sable mouvant (ATTENTION NE FOCNTIONNE PAS)
+
+            if self.in_quicksand :
+                self.quicksand_timer += 1
+
+                if self.quicksand_timer > 30 :
+
+                    self.quicksand_sink = min(40, self.quicksand_sink + 0.2)
+
+                    self.current_slow_factor *= 0.97
+
+                if self.quicksand_sink >=  40:
+                    self.health -= 1
+                    self.position = self.last_safe_position.copy()
+                    self.velocity = pygame.math.Vector2(0,0)
+                    self.rect.midbottom = self.position
+                    self.in_quicksand = False
+
+            else:
+                self.quicksand_timer = 0
+                self.quicksand_sink = 0
 
             # COLLISION HORIZONTALE (AXE X)
 
@@ -107,13 +153,13 @@ class Player(pygame.sprite.Sprite):
             self.on_ground = False
             for platform in platforms:
                 if self.rect.colliderect(platform.rect):
-                    if self.velocity.y > 0: # Se déplace vers le bas
+                    if self.velocity.y > 0:  # Se déplace vers le bas
                         self.rect.bottom = platform.rect.top
                         self.on_ground = True
                         self.is_jumping = False
                         self.velocity.y = 0
-                        self.double_jump.reset() # Recharger le double saut
-                    elif self.velocity.y < 0: # Se déplace vers le haut
+                        self.double_jump.reset()  # Recharger le double saut
+                    elif self.velocity.y < 0:  # Se déplace vers le haut
                         self.rect.top = platform.rect.bottom
                         self.velocity.y = 0
                     self.position.y = self.rect.bottom
@@ -127,7 +173,7 @@ class Player(pygame.sprite.Sprite):
             can_jump = now - self.coyote_timer <= 150
             want_to_jump = now - self.jump_buffer_timer <= 150
 
-            if want_to_jump:
+            if want_to_jump and self.quicksand_sink < 5:
                 if can_jump:
                     self.execute_jump(jump_type="simple") # Exécuter le saut si le jump buffer est actif (c-à-d que le joeur a préssé le bouton de saut) et que le joueur peut sauter (c-à-d que le joueur est dans la fenêtre de coyote time)
                 elif self.double_jump.can_execute(self):
@@ -161,14 +207,19 @@ class Player(pygame.sprite.Sprite):
             self.acceleration.x = 0 # Ne pas permettre au joueur de se déplacer pendant le stun
 
     def press_jump(self):
+
         self.jump_buffer_timer = pygame.time.get_ticks() # Enregistrer le moment où le bouton de saut est préssé
+
+        if self.in_quicksand:
+            self.position.y -= 5
+            self.quicksand_sink = max(0, self.quicksand_sink - 5)
 
     def execute_jump(self, jump_type="simple"):
             self.on_ground = False
             self.is_jumping = True
             
             if jump_type == "simple" :
-                self.velocity.y = self.jump_strength
+                self.velocity.y = self.jump_strength * self.current_jump_factor
             elif jump_type == "double" :
                 self.velocity.y = self.double_jump.strength
                 self.double_jump.used =True
@@ -201,10 +252,10 @@ class Player(pygame.sprite.Sprite):
                 else:
                     self.attack_direction = "LEFT"
     
-    def take_damage(self, attack_data, source_rect, source_type):
+    def take_damage(self, attack_data, source_rect, source):
         now = pygame.time.get_ticks()
 
-        if self.invincible and source_type not in ["SPIKE"]: #liste des objets infligeant des dégats même en période d'invincibilté
+        if self.invincible and not source.ignore_invincibility:
             return 0, 0
         
         damage_amount = attack_data["damage"]
@@ -218,11 +269,11 @@ class Player(pygame.sprite.Sprite):
         if damage_amount == 2:
             hitstop_duration = 200
             shake_amount = 10
-        else :
+        elif damage_amount == 1:
             hitstop_duration = 100
             shake_amount = 5
 
-        if source_type in ["SPIKE"]:
+        if source.respawn_on_touch:
             if self.health > 0:
                 self.position = self.last_safe_position.copy()
                 self.velocity = pygame.math.Vector2(0, 0)

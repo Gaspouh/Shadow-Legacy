@@ -8,7 +8,8 @@ class ennemi_debutant(Animation):
         super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne)
 
         self.alive = True
-
+        self.ignore_invincibility = False
+        self.respawn_on_touch = False 
 
     def knockback(self,player_rect, player):
         if player_rect.centerx > self.rect.centerx:
@@ -20,8 +21,6 @@ class ennemi_debutant(Animation):
         self.pv_ennemi -=  player.attack
         if self.pv_ennemi <= 0:
             self.alive = False
-    
-        
         
 
 class Araignee(ennemi_debutant):
