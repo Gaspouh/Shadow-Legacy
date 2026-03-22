@@ -11,7 +11,7 @@ from sprite_sheet import *
 from save import sauvegarder, charger, get_spawn_from_checkpoints
 from golem import Golem
 from interface import menu
-
+from reset import reset
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
 pygame.init()
@@ -33,7 +33,6 @@ ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /5.15, u
 
 # Sons
 set_spawn_sound = pygame.mixer.Sound("set_spawn_sound.mp3")
-
 
 # Définir le titre de la fenêtre
 pygame.display.set_caption("Shadow Legacy")
@@ -64,30 +63,6 @@ traps = spike + thorn + lava
 # Variables pour le screen shake et le hitstop à initialiser
 hitstop_until = -1 # Temps jusqu'auquel le hitstop est actif (initialisé à une valeur passée)
 shake_amount = 0 # Intensité du screen shake
-
-
-
-def reset():
-        # Fonction de réinitialisation du jeu après la mort du joueur
-    global spawn_point
-    player.health = player.max_health
-    player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)
-    player.rect.midbottom = player.position
-    player.velocity = pygame.math.Vector2(0, 0)
-    player.acceleration = pygame.math.Vector2(0, 0)
-    player.invincible = False
-    for ennemi in liste_ennemis:
-        # Chaque ennemi retourne à sa position de départ et reinitialise sa vitesse
-        ennemi.rect.x = ennemi.position_initiale_x
-        ennemi.rect.y = ennemi.position_initiale_y 
-        ennemi.velocity_y = 0
-        ennemi.velocity_x = 0
-        ennemi.alive = True # Réactiver les ennemis
-        ennemi.pv_ennemi = ennemi.pv_max  # Réinitialiser la santé de l'ennemi
-    # Réinitialiser les cœurs
-    for heart in hearts:
-        heart.state = "ALIVE"
-        heart.index_anim = 0
 
 continuer = True
 pause = False
@@ -179,7 +154,6 @@ while continuer:
                 #lancer la fonction de poursuite pour chaque volant
                 elem.poursuite(player.rect)
             """
-        
         # Gestion du recul et du pogo après une attaque
         for ennemi in liste_ennemis:
             if player.is_attacking and player.attack_rect.colliderect(ennemi.rect):
@@ -207,9 +181,7 @@ while continuer:
                 hitstop_duration, shake_amount = player.take_damage(ennemi.attack_data, ennemi.rect, ennemi) # Appliquer les effets de recul au joueur si un ennemi le touche
                 hitstop_until = pygame.time.get_ticks() + hitstop_duration
 
-
-
-        # Dessiner les éléments du jeu sur la fenêtre
+    # Dessiner les éléments du jeu sur la fenêtre
         if player.health > 0 :
             fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
             
@@ -247,8 +219,7 @@ while continuer:
             fenetre.blit(trap.image, camera.apply(trap.rect)) 
             pygame.draw.rect(fenetre, (0, 255, 255), camera.apply(trap.rect), 2)
 
-
-        # Joueur
+     # Joueur
         image_rect = player.image.get_rect(midbottom=player.rect.midbottom)
         if not player.invincible or (pygame.time.get_ticks() // 100) % 2 == 0: # Clignoter le sprite du joueur lorsqu'il est invincible
             fenetre.blit(player.image, camera.apply(image_rect))
@@ -288,9 +259,7 @@ while continuer:
         fenetre.fill((0, 0, 30)) # Afficher un écran noir lorsque le joueur n'a plus de santé
         pygame.display.update()
         pygame.time.delay(1000)
-        reset()
-
-        
+        reset(player, liste_ennemis, hearts, spawn_point) # Réinitialiser le jeu après la mort du joueur
 
 # Mettre à jour l'affichage
     if not pause:
