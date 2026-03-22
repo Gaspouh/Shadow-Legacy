@@ -10,6 +10,7 @@ from objets import Coeur
 from sprite_sheet import *
 from save import sauvegarder, charger, get_spawn_from_checkpoints
 from golem import Golem
+from interface import menu
 
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
@@ -41,7 +42,7 @@ pygame.display.set_caption("Shadow Legacy")
 araignee1 = Araignee(fenetre, 300, 10)
 volant1 = Volant(fenetre, 400, 200)
 player = Player(100, 100, fenetre)
-hearts = [Coeur(fenetre, 100 + i*110, 20) for i in range(player.max_health)]
+hearts = [Coeur(fenetre, 100 + i*110, 35) for i in range(player.max_health)]
 golem = Golem(fenetre, 800, 500) # spawn
 
 spawn_point = charger(player, checkpoints)  # charge la save si elle existe, sinon spawn par défaut
@@ -81,19 +82,22 @@ def reset():
         ennemi.rect.y = ennemi.position_initiale_y 
         ennemi.velocity_y = 0
         ennemi.velocity_x = 0
+        ennemi.alive = True # Réactiver les ennemis
+        ennemi.pv_ennemi = ennemi.pv_max  # Réinitialiser la santé de l'ennemi
     # Réinitialiser les cœurs
     for heart in hearts:
         heart.state = "ALIVE"
         heart.index_anim = 0
 
 continuer = True
+pause = False
 while continuer:
     now = pygame.time.get_ticks()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             continuer = False
-
+            
         if now > hitstop_until and player.health > 0: # On traite les touches que si on n'est pas en histstop et en vie
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
@@ -102,6 +106,8 @@ while continuer:
                 if event.key == pygame.K_LSHIFT:
                     # faire dasher le joueur
                     player.dash.start_dash(player) # Dash dans la direction du joueur
+                if event.key == pygame.K_ESCAPE:
+                    pause = menu(fenetre)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Clic gauche
                     # faire attaquer le joueur
@@ -203,13 +209,13 @@ while continuer:
 
 
 
-    # Dessiner les éléments du jeu sur la fenêtre
-    if player.health > 0 :
-        fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
-        
-        # Plateformes
-        for platform in platforms:
-            fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
+        # Dessiner les éléments du jeu sur la fenêtre
+        if player.health > 0 :
+            fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
+            
+            # Plateformes
+            for platform in platforms:
+                fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
 
         # Plateformes spéciales (boue, sable mouvant, eau)
         for sp in special_platforms:
@@ -223,7 +229,7 @@ while continuer:
 
             # Quand le joueur est proche du banc
             if cp.rect.colliderect(player.rect) and not cp.activated:
-                
+                    
                 # UI (centrage)
                 ui_x = cp_screen_rect.centerx - (ui_reposer.get_width() // 2)
                 ui_y = cp_screen_rect.top - ui_reposer.get_height() - 10
@@ -287,7 +293,8 @@ while continuer:
         
 
 # Mettre à jour l'affichage
-    pygame.display.update()
-    clock.tick(60)
+    if not pause:
+        pygame.display.update()
+        clock.tick(60)
 
 pygame.quit()

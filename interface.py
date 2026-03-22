@@ -1,73 +1,32 @@
 import pygame
-from sprite_sheet import *
- 
-class Coeur(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.width = 135  
-        self.height = 95  # Hauteur d'une rangée
-        self.row = 1      
-        
-        # Chargement de la planche de sprite
-        self.sheet = pygame.image.load('coeur2.png').convert_alpha()
-        
-        # Découpage des frames de l'animation à partir de la sprite sheet
-        self.frames = [self.get_frame(i) for i in range(4)] + [self.get_frame(4)]  # Ajouter une frame supplémentaire pour le cœur vide
-        
-        # Configuration de l'état
-        self.state = "ALIVE"
-        self.image = self.frames[0]
-        self.rect = self.image.get_rect(topleft=(x, y))
-        
-        # variables d'animation
-        self.index_anim = 0.0
-        self.vitesse_animation = 0.30
 
-    def get_frame(self, index):
-        """Découpe une image précise dans la planche de sprites."""
-        frame = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        
-        if index == 4 :
-            y_offset = self.row * self.height + 80
-            frame.blit(self.sheet, (40, 0), (index * self.width, y_offset, self.width , self.height))
+def menu(fenetre):
+    pause = True
+    # Afficher le menu
+    menu_image = pygame.image.load('pause.jpg').convert_alpha()
+    menu_rect = menu_image.get_rect(center=(fenetre.get_width() // 2, fenetre.get_height() // 2))
+    
+    # Définir les boutons
+    bouton_reprendre = pygame.Rect(menu_rect.centerx - 100, menu_rect.centery - 50, 200, 50)
+    bouton_options = pygame.Rect(menu_rect.centerx - 100, menu_rect.centery + 20, 200, 50)
+    bouton_quitter = pygame.Rect(menu_rect.centerx - 130, menu_rect.centery + 95, 260, 50)
 
-        elif index < 4:
-        # Extraire de la ligne 2 avec un petit offset pour éviter le débordement
-            y_offset = self.row * self.height + 80
-            frame.blit(self.sheet, (0, 0), (index * self.width, y_offset, self.width , self.height))
+    # actualiser l'affichage du menu
+    fenetre.blit(menu_image, menu_rect)
 
-        # Redimensionner pour l'affichage
-        frame_redimensionnee = pygame.transform.smoothscale(frame, (70, 70))
-        return frame_redimensionnee
-
-    def update(self, current_player_health, heart_index):
-        # on compare l'index du cœur avec la santé actuelle du joueur pour déterminer l'état du cœur
-        if heart_index >= current_player_health and self.state == "ALIVE":
-            # on enlève un cœur si la santé du joueur diminue
-            self.state = "DYING"
-            self.index_anim = 0  # On reset l'anim pour jouer la séquence de mort
-        
-        # on ajoute un coeur si la santé du joueur augmente
-        elif heart_index < current_player_health and self.state != "ALIVE":
-            self.state = "ALIVE"
-        
-        # on laisse le coeur vivant
-        if self.state == "ALIVE":
-            self.index_anim += self.vitesse_animation
-            self.image = self.frames[0]
-        
-        # on joue l'animation de mort du cœur
-        elif self.state == "DYING":
-            self.index_anim += self.vitesse_animation
-            if self.index_anim < len(self.frames):
-                self.image = self.frames[int(self.index_anim)]
-            else:
-                self.state = "DEAD"
-                
-        # on affiche un cœur vide si le cœur est mort
-        elif self.state == "DEAD":
-            self.index_anim = 0  
-            self.index_anim += self.vitesse_animation
-            if self.index_anim >= len(self.frames):
-                self.index_anim = len(self.frames) - 1  # Rester sur la frame du cœur vide
-            
+    while pause:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if bouton_reprendre.collidepoint(event.pos):
+                    return False  # Reprendre le jeu
+                #elif bouton_options.collidepoint(event.pos):
+                    
+                elif bouton_quitter.collidepoint(event.pos):
+                    pygame.quit()  # Quitter le jeu
+                    exit()
+          # Dessiner les boutons
+        pygame.draw.rect(fenetre, (255, 255, 255), bouton_reprendre, 2)
+        pygame.draw.rect(fenetre, (255, 255, 0), bouton_options, 2)
+        pygame.draw.rect(fenetre, (255, 0, 0), bouton_quitter, 2)
+        pygame.display.update()
+    return pause
