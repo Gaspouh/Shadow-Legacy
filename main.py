@@ -26,7 +26,7 @@ camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT)
 clock = pygame.time.Clock()
 
 # Image
-ui_reposer = pygame.image.load("UI_'Pressez_E'.png").convert_alpha()
+ui_reposer = pygame.image.load("player.png").convert_alpha()
 ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /5.15, ui_reposer.get_height() / 5.15))
 
 # Sons
