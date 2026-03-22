@@ -44,7 +44,8 @@ class Araignee(ennemi_debutant):
             "knockback_y" : -4
         }
 
-        self.pv_ennemi = 3
+        self.pv_max = 3
+        self.pv_ennemi = self.pv_max
 
     def patrouille(self):
         Animation.gestion_animation(self)
@@ -121,8 +122,8 @@ class Volant(ennemi_debutant):
             "knockback_x" : 80,
             "knockback_y" : -4
         }
-        
-        self.pv_ennemi = 5
+        self.pv_max = 5
+        self.pv_ennemi = self.pv_max
 
     def poursuite(self, player_rect):
             Animation.gestion_animation(self)
