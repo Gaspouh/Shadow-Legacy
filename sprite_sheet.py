@@ -42,3 +42,34 @@ class Animation:
                 # Réinitialiser l'index pour recommencer l'animation
                 self.index_image = 0.0
             return self.index_image
+    
+# 2eme classe pour d'autres types de spritesheet
+class VerticalAnimation:
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne):
+        self.ecran = fenetre
+        sheet = pygame.image.load(sprite_sheet).convert_alpha()
+        
+        frames_droite = []
+        frames_gauche = []
+        
+        for i in range(nb_frames): 
+            # Verticalement
+            frame = pygame.Surface((width, height), pygame.SRCALPHA)
+            # multiplie le height
+            frame.blit(sheet, (0, 0),(colonne * width, marge + (i * height), width, height))
+            
+            frame.set_colorkey((0, 0, 0)) 
+            frames_droite.append(frame)
+            frames_gauche.append(pygame.transform.flip(frame, True, False))
+        
+        self.frames_droite = frames_droite
+        self.frames_gauche = frames_gauche
+        self.rect = frames_droite[0].get_rect(center=(x, y))
+        self.index_image = 0.0
+        self.vitesse_animation = 0.1
+
+    def gestion_animation(self):
+        self.index_image += self.vitesse_animation
+        if self.index_image >= len(self.frames_droite):
+            self.index_image = 0.0
+        return self.index_image

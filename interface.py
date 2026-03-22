@@ -9,7 +9,7 @@ class Coeur(pygame.sprite.Sprite):
         self.row = 1      
         
         # Chargement de la planche de sprite
-        self.sheet = pygame.image.load('coeur.png').convert_alpha()
+        self.sheet = pygame.image.load('coeur2.png').convert_alpha()
         
         # Découpage des frames de l'animation à partir de la sprite sheet
         self.frames = [self.get_frame(i) for i in range(4)] + [self.get_frame(4)]  # Ajouter une frame supplémentaire pour le cœur vide

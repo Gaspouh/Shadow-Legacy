@@ -9,6 +9,7 @@ from traps import *
 from objets import Coeur
 from sprite_sheet import *
 from save import sauvegarder, charger, get_spawn_from_checkpoints
+from golem import Golem
 
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
@@ -41,6 +42,7 @@ araignee1 = Araignee(fenetre, 300, 10)
 volant1 = Volant(fenetre, 400, 200)
 player = Player(100, 100, fenetre)
 hearts = [Coeur(fenetre, 100 + i*110, 20) for i in range(player.max_health)]
+golem = Golem(fenetre, 800, 500) # spawn
 
 spawn_point = charger(player, checkpoints)  # charge la save si elle existe, sinon spawn par défaut
 player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
@@ -217,17 +219,12 @@ while continuer:
                     spawn_point = pygame.math.Vector2(cp.rect.topleft)
                     sauvegarder(player, checkpoints)
                     set_spawn_sound.play()
-
-        # Ennemis
-        for elem in araignee:
-            fenetre.blit(elem.image, camera.apply(elem.rect)) # Appliquer le décalage de rendu pour le screen shake
-        for elem in volant:
-            fenetre.blit(elem.image, camera.apply(elem.rect)) # Appliquer le décalage de rendu pour le screen shake
-
+        """
         # Pièges
         for trap in traps:
             fenetre.blit(trap.image, camera.apply(trap.rect)) 
             pygame.draw.rect(fenetre, (0, 255, 255), camera.apply(trap.rect), 2)
+        """
 
         # Joueur
         image_rect = player.image.get_rect(midbottom=player.rect.midbottom)
@@ -236,6 +233,22 @@ while continuer:
 
         if player.is_attacking:
             pygame.draw.rect(fenetre, (255, 0, 0), camera.apply(player.attack_rect)) # Afficher la hitbox de l'attaque pour les tests
+
+        # Ennemis
+        for elem in araignee:
+            fenetre.blit(elem.image, camera.apply(elem.rect)) # Shake
+        for elem in volant:
+            fenetre.blit(elem.image, camera.apply(elem.rect))
+        
+        # Boss
+        golem.update(player.rect)
+        golem.draw(fenetre, camera) # A modifier : Dans golem.py dans la fonction draw pour afficher les hitbox ou non
+        if player.is_attacking and player.attack_rect.colliderect(golem.hitbox):
+            golem.knockback(player.rect, player)
+            fenetre.blit(golem.image, camera.apply(golem.rect))
+        if golem.hitbox.colliderect(player.rect):
+            hitstop_duration, shake_amount = player.take_damage(golem.attack_data, golem.rect, golem) # Recul du joueur
+            hitstop_until = pygame.time.get_ticks() + hitstop_duration
 
         # Particules
         for p in particles[:]: # On utilise [:] pour copier la liste et éviter les erreurs de suppression
@@ -250,7 +263,7 @@ while continuer:
             fenetre.blit(heart.image, heart.rect) # Les cœurs sont fixes à l'écran, pas besoin d'appliquer le décalage de la caméra
 
     else:
-        fenetre.fill((0, 0, 0)) # Afficher un écran noir lorsque le joueur n'a plus de santé
+        fenetre.fill((0, 0, 30)) # Afficher un écran noir lorsque le joueur n'a plus de santé
         pygame.display.update()
         pygame.time.delay(1000)
         reset()
