@@ -63,40 +63,6 @@ class Acid(Rectangular_Obstacle):
 
         self.respawn_on_touch = True
 
-class Water(Rectangular_Obstacle):
-    def __init__(self, x, y, width, height):
-        super().__init__(x, y, width, height, 0, "insecte_sheet2.png")
-        
-        self.special_effect = "water"
-
-class Iced_Water(Rectangular_Obstacle):
-    def __init__(self, x, y, width, height):
-        super().__init__(x, y, width, height, 1, "insecte_sheet2.png")
-
-        self.damage_cooldown = 1000
-        self.special_effect = "ice"
-
-class Poison_Pool(Rectangular_Obstacle):
-    def __init__(self, x, y, width, height):
-        super().__init__(x, y, width, height, 0, "insecte_sheet2.png")
-
-        self.special_effect = "poison"
-
-class Mud(Rectangular_Obstacle):
-    def __init__(self, x, y, width, height):
-        super().__init__(x, y, width, height, 0, "insecte_sheet2.png")
-
-        self.special_effect = "mud"
-
-        self.slow_factor = 0.5
-        self.jump_factor = 0.7
-
-class Quicksand(Rectangular_Obstacle):
-    def __init__(self, x, y, width, height):
-        super().__init__(x, y, width, height, 0, "insecte_sheet2.png")
-
-        self.special_effect = "quicksand"
-
 class Wind_Horizontal(Rectangular_Obstacle):
     def __init__(self, x, y, width, height, force):
         super().__init__(x, y, width, height, 0, "insecte_sheet2.png")
@@ -110,7 +76,6 @@ class Wind_Vertical(Rectangular_Obstacle):
         super().__init__(x, y, width, height, 0, "insecte_sheet2.png")
 
         self.special_effect = "wind"
-
         self.force_y = force
 
 class Saw :

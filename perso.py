@@ -5,7 +5,7 @@ from save import load_config
 # PARAMETRES MONDE
 GRAVITY = 0.4
 FRICTION = -0.5
-ACCELERATION = 2.5
+ACCELERATION = 3
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, fenetre):
@@ -20,6 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.max_health = p.get("max_health", 5)
         self.attack = p.get("attack", 1)
         self.jump_strength = p.get("jump_strength", -14)
+        self.max_speed = p.get("max_speed", 10)
 
         # PHYSIQUE DU JOUEUR
         self.direction = 1 # 1 pour droite, -1 pour gauche
@@ -67,10 +68,7 @@ class Player(pygame.sprite.Sprite):
         # Variables sable mouvant
         self.quicksand_timer = 0
         self.quicksand_sink = 0
-
-    def update(self, platforms):
-        self.acceleration = pygame.math.Vector2(0, GRAVITY)
-        now = pygame.time.get_ticks()
+        self.in_quicksand = False
 
         # Variables de ralentissement
         self.current_slow_factor = 1
@@ -80,8 +78,12 @@ class Player(pygame.sprite.Sprite):
         self.wind_force_x = 0
         self.wind_force_y = 0
 
-        # Variable de sable mouvant
-        self.in_quicksand = False
+        # Variable glace
+        self.on_ice = False
+
+    def update(self, platforms):
+        self.acceleration = pygame.math.Vector2(0, GRAVITY)
+        now = pygame.time.get_ticks()
 
         if self.on_ground and not self.in_quicksand and now - self.safe_position_timer > 500:  # enregistrement du dernier sol safe (toutes les 500ms pour éviter les surcharge de données)
             self.last_safe_position = pygame.math.Vector2(self.position.x, self.position.y)
@@ -91,16 +93,37 @@ class Player(pygame.sprite.Sprite):
         if not is_stunned:
             keys = pygame.key.get_pressed()
 
+            if self.on_ice and self.on_ground :
+                friction = FRICTION / 30
+                acceleration = ACCELERATION / 5
+            else :
+                friction = FRICTION
+                acceleration = ACCELERATION
+            
             if keys[pygame.K_q]and not keys[pygame.K_d]:
-                self.acceleration.x = -ACCELERATION
+                self.acceleration.x = -acceleration
                 self.direction = -1
             elif keys[pygame.K_d] and not keys[pygame.K_q]:
-                self.acceleration.x = ACCELERATION
+                self.acceleration.x = acceleration
                 self.direction = 1
 
-            self.acceleration.x += self.velocity.x * FRICTION 
-            self.velocity.x += self.acceleration.x * self.current_slow_factor
+            
+
+            self.acceleration.x += self.velocity.x * friction
+            self.velocity.x += self.acceleration.x 
+            self.velocity.x *= self.current_slow_factor
             self.velocity.y += self.acceleration.y
+
+            if not self.dash.in_use: # Hors période de dash
+                # Limiter vitesse hozitontal du joueur
+                if self.velocity.x < -self.max_speed  :
+                    self.velocity.x += (-self.max_speed - self.velocity.x) / 15
+                elif self.velocity.x > self.max_speed:
+                    self.velocity.x += (self.max_speed - self.velocity.x) / 15
+                
+                # Limiter la vitesse de chute du joueur 
+                if self.velocity.y > 20 :
+                    self.velocity.y = 20
 
             # Gestion du vent
             if not self.on_ground :
@@ -109,28 +132,26 @@ class Player(pygame.sprite.Sprite):
                 self.velocity.x += self.wind_force_x * 0.2
             self.velocity.y += self.wind_force_y
 
-            # Limiter la vitesse de chute du joueur sauf en cas de dash vers le bas
-            if self.velocity.y > 20 and not self.dash.in_use: 
-                self.velocity.y = 20
+            # Gestion sable mouvant
+            if self.in_quicksand:
 
-            # Gestion sable mouvant (ATTENTION NE FOCNTIONNE PAS)
+                self.quicksand_sink = min(80, self.quicksand_sink + 0.5)
 
-            if self.in_quicksand :
-                self.quicksand_timer += 1
+                # Vitesse de chute limitée à l'enfoncement (le joueur descend lentement)
+                self.velocity.y = min(self.velocity.y, 0.3)  # tombe très lentement
 
-                if self.quicksand_timer > 30 :
+                # Ralentissement lié à la profondeur
+                self.current_slow_factor = 1 - self.quicksand_sink / 100
+                self.velocity.x *= self.current_slow_factor  # ralentissement horizontal progressif
 
-                    self.quicksand_sink = min(40, self.quicksand_sink + 0.2)
-
-                    self.current_slow_factor *= 0.97
-
-                if self.quicksand_sink >=  40:
+                if self.quicksand_sink >= 80:
                     self.health -= 1
                     self.position = self.last_safe_position.copy()
-                    self.velocity = pygame.math.Vector2(0,0)
+                    self.velocity = pygame.math.Vector2(0, 0)
                     self.rect.midbottom = self.position
                     self.in_quicksand = False
-
+                    self.quicksand_sink = 0
+                    self.quicksand_timer = 0
             else:
                 self.quicksand_timer = 0
                 self.quicksand_sink = 0
@@ -162,7 +183,6 @@ class Player(pygame.sprite.Sprite):
                         self.on_ground = True
                         self.is_jumping = False
                         self.velocity.y = 0
-                        self.double_jump.reset()  # Recharger le double saut
                     elif self.velocity.y < 0:  # Se déplace vers le haut
                         self.rect.top = platform.rect.bottom
                         self.velocity.y = 0
@@ -171,8 +191,9 @@ class Player(pygame.sprite.Sprite):
             # GESTION DES TIMERS (COYOTE TIME ET JUMP BUFFER)
             now = pygame.time.get_ticks()
 
-            if self.on_ground:
+            if self.on_ground or self.in_quicksand:
                 self.coyote_timer = now # Réinitialiser le timer de coyote lorsque le joueur est au sol
+                self.double_jump.reset()
 
             can_jump = now - self.coyote_timer <= 150
             want_to_jump = now - self.jump_buffer_timer <= 150
@@ -215,8 +236,8 @@ class Player(pygame.sprite.Sprite):
         self.jump_buffer_timer = pygame.time.get_ticks() # Enregistrer le moment où le bouton de saut est préssé
 
         if self.in_quicksand:
-            self.position.y -= 5
-            self.quicksand_sink = max(0, self.quicksand_sink - 5)
+            self.position.y -= 10
+            self.quicksand_sink = max(0, self.quicksand_sink - 10)
 
     def execute_jump(self, jump_type="simple"):
             self.on_ground = False

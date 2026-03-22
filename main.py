@@ -2,7 +2,7 @@ import pygame
 import os
 from perso import Player
 from ennemi import ennemi_debutant, Araignee, Volant
-from map import Platform, platforms, Checkpoint, checkpoints
+from map import Platform, platforms, special_platforms, Checkpoint, checkpoints
 from camera import Camera
 from vfx import particles, Particle
 from traps import *
@@ -27,7 +27,7 @@ camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT)
 clock = pygame.time.Clock()
 
 # Image
-ui_reposer = pygame.image.load("player.png").convert_alpha()
+ui_reposer = pygame.image.load("UI_'Pressez_E'.png").convert_alpha()
 ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /5.15, ui_reposer.get_height() / 5.15))
 
 # Sons
@@ -57,9 +57,8 @@ liste_ennemis = araignee + volant
 spike = [Spike(300, 300, 40, 40), Spike(1560, 950, 40, 40)]
 thorn = []
 lava = []
-quicksand = [Quicksand(1000, 420, 300, 100)]
 
-traps = spike + thorn + lava + quicksand
+traps = spike + thorn + lava
 
 # Variables pour le screen shake et le hitstop à initialiser
 hitstop_until = -1 # Temps jusqu'auquel le hitstop est actif (initialisé à une valeur passée)
@@ -124,7 +123,9 @@ while continuer:
             player.wind_force_x = 0
             player.wind_force_y = 0
             player.in_quicksand = False
-
+            player.on_ice = False
+        
+            # Pieges
             for trap in traps:
                 now = pygame.time.get_ticks()
                 if trap.rect.colliderect(player.rect):
@@ -134,19 +135,30 @@ while continuer:
                             
                             hitstop_duration, shake_amount = player.take_damage(trap.attack_data, trap.rect, trap)
                             trap.last_damage_time = now
-                    
-                    if trap.special_effect == "mud":
-                        player.current_slow_factor = trap.slow_factor
-                        player.current_jump_factor = trap.jump_factor
-                    
+
                     if trap.special_effect == "wind":
                         player.wind_force_x = trap.force_x
                         player.wind_force_y = trap.force_y
 
-                    if trap.special_effect == "quicksand":
+            special_surfaces = []
+            for sp in special_platforms:
+
+                if sp.surface is not None:
+                    special_surfaces.append(sp.surface)
+
+                if sp.rect.colliderect(player.rect):
+
+                    if sp.effect == "mud":
+                        player.current_slow_factor = sp.slow_factor
+                        player.current_jump_factor = sp.jump_factor
+                    
+                    elif sp.effect == "quicksand":
                         player.in_quicksand = True
-                        
-            player.update(platforms)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
+
+                    elif sp.effect == "ice":
+                        player.on_ice = True
+
+            player.update(platforms + special_surfaces)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
             
             if shake_amount > 0:
@@ -199,6 +211,10 @@ while continuer:
         for platform in platforms:
             fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
 
+        # Plateformes spéciales (boue, sable mouvant, eau)
+        for sp in special_platforms:
+            fenetre.blit(sp.image, camera.apply(sp.rect)) # Appliquer le décalage de rendu pour le screen shake
+
         # Checkpoints
         for cp in checkpoints:
             # 1. On calcule la position à l'écran UNE SEULE FOIS
@@ -219,12 +235,12 @@ while continuer:
                     spawn_point = pygame.math.Vector2(cp.rect.topleft)
                     sauvegarder(player, checkpoints)
                     set_spawn_sound.play()
-        """
+
         # Pièges
         for trap in traps:
             fenetre.blit(trap.image, camera.apply(trap.rect)) 
             pygame.draw.rect(fenetre, (0, 255, 255), camera.apply(trap.rect), 2)
-        """
+
 
         # Joueur
         image_rect = player.image.get_rect(midbottom=player.rect.midbottom)

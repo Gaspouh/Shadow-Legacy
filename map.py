@@ -1,19 +1,45 @@
 import pygame
 
 class Platform(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height):
+    def __init__(self, x, y, width, height, color):
         super().__init__()
         self.image = pygame.Surface((width, height))
-        self.image.fill((100, 100, 100))
+        self.image.fill(color)
         self.rect = self.image.get_rect(topleft=(x, y))
-    
+
+class Special_Platform(Platform):
+    def __init__(self, x, y, width, height, color, effect=None, slow_factor = 1, jump_factor = 1):
+        super().__init__(x, y, width, height, color)
+        self.effect = effect
+        self.slow_factor = slow_factor
+        self.jump_factor = jump_factor    
+
+        if effect == "mud":
+            marge = 10
+        elif effect == "ice":
+            marge = 1
+        else :
+            marge = 30
+        
+        if effect != "quicksand":
+            self.surface = Platform(x,y, width, 5, color)
+            self.rect = pygame.Rect(x, y - marge, width, height + marge)
+        else :
+            self.surface = None
+
 platforms = [
-    Platform(0, 500, 8000, 100),
-    Platform(300, 350, 200, 20),
-    Platform(500, 200, 200, 20),
-    Platform(800, 0, 20, 350),
-    Platform(1100, 300, 200, 20),
-    Platform(1400, 400, 200, 20)
+    Platform(0, 500, 8000, 100, (100, 100, 100)),
+    Platform(300, 350, 200, 20, (100, 100, 100)),
+    Platform(500, 200, 200, 20, (100, 100, 100)),
+    Platform(800, 0, 20, 350, (100, 100, 100)),
+    Platform(1100, 300, 200, 20, (100, 100, 100)),
+    Platform(1400, 400, 200, 20, (100, 100, 100))
+]
+
+special_platforms = [
+    Special_Platform(2000, 400, 470, 150, (194, 178, 128), effect="quicksand"),  # même hauteur que le sol
+    Special_Platform(3000, 400, 1500, 150, (200, 230, 255), effect="ice"),
+    Special_Platform(2500, 400, 470, 150, (100, 80, 40),  effect="mud", slow_factor=0.5, jump_factor = 0.6)
 ]
 
 class Checkpoint(pygame.sprite.Sprite):

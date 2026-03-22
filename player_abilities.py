@@ -26,6 +26,7 @@ class Dash:
             self.in_use = True
             self.dash_timer = now
             self.last_dash = now
+            self.dash_direction = player.direction
             
             keys = pygame.key.get_pressed()
             self.is_dash_down = keys[pygame.K_s] and not player.on_ground
@@ -43,7 +44,6 @@ class Dash:
             now = pygame.time.get_ticks()
             if now - self.dash_timer > self.duree:
                 self.in_use = False
-                player.velocity.x *= 0.5 # Ralentir le joueur après le dash
                 player.velocity.y *= 0.7
 
                 # Retirer l'invincibilité du dash seulement si c'est le dash qui l'avait activée
@@ -57,7 +57,7 @@ class Dash:
                     player.velocity.x = 0 # Ne pas permettre au joueur de se déplacer horizontalement pendant le dash vers le bas
                     player.velocity.y = self.vitesse_dash*0.3 # Appliquer la vitesse de dash vers le bas plus lente vers le bas car il n'y a pas de force qui compense le dash sur l'axe des y
                 else:
-                    player.velocity.x = self.vitesse_dash * player.direction # Appliquer la vitesse de dash dans la direction du joueur
+                    player.velocity.x = (self.vitesse_dash * 0.3 if player.on_ice else self.vitesse_dash) * self.dash_direction # Appliquer la vitesse de dash dans la direction du joueur (diminuée si joueur est sur de la glace)
                     player.velocity.y = 0 # Ne pas permettre au joueur de monter ou descendre pendant le dash
 
 class Double_jump:
