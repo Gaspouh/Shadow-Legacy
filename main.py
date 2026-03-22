@@ -10,6 +10,7 @@ from objets import Coeur
 from sprite_sheet import *
 from save import sauvegarder, charger, get_spawn_from_checkpoints
 from golem import Golem
+from interface import menu
 
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
@@ -82,19 +83,22 @@ def reset():
         ennemi.rect.y = ennemi.position_initiale_y 
         ennemi.velocity_y = 0
         ennemi.velocity_x = 0
+        ennemi.alive = True # Réactiver les ennemis
+        ennemi.pv_ennemi = ennemi.pv_max  # Réinitialiser la santé de l'ennemi
     # Réinitialiser les cœurs
     for heart in hearts:
         heart.state = "ALIVE"
         heart.index_anim = 0
 
 continuer = True
+pause = False
 while continuer:
     now = pygame.time.get_ticks()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             continuer = False
-
+            
         if now > hitstop_until and player.health > 0: # On traite les touches que si on n'est pas en histstop et en vie
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
@@ -103,6 +107,8 @@ while continuer:
                 if event.key == pygame.K_LSHIFT:
                     # faire dasher le joueur
                     player.dash.start_dash(player) # Dash dans la direction du joueur
+                if event.key == pygame.K_ESCAPE:
+                    pause = menu(fenetre)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Clic gauche
                     # faire attaquer le joueur
@@ -191,34 +197,34 @@ while continuer:
 
 
 
-    # Dessiner les éléments du jeu sur la fenêtre
-    if player.health > 0 :
-        fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
-        
-        # Plateformes
-        for platform in platforms:
-            fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
+        # Dessiner les éléments du jeu sur la fenêtre
+        if player.health > 0 :
+            fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
+            
+            # Plateformes
+            for platform in platforms:
+                fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
 
-        # Checkpoints
-        for cp in checkpoints:
-            # 1. On calcule la position à l'écran UNE SEULE FOIS
-            cp_screen_rect = camera.apply(cp.rect)
-            fenetre.blit(cp.image, cp_screen_rect)
+            # Checkpoints
+            for cp in checkpoints:
+                # 1. On calcule la position à l'écran UNE SEULE FOIS
+                cp_screen_rect = camera.apply(cp.rect)
+                fenetre.blit(cp.image, cp_screen_rect)
 
-            # Quand le joueur est proche du banc
-            if cp.rect.colliderect(player.rect) and not cp.activated:
-                
-                # UI (centrage)
-                ui_x = cp_screen_rect.centerx - (ui_reposer.get_width() // 2)
-                ui_y = cp_screen_rect.top - ui_reposer.get_height() - 10
-                fenetre.blit(ui_reposer, (ui_x, ui_y)) 
+                # Quand le joueur est proche du banc
+                if cp.rect.colliderect(player.rect) and not cp.activated:
+                    
+                    # UI (centrage)
+                    ui_x = cp_screen_rect.centerx - (ui_reposer.get_width() // 2)
+                    ui_y = cp_screen_rect.top - ui_reposer.get_height() - 10
+                    fenetre.blit(ui_reposer, (ui_x, ui_y)) 
 
-                # Au lieu de juste "if 'E' pressed" qui appuierai 60 fois/s :
-                if pygame.key.get_pressed()[pygame.K_e]:
-                    cp.activated = True
-                    spawn_point = pygame.math.Vector2(cp.rect.topleft)
-                    sauvegarder(player, checkpoints)
-                    set_spawn_sound.play()
+                    # Au lieu de juste "if 'E' pressed" qui appuierai 60 fois/s :
+                    if pygame.key.get_pressed()[pygame.K_e]:
+                        cp.activated = True
+                        spawn_point = pygame.math.Vector2(cp.rect.topleft)
+                        sauvegarder(player, checkpoints)
+                        set_spawn_sound.play()
         """
         # Pièges
         for trap in traps:
@@ -271,7 +277,8 @@ while continuer:
         
 
 # Mettre à jour l'affichage
-    pygame.display.update()
-    clock.tick(60)
+    if not pause:
+        pygame.display.update()
+        clock.tick(60)
 
 pygame.quit()
