@@ -41,7 +41,7 @@ pygame.display.set_caption("Shadow Legacy")
 araignee1 = Araignee(fenetre, 300, 10)
 volant1 = Volant(fenetre, 400, 200)
 player = Player(100, 100, fenetre)
-hearts = [Coeur(fenetre, 100 + i*110, 20) for i in range(player.max_health)]
+hearts = [Coeur(fenetre, 100 + i*110, 35) for i in range(player.max_health)]
 golem = Golem(fenetre, 800, 500) # spawn
 
 spawn_point = charger(player, checkpoints)  # charge la save si elle existe, sinon spawn par défaut
