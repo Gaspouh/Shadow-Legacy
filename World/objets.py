@@ -1,9 +1,9 @@
 import pygame
-from sprite_sheet import *
+from Visual.sprite_sheet import *
  
 class Coeur(Animation):
     def __init__(self, fenetre, x, y):
-        super().__init__(fenetre, x, y, 'coeur2.png', 8, 92, 90, 0, 2)
+        super().__init__(fenetre, x, y, 'Assets/Images/coeur2.png', 8, 92, 90, 0, 2)
         self.state = "ALIVE"
 
         for frame in self.frames_droite:

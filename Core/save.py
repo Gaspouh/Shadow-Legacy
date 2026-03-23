@@ -2,9 +2,10 @@ import json
 import os
 import pygame
 
-# Path constants :
-SAVE_FILE = "save.json"
-CONFIG_FILE = "config.json"
+# Path constants : use relative paths from Core directory
+CORE_DIR = os.path.dirname(os.path.abspath(__file__))
+SAVE_FILE = os.path.join(CORE_DIR, "save.json")
+CONFIG_FILE = os.path.join(CORE_DIR, "config.json")
 
 # Spawn
 DEFAULT_SPAWN = {"x": 100, "y": 100} # Position de spawn par défaut (si aucun checkpoint activé)

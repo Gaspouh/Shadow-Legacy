@@ -1,5 +1,5 @@
 import pygame
-from save import load_config
+from Core.save import load_config
 
 class Dash:
     def __init__(self, cfg={}): #cfg signifie "configuration"

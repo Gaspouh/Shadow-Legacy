@@ -40,32 +40,32 @@ class Rectangular_Obstacle():
 
 class Spike(Rectangular_Obstacle):
     def __init__(self, x, y, width, height):
-        super().__init__(x, y, width, height, 1, "insecte_sheet2.png")
+        super().__init__(x, y, width, height, 1, "Assets/Images/insecte_sheet2.png")
 
         self.respawn_on_touch = True
         self.apply_knockback = True
 
 class Thorns(Rectangular_Obstacle):
     def __init__(self, x, y, width, height):
-        super().__init__(x, y, width, height, 1, "insecte_sheet2.png")
+        super().__init__(x, y, width, height, 1, "Assets/Images/insecte_sheet2.png")
 
         self.respawn_on_touch = True
 
 class Lava(Rectangular_Obstacle):
     def __init__(self, x, y, width, height):
-        super().__init__(x, y, width, height, 2, "insecte_sheet2.png")
+        super().__init__(x, y, width, height, 2, "Assets/Images/insecte_sheet2.png")
 
         self.respawn_on_touch = True
 
 class Acid(Rectangular_Obstacle):
     def __init__(self, x, y, width, height):
-        super().__init__(x, y, width, height, 1, "insecte_sheet2.png")
+        super().__init__(x, y, width, height, 1, "Assets/Images/insecte_sheet2.png")
 
         self.respawn_on_touch = True
 
 class Wind_Horizontal(Rectangular_Obstacle):
     def __init__(self, x, y, width, height, force):
-        super().__init__(x, y, width, height, 0, "insecte_sheet2.png")
+        super().__init__(x, y, width, height, 0, "Assets/Images/insecte_sheet2.png")
 
         self.special_effect = "wind"
 
@@ -73,7 +73,7 @@ class Wind_Horizontal(Rectangular_Obstacle):
 
 class Wind_Vertical(Rectangular_Obstacle):
     def __init__(self, x, y, width, height, force):
-        super().__init__(x, y, width, height, 0, "insecte_sheet2.png")
+        super().__init__(x, y, width, height, 0, "Assets/Images/insecte_sheet2.png")
 
         self.special_effect = "wind"
         self.force_y = force
@@ -82,7 +82,7 @@ class Saw :
     def __init__(self, x, y, radius):
         super().__init__()
     # Charger une image de scie circulaire
-        self.sheet = pygame.image.load("insecte_sheet2.png").convert_alpha()
+        self.sheet = pygame.image.load("Assets/Images/insecte_sheet2.png").convert_alpha()
         self.image = pygame.transform.scale(self.sheet, (radius*2, radius*2))
         
 

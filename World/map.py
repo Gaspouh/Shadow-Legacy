@@ -46,7 +46,7 @@ class Checkpoint(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         scale_x = scale_y = 85
-        self.image = pygame.image.load('banc.png')  # sans fill
+        self.image = pygame.image.load('Assets/Images/banc.png')  # sans fill
         self.image = pygame.transform.scale(self.image, (scale_x, scale_y))  # adapter la taille
         self.rect = self.image.get_rect(topleft=(x, y))
         self.activated = False  # devient True quand le joueur passe dessus

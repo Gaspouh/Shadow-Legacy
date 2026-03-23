@@ -3,7 +3,7 @@ import pygame
 def menu(fenetre):
     pause = True
     # Afficher le menu
-    menu_image = pygame.image.load('pause.jpg').convert_alpha()
+    menu_image = pygame.image.load('Assets/Images/pause.jpg').convert_alpha()
     menu_rect = menu_image.get_rect(center=(fenetre.get_width() // 2, fenetre.get_height() // 2))
     
     # Définir les boutons

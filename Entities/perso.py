@@ -1,6 +1,6 @@
 import pygame 
-from player_abilities import Dash, Double_jump
-from save import load_config
+from Entities.player_abilities import Dash, Double_jump
+from Core.save import load_config
 
 # PARAMETRES MONDE
 GRAVITY = 0.4
@@ -44,7 +44,7 @@ class Player(pygame.sprite.Sprite):
 
         # HITBOX ET IMAGE DU JOUEUR
         self.rect = pygame.Rect(x, y, 60, 90)
-        original_image = pygame.image.load('player.png').convert_alpha()
+        original_image = pygame.image.load('Assets/Player/player.png').convert_alpha()
         self.image = pygame.transform.scale(original_image, (75, 90))
         self.attack_rect = pygame.Rect(0, 0, 0, 0) # Hitbox de l'attaque initialisée vide
 
@@ -167,7 +167,6 @@ class Player(pygame.sprite.Sprite):
                         self.rect.right = platform.rect.left
                     elif self.velocity.x < 0: # Se déplace vers la gauche
                         self.rect.left = platform.rect.right
-                    self.position.x = self.rect.centerx
                     self.velocity.x = 0 # Arrêter le mouvement horizontal en cas de collision
 
             # COLLISION VERTICALE (AXE Y)

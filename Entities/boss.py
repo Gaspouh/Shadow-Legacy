@@ -1,6 +1,6 @@
 import pygame
-from sprite_sheet import VerticalAnimation
-from map import platforms
+from Visual.sprite_sheet import VerticalAnimation
+from World.map import platforms
 
 class Golem(pygame.sprite.Sprite):  # pas de "self" ici
     def __init__(self, fenetre, x, y):
@@ -13,11 +13,11 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
         self.direction = 1
 
         # Spriteheets, animations :
-        self.anim_idle        = VerticalAnimation(fenetre, x, y, 'boss/golem/golem_idle_sheet.png',        40, 240, 240, 0, 0)
-        self.anim_walk_right  = VerticalAnimation(fenetre, x, y, 'boss/golem/golem_walk_right_sheet.png',  32, 240, 240, 0, 0)
-        self.anim_walk_left   = VerticalAnimation(fenetre, x, y, 'boss/golem/golem_walk_left_sheet.png',   32, 240, 240, 0, 0)
-        self.anim_smash_right = VerticalAnimation(fenetre, x, y, 'boss/golem/golem_smash_right_sheet.png', 12, 240, 240, 0, 0)
-        self.anim_smash_left  = VerticalAnimation(fenetre, x, y, 'boss/golem/golem_smash_left_sheet.png',  12, 240, 240, 0, 0)
+        self.anim_idle        = VerticalAnimation(fenetre, x, y, 'Assets/Boss/golem/golem_idle_sheet.png',        40, 240, 240, 0, 0)
+        self.anim_walk_right  = VerticalAnimation(fenetre, x, y, 'Assets/Boss/golem/golem_walk_right_sheet.png',  32, 240, 240, 0, 0)
+        self.anim_walk_left   = VerticalAnimation(fenetre, x, y, 'Assets/Boss/golem/golem_walk_left_sheet.png',   32, 240, 240, 0, 0)
+        self.anim_smash_right = VerticalAnimation(fenetre, x, y, 'Assets/Boss/golem/golem_smash_right_sheet.png', 12, 240, 240, 0, 0)
+        self.anim_smash_left  = VerticalAnimation(fenetre, x, y, 'Assets/Boss/golem/golem_smash_left_sheet.png',  12, 240, 240, 0, 0)
         
         v = 120
         # Vitesses d'animation (divisé par 60 pour chaque frame)

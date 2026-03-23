@@ -1,17 +1,24 @@
 import pygame
 import os
-from perso import Player
-from ennemi import ennemi_debutant, Araignee, Volant
-from map import Platform, platforms, special_platforms, Checkpoint, checkpoints
-from camera import Camera
-from vfx import particles, Particle
-from traps import *
-from objets import Coeur
-from sprite_sheet import *
-from save import sauvegarder, charger, get_spawn_from_checkpoints
-from golem import Golem
-from interface import menu
-from reset import reset
+import sys
+
+# Add project root to path for imports
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from Entities.perso import Player
+from Entities.ennemi import Ennemi, Araignee, Volant
+from World.map import Platform, platforms, special_platforms, Checkpoint, checkpoints
+from Visual.camera import Camera
+from Visual.vfx import particles, Particle
+from World.traps import *
+from World.objets import Coeur
+from Visual.sprite_sheet import *
+from Core.save import sauvegarder, charger, get_spawn_from_checkpoints
+from Entities.boss import Golem
+from Visual.interface import menu
+from Core.reset import reset
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
 pygame.init()
@@ -28,11 +35,11 @@ camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT)
 clock = pygame.time.Clock()
 
 # Image
-ui_reposer = pygame.image.load("UI_'Pressez_E'.png").convert_alpha()
+ui_reposer = pygame.image.load("Assets/Images/UI_'Pressez_E'.png").convert_alpha()
 ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /5.15, ui_reposer.get_height() / 5.15))
 
 # Sons
-set_spawn_sound = pygame.mixer.Sound("set_spawn_sound.mp3")
+set_spawn_sound = pygame.mixer.Sound("Assets/Sounds/set_spawn_sound.mp3")
 
 # Définir le titre de la fenêtre
 pygame.display.set_caption("Shadow Legacy")
