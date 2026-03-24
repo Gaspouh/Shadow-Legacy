@@ -3,18 +3,30 @@ import pygame
 def menu(fenetre):
     pause = True
     # Afficher le menu
-    menu_image = pygame.image.load('Assets/Images/pause.jpg').convert_alpha()
-    menu_rect = menu_image.get_rect(center=(fenetre.get_width() // 2, fenetre.get_height() // 2))
+    noir_transparent = pygame.Surface((fenetre.get_width(), fenetre.get_height()))
+    noir_transparent.fill((0, 0, 0)) # Remplir avec du noir
+    noir_transparent.set_alpha(220) # Définir la transparence 
+    image_menu = pygame.image.load("Assets/Images/pause.jpg").convert_alpha()
+
+    for x in range(image_menu.get_width()):
+        for y in range(image_menu.get_height()):
+            r, g, b, a = image_menu.get_at((x, y))
+            
+            # si ce n'est PAS du blanc → transparent
+            if not (r > 200 and g > 200 and b > 200):
+                image_menu.set_at((x, y), (0, 0, 0, 0))
     
     # Définir les boutons
-    bouton_reprendre = pygame.Rect(menu_rect.centerx - 100, menu_rect.centery - 50, 200, 50)
-    bouton_options = pygame.Rect(menu_rect.centerx - 100, menu_rect.centery + 20, 200, 50)
-    bouton_quitter = pygame.Rect(menu_rect.centerx - 130, menu_rect.centery + 95, 260, 50)
+    bouton_reprendre = pygame.Rect(fenetre.get_width() // 2 - 100, fenetre.get_height() // 2 - 50, 200, 40)
+    bouton_options = pygame.Rect(fenetre.get_width() // 2 - 100, fenetre.get_height() // 2 + 20, 200, 40)
+    bouton_quitter = pygame.Rect(fenetre.get_width() // 2 - 130, fenetre.get_height() // 2 + 95, 260, 40)
 
     # actualiser l'affichage du menu
-    fenetre.blit(menu_image, menu_rect)
+    fenetre.blit(noir_transparent, (0, 0)) 
+    fenetre.blit(image_menu, (fenetre.get_width() // 2 - image_menu.get_width() // 2, fenetre.get_height() // 2 - image_menu.get_height() // 2))
 
     while pause:
+        souris_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if bouton_reprendre.collidepoint(event.pos):
@@ -24,9 +36,25 @@ def menu(fenetre):
                 elif bouton_quitter.collidepoint(event.pos):
                     pygame.quit()  # Quitter le jeu
                     exit()
-          # Dessiner les boutons
-        pygame.draw.rect(fenetre, (255, 255, 255), bouton_reprendre, 2)
-        pygame.draw.rect(fenetre, (255, 255, 0), bouton_options, 2)
-        pygame.draw.rect(fenetre, (255, 0, 0), bouton_quitter, 2)
+
+        if bouton_reprendre.collidepoint(souris_pos):
+            r1, g1, b1 = 255, 255 , 255
+        else :
+            r1, g1, b1 = 0, 0, 0
+
+        if bouton_options.collidepoint(souris_pos):
+            r2, g2, b2 = 255, 255 , 255
+        else :
+            r2, g2, b2 = 0, 0, 0
+
+        if bouton_quitter.collidepoint(souris_pos):
+            r3, g3, b3 = 255, 255 , 255
+        else :
+            r3, g3, b3 = 0, 0, 0
+
+        # Dessiner les boutons
+        pygame.draw.rect(fenetre, (r1, g1, b1), bouton_reprendre, 2)
+        pygame.draw.rect(fenetre, (r2, g2, b2), bouton_options, 2)
+        pygame.draw.rect(fenetre, (r3, g3, b3), bouton_quitter, 2)
         pygame.display.update()
     return pause
