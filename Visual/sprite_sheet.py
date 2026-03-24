@@ -73,3 +73,13 @@ class VerticalAnimation:
         if self.index_image >= len(self.frames_droite):
             self.index_image = 0.0
         return self.index_image
+    
+    def start_animation(self):
+        """Lance l'animation"""
+        self.is_playing = True
+    
+    def stop_animation(self, reset_frame=True):
+        """Arrête l'animation"""
+        self.is_playing = False
+        if reset_frame:
+            self.index_image = 0.0

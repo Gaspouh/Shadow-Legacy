@@ -226,7 +226,7 @@ while continuer:
             fenetre.blit(trap.image, camera.apply(trap.rect)) 
             pygame.draw.rect(fenetre, (0, 255, 255), camera.apply(trap.rect), 2)
 
-     # Joueur
+        # Joueur
         image_rect = player.image.get_rect(midbottom=player.rect.midbottom)
         if not player.invincible or (pygame.time.get_ticks() // 100) % 2 == 0: # Clignoter le sprite du joueur lorsqu'il est invincible
             fenetre.blit(player.image, camera.apply(image_rect))
@@ -241,7 +241,7 @@ while continuer:
             fenetre.blit(elem.image, camera.apply(elem.rect))
         
         # Boss
-        golem.update(player.rect)
+        golem.update(player.rect, player)
         golem.draw(fenetre, camera) # A modifier : Dans golem.py dans la fonction draw pour afficher les hitbox ou non
         if player.is_attacking and player.attack_rect.colliderect(golem.hitbox):
             golem.knockback(player.rect, player)
