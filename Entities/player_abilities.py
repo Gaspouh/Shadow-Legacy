@@ -57,7 +57,7 @@ class Dash:
                     player.velocity.x = 0 # Ne pas permettre au joueur de se déplacer horizontalement pendant le dash vers le bas
                     player.velocity.y = self.vitesse_dash*0.3 # Appliquer la vitesse de dash vers le bas plus lente vers le bas car il n'y a pas de force qui compense le dash sur l'axe des y
                 else:
-                    player.velocity.x = (self.vitesse_dash * 0.3 if player.on_ice else self.vitesse_dash) * self.dash_direction # Appliquer la vitesse de dash dans la direction du joueur (diminuée si joueur est sur de la glace)
+                    player.velocity.x = (self.vitesse_dash*0.3 if player.on_ice else self.vitesse_dash) * self.dash_direction # Appliquer la vitesse de dash dans la direction du joueur (diminuée si joueur est sur de la glace)
                     player.velocity.y = 0 # Ne pas permettre au joueur de monter ou descendre pendant le dash
 
 class Double_jump:

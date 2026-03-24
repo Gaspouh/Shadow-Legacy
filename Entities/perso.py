@@ -1,18 +1,17 @@
 import pygame 
 from Entities.player_abilities import Dash, Double_jump
 from Core.save import load_config
+from Entities.physics_entity import PhysicsEntity
 
 # PARAMETRES MONDE
-GRAVITY = 0.4
-FRICTION = -0.5
+
 ACCELERATION = 3
 
-class Player(pygame.sprite.Sprite):
+class Player(PhysicsEntity):
     def __init__(self, x, y, fenetre):
-        super().__init__()
+        super().__init__(x, y, 60, 90, gravity=0.4 , friction=-0.5, use_gravity=True)
         self.window = fenetre
 
-        
         p = load_config().get("player", {}) if load_config() else {}
         
         # STATS DU JOUEUR
@@ -24,12 +23,8 @@ class Player(pygame.sprite.Sprite):
 
         # PHYSIQUE DU JOUEUR
         self.direction = 1 # 1 pour droite, -1 pour gauche
-        self.position = pygame.math.Vector2(x, y) 
-        self.velocity = pygame.math.Vector2(0, 0)
-        self.acceleration = pygame.math.Vector2(0, 0)
 
         # VARIABLES DE GESTION DU SAUT A INITIALISER
-        self.on_ground = False
         self.is_jumping = False
         self.coyote_timer = -1000
         self.jump_buffer_timer = -1000
@@ -41,48 +36,41 @@ class Player(pygame.sprite.Sprite):
         self.attack_cooldown = p.get("attack_cooldown", 350)
         self.last_attack_time = -1000
         self.attack_direction = None #"UP", "DOWN", "RIGHT" ou "LEFT"
+        self.attack_rect = pygame.Rect(0, 0, 0, 0) # Hitbox de l'attaque initialisée vide
+        self.ennemis_touches = []
 
-        # HITBOX ET IMAGE DU JOUEUR
-        self.rect = pygame.Rect(x, y, 60, 90)
+        # IMAGE DU JOUEUR
         original_image = pygame.image.load('Assets/Player/player.png').convert_alpha()
         self.image = pygame.transform.scale(original_image, (75, 90))
-        self.attack_rect = pygame.Rect(0, 0, 0, 0) # Hitbox de l'attaque initialisée vide
 
-        # invincibilité après avoir été touché
+        # INVINCIBILITE
         self.invincible = False
         self.invincibility_duration = p.get("invincibility_duration", 2000) # Durée de l'invincibilité 
         self.invincibility_timer = 0
 
-        # blocage des touches pendant recul apres avoir été touché
+        # STUN
         self.stun_timer = 0
         self.stun_duration = p.get("stun_duration", 100) # Durée pendant laquelle les touches sont bloquées
 
-        #abilités du personnage
+        # ABILITIES
         self.dash = Dash()
         self.double_jump = Double_jump()
 
-        #dernier sol si collision avec pique
+        # SAFE POSITION
         self.last_safe_position = pygame.math.Vector2(x,y)
         self.safe_position_timer = 0
 
-        # Variables sable mouvant
+        # EFFETS SURFACE
         self.quicksand_timer = 0
         self.quicksand_sink = 0
         self.in_quicksand = False
-
-        # Variables de ralentissement
         self.current_slow_factor = 1
         self.current_jump_factor = 1
-
-        # Variables de vent
         self.wind_force_x = 0
         self.wind_force_y = 0
-
-        # Variable glace
         self.on_ice = False
 
     def update(self, platforms):
-        self.acceleration = pygame.math.Vector2(0, GRAVITY)
         now = pygame.time.get_ticks()
 
         if self.on_ground and not self.in_quicksand and now - self.safe_position_timer > 500:  # enregistrement du dernier sol safe (toutes les 500ms pour éviter les surcharge de données)
@@ -94,34 +82,39 @@ class Player(pygame.sprite.Sprite):
             keys = pygame.key.get_pressed()
 
             if self.on_ice and self.on_ground :
-                friction = FRICTION / 30
-                acceleration = ACCELERATION / 5
+                friction = self.friction / 30
+                acceleration = ACCELERATION / 6
+
             else :
-                friction = FRICTION
                 acceleration = ACCELERATION
+                friction = self.friction
+
+            self.acceleration.x = 0
+            self.acceleration.y = 0
             
-            if keys[pygame.K_q]and not keys[pygame.K_d]:
-                self.acceleration.x = -acceleration
+            if keys[pygame.K_q] and not keys[pygame.K_d]:
+                self.acceleration.x -= acceleration
                 self.direction = -1
+
             elif keys[pygame.K_d] and not keys[pygame.K_q]:
-                self.acceleration.x = acceleration
+                self.acceleration.x += acceleration
                 self.direction = 1
 
-            
-
             self.acceleration.x += self.velocity.x * friction
-            self.velocity.x += self.acceleration.x 
-            self.velocity.x *= self.current_slow_factor
+
+            self.acceleration.y = self.gravity
+
+            self.velocity.x += self.acceleration.x
             self.velocity.y += self.acceleration.y
 
-            if not self.dash.in_use: # Hors période de dash
+            # Cap de vitesse appliqué hors dash
+            if not self.dash.in_use:
                 # Limiter vitesse hozitontal du joueur
                 if self.velocity.x < -self.max_speed  :
                     self.velocity.x += (-self.max_speed - self.velocity.x) / 15
                 elif self.velocity.x > self.max_speed:
                     self.velocity.x += (self.max_speed - self.velocity.x) / 15
-                
-                # Limiter la vitesse de chute du joueur 
+                # Limiter la vitesse de chute du joueur     
                 if self.velocity.y > 20 :
                     self.velocity.y = 20
 
@@ -155,37 +148,11 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.quicksand_timer = 0
                 self.quicksand_sink = 0
+                self.velocity.x *= self.current_slow_factor
 
-            # COLLISION HORIZONTALE (AXE X)
-
-            self.position.x += self.velocity.x + 0.5 * self.acceleration.x
-            self.rect.centerx = self.position.x
-
-            for platform in platforms:
-                if self.rect.colliderect(platform.rect):
-                    if self.velocity.x > 0: # Se déplace vers la droite
-                        self.rect.right = platform.rect.left
-                    elif self.velocity.x < 0: # Se déplace vers la gauche
-                        self.rect.left = platform.rect.right
-                    self.velocity.x = 0 # Arrêter le mouvement horizontal en cas de collision
-
-            # COLLISION VERTICALE (AXE Y)
-
-            self.position.y += self.velocity.y + 0.5 * self.acceleration.y
-            self.rect.bottom = self.position.y
-
-            self.on_ground = False
-            for platform in platforms:
-                if self.rect.colliderect(platform.rect):
-                    if self.velocity.y > 0:  # Se déplace vers le bas
-                        self.rect.bottom = platform.rect.top
-                        self.on_ground = True
-                        self.is_jumping = False
-                        self.velocity.y = 0
-                    elif self.velocity.y < 0:  # Se déplace vers le haut
-                        self.rect.top = platform.rect.bottom
-                        self.velocity.y = 0
-                    self.position.y = self.rect.bottom
+            # Déplacements et collisions
+            self.move_horizontal(platforms)
+            self.move_vertical(platforms)
 
             # GESTION DES TIMERS (COYOTE TIME ET JUMP BUFFER)
             now = pygame.time.get_ticks()
@@ -203,6 +170,7 @@ class Player(pygame.sprite.Sprite):
                 elif self.double_jump.can_execute(self):
                     self.execute_jump(jump_type="double")
 
+            # ATTAQUE
             now = pygame.time.get_ticks()
 
             if self.is_attacking:
@@ -220,6 +188,7 @@ class Player(pygame.sprite.Sprite):
                         else: # Attaque vers la gauche
                             self.attack_rect = pygame.Rect(self.rect.left - 70, self.rect.centery - 20, 70, 50)
             
+            # INVINCIBILITE
             if self.invincible:
                 now = pygame.time.get_ticks()
                 if now - self.invincibility_timer >= self.invincibility_duration: # Si la durée d'invincibilité est écoulée
@@ -264,7 +233,7 @@ class Player(pygame.sprite.Sprite):
             self.is_attacking = True
             self.attack_timer = now
             self.last_attack_time = now
-            self.ennemis_touches = [] # On vide la liste dpour ne pas toucher plusieurs fois le même ennemi avec une seule attaque
+            self.ennemis_touches = [] # On vide la liste pour ne pas toucher plusieurs fois le même ennemi avec une seule attaque
 
             if keys[pygame.K_z]: # Attaque vers le haut
                 self.attack_direction = "UP"

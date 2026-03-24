@@ -28,6 +28,7 @@ class Animation:
         self.rect = rect
         self.index_image = index_image
         self.vitesse_animation = vitesse_animation
+        self.image = image  # Ajouter l'attribut image manquant
 
     def changer_frame(self, index, width, height, marge, sheet, ligne):
             # Extraire une frame de la feuille de sprite

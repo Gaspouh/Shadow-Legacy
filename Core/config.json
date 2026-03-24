@@ -4,6 +4,7 @@
         "max_health": 5,
         "jump_strength": -14,
         "attack": 1,
+        "max_speed": 10,
         "attack_cooldown": 350,
         "attack_duration": 100,
         "invincibility_duration": 2000,

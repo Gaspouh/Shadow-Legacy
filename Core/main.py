@@ -155,7 +155,7 @@ while continuer:
             for elem in araignee:
                 if elem.alive: # Vérifier que l'ennemi est vivant avant de le mettre à jour
                 #lancer la fonction de patrouille pour chaque araignée
-                    elem.patrouille()
+                    elem.patrouille(platforms)
             """
             for elem in volant:
                 #lancer la fonction de poursuite pour chaque volant
@@ -188,13 +188,12 @@ while continuer:
                 hitstop_duration, shake_amount = player.take_damage(ennemi.attack_data, ennemi.rect, ennemi) # Appliquer les effets de recul au joueur si un ennemi le touche
                 hitstop_until = pygame.time.get_ticks() + hitstop_duration
 
-    # Dessiner les éléments du jeu sur la fenêtre
-        if player.health > 0 :
-            fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
+        # Dessiner les éléments du jeu sur la fenêtre
+        fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
             
-            # Plateformes
-            for platform in platforms:
-                fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
+        # Plateformes
+        for platform in platforms:
+            fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
 
         # Plateformes spéciales (boue, sable mouvant, eau)
         for sp in special_platforms:
