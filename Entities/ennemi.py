@@ -64,7 +64,7 @@ class Ennemi(Animation, PhysicsEntity):
 
             self.velocity.x = attack_data["knockback_x"] * knockback_direction # Reculer le joueur dans la direction opposée à laquelle il fait face lorsqu'il est touché
             self.velocity.y = attack_data["knockback_y"]  # faire sauter légerement le joueur si touché
-            self.is_knocked_back = False
+            self.is_knocked_back = True
         if self.pv_ennemi <= 0:
             self.alive = False      
 

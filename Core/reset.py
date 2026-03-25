@@ -13,8 +13,8 @@ def reset(player, liste_ennemis, hearts, spawn_point):
         # Chaque ennemi retourne à sa position de départ et reinitialise sa vitesse
         ennemi.rect.x = ennemi.position_initiale.x
         ennemi.rect.y = ennemi.position_initiale.y 
-        ennemi.velocity_y = 0
-        ennemi.velocity_x = 0
+        ennemi.velocity.y = 0
+        ennemi.velocity.x = 0
         ennemi.alive = True # Réactiver les ennemis
         ennemi.pv_ennemi = ennemi.pv_max  # Réinitialiser la santé de l'ennemi
     # Réinitialiser les cœurs
