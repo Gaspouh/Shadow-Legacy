@@ -2,6 +2,7 @@ import pygame
 from Visual.sprite_sheet import VerticalAnimation
 from World.map import platforms
 import time
+import random
 
 class Golem(pygame.sprite.Sprite):  # pas de "self" ici
     def __init__(self, fenetre, x, y):
@@ -19,20 +20,28 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
         self.anim_walk_left   = VerticalAnimation(fenetre, x, y, 'Assets/Boss/golem/golem_walk_left_sheet.png',   32, 240, 240, 0, 0)
         self.anim_smash_right = VerticalAnimation(fenetre, x, y, 'Assets/Boss/golem/golem_smash_right_sheet.png', 12, 240, 240, 0, 0)
         self.anim_smash_left  = VerticalAnimation(fenetre, x, y, 'Assets/Boss/golem/golem_smash_left_sheet.png',  12, 240, 240, 0, 0)
-        
+
+        # Sons : dans le dossier : C:\Users\user\Shadow-Legacy\Assets\Sounds
+        self.sound_smash1 = pygame.mixer.Sound('Assets/Sounds/golem_smash_sound1.MP3')
+        self.sound_smash2 = pygame.mixer.Sound('Assets/Sounds/golem_smash_sound2.MP3')
+        self.smash_sounds = [self.sound_smash1, self.sound_smash2]        
+
+        self.played_sound = False # flag pour pas que le son se joue chaque frames
+
         v = 120
         # Vitesses d'animation (divisé par 60 pour chaque frame)
         self.anim_idle.vitesse_animation        = 40 / v /2
         self.anim_walk_right.vitesse_animation  = 32 / v /1.5 # plus lent
         self.anim_walk_left.vitesse_animation   = 32 / v /1.5
-        self.anim_smash_right.vitesse_animation = 12 / v * 2.35 # plus rapide
-        self.anim_smash_left.vitesse_animation  = 12 / v * 2.35
+        self.anim_smash_right.vitesse_animation = 12 / v * 2 # plus rapide
+        self.anim_smash_left.vitesse_animation  = 12 / v * 2
 
         # Affichage de base
         self.image = self.anim_idle.frames_droite[0]
         self.rect = self.image.get_rect(topleft=(x, y))
 
         # Position et vitesse initiales
+        self.sprite_offset_y = 53
         self.position_initiale_x = x
         self.position_initiale_y = y
         self.velocity_x = 0
@@ -56,6 +65,10 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
         # Attack range
         self.attack_range_x = 57
         self.attack_range_y = 125
+
+        # Cooldown d'attaque
+        self.attack_cooldown = 2.0
+        self.last_attack_time = 0.0
 
         # Gestion hitbox avec le inflate
         self.rect = self.image.get_rect(topleft=(x, y))
@@ -118,8 +131,7 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
                     self.velocity_y = 0
 
         self.rect.midbottom = self.hitbox.midbottom
-        self.rect.y += 53
-
+        
         """ IA du golem """
         
         # Blocage de l'attaque
@@ -127,22 +139,38 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
             self.velocity_x = 0
             if self.direction == 1:
                 
-                idx = self.anim_smash_right.gestion_animation()
+                idx = self.anim_smash_right.gestion_animation() # "idx" = index de l'animation
                 self.image = self.anim_smash_right.frames_droite[int(idx)]
+                if self.played_sound == False:
+                    random.choice(self.smash_sounds).play()  # jouer un son de smash random
+                    self.played_sound = True  # Joue une fois
                 if idx == 0: 
                     self.is_attacking = False
+                    self.played_sound = False
             else:
                 idx = self.anim_smash_left.gestion_animation()
-                self.image = self.anim_smash_left.frames_droite[int(idx)]
+                self.image = self.anim_smash_left.frames_droite[int(idx)]   
+                if self.played_sound == False:
+                    random.choice(self.smash_sounds).play()
+                    self.played_sound = True
                 if idx == 0: 
                     self.is_attacking = False
+                    self.played_sound = False
 
         # Attaque quand le joueur est dans l'attack range, et bloque dans l'état d'attaque. le joueur prend du degat au moment de l'impact du smash de l'animation
         elif self.joueur_dans_attack(player_rect):
-            self.is_attacking = True
-            self.has_dealt_damage = False      # flag reset a False
-            self.start_attack_time = time.time()  # initialisation de time
-            self.velocity_x = 0
+            temps_actuel = time.time()
+            
+            # Si le délai du cooldown est respecté, on lance l'attaque
+            if temps_actuel - self.last_attack_time >= self.attack_cooldown:
+                self.is_attacking = True
+                self.has_dealt_damage = False      
+                self.start_attack_time = temps_actuel  
+                self.last_attack_time = temps_actuel
+                self.velocity_x = 0
+            else:
+                self.velocity_x = 0
+                self.image = self.anim_idle.frames_droite[int(self.anim_idle.gestion_animation())]
 
         # On vérifie le delai
         if self.is_attacking:
@@ -155,10 +183,11 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
                 if not self.has_dealt_damage and time.time() - self.start_attack_time >= 0.3:
                     if self.joueur_dans_attack(player_rect):
                         player.take_damage(self.attack_data, self.rect, self)
-                    self.has_dealt_damage = True  # ← un seul coup par smash
+                    self.has_dealt_damage = True
                 
                 if idx == 0:
                     self.is_attacking = False
+                    self.played_sound = False
             else:
                 idx = self.anim_smash_left.gestion_animation()
                 self.image = self.anim_smash_left.frames_droite[int(idx)]
@@ -170,6 +199,7 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
                 
                 if idx == 0:
                     self.is_attacking = False
+                    self.played_sound = False
         # Poursuite
         elif self._joueur_dans_trigger(player_rect):
             if player_rect.centerx > self.rect.centerx:
@@ -212,7 +242,9 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
         if not self.alive:
             return
         # Afficher simplement le sprite du golem
-        fenetre.blit(self.image, camera.apply(self.rect))
+        visual_rect = self.rect.move(0, self.sprite_offset_y)
+        fenetre.blit(self.image, camera.apply(visual_rect))
+
         """
         # La hitbox en rouge
         pygame.draw.rect(fenetre, (255, 0, 0), camera.apply(self.hitbox), 2)
@@ -246,3 +278,4 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
         pygame.draw.rect(fenetre, (255, 255, 0), camera.apply(attack_rect), 1)
 
         """
+
