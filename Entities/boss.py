@@ -41,6 +41,7 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
         self.rect = self.image.get_rect(topleft=(x, y))
 
         # Position et vitesse initiales
+        self.sprite_offset_y = 53
         self.position_initiale_x = x
         self.position_initiale_y = y
         self.velocity_x = 0
@@ -130,8 +131,7 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
                     self.velocity_y = 0
 
         self.rect.midbottom = self.hitbox.midbottom
-        self.rect.y += 53
-
+        
         """ IA du golem """
         
         # Blocage de l'attaque
@@ -242,7 +242,9 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
         if not self.alive:
             return
         # Afficher simplement le sprite du golem
-        fenetre.blit(self.image, camera.apply(self.rect))
+        visual_rect = self.rect.move(0, self.sprite_offset_y)
+        fenetre.blit(self.image, camera.apply(visual_rect))
+
         """
         # La hitbox en rouge
         pygame.draw.rect(fenetre, (255, 0, 0), camera.apply(self.hitbox), 2)
@@ -276,3 +278,4 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
         pygame.draw.rect(fenetre, (255, 255, 0), camera.apply(attack_rect), 1)
 
         """
+
