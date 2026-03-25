@@ -2,11 +2,20 @@
     "player": {
         "health": 5,
         "max_health": 5,
+
         "jump_strength": -14,
-        "attack": 1,
+        "pogo_strength": -10,
+
         "max_speed": 10,
+        "speed": 3,
+
+        "attack": 1,
         "attack_cooldown": 350,
         "attack_duration": 100,
+        "attack_knockback_x": 80,
+        "attack_knockback_y": -5,
+        "crit_chance": 0.02,
+
         "invincibility_duration": 2000,
         "stun_duration": 100
     },

@@ -116,9 +116,18 @@ while continuer:
             # Pieges
             for trap in traps:
                 now = pygame.time.get_ticks()
+
+                if player.is_attacking and player.attack_rect.colliderect(trap.rect):
+
+                    if trap not in player.entite_touches: # Vérifier que ce piège n'a pas déjà été touché par cette attaque
+
+                        player.entite_touches.append(trap) # Ajouter le piège à la liste d'entités déjà touchées
+                        player.attack_feedback(trap)
+
                 if trap.rect.colliderect(player.rect):
 
                     if trap.attack_data["damage"] > 0:
+
                         if trap.damage_cooldown == 0 or now - trap.last_damage_time >= trap.damage_cooldown :
                             
                             hitstop_duration, shake_amount = player.take_damage(trap.attack_data, trap.rect, trap)
@@ -164,25 +173,18 @@ while continuer:
         # Gestion du recul et du pogo après une attaque
         for ennemi in liste_ennemis:
             if player.is_attacking and player.attack_rect.colliderect(ennemi.rect):
-                if ennemi not in player.ennemis_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque
-                    player.ennemis_touches.append(ennemi) # Ajouter l'ennemi à la liste des ennemis déjà touchés
-                    ennemi.knockback(player.rect, player) # Appliquer les effets de recul à l'ennemi 
-
+                if ennemi not in player.entite_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque
+                    player.entite_touches.append(ennemi) # Ajouter l'ennemi à la liste d'entités déjà touchées
+                    if player.attack_data["critical"] : # Si coup critique
+                        player.attack_data["damage"] = player.attack * 3
+                        print("CRIT !!!")
+                    player.attack_feedback(ennemi)
+                    ennemi.receive_hit(player.attack_data, player.rect, player) # Appliquer les effets de recul à l'ennemi 
                     for _ in range(15): # 15 étincelles par coup
                         particles.append(Particle(ennemi.rect.centerx, ennemi.rect.centery))
 
                     hitstop_until = now + 50 # Activer le hitstop pendant 50ms
-                    shake_amount = 5 # Définir l'intensité du screen shake 
-
-                    if player.attack_direction == "DOWN": 
-                        player.velocity.y = -10 # Rebondir vers le haut après une attaque vers le bas
-                        player.double_jump.reset()
-                    else :
-                        knockback_force = 40
-                        if player.direction == 1: # Reculer vers la droite
-                            player.velocity.x = -knockback_force
-                        else: # Reculer vers la gauche
-                            player.velocity.x = knockback_force
+                    shake_amount = 4 # Définir l'intensité du screen shake 
             
             if ennemi.rect.colliderect(player.rect):
                 hitstop_duration, shake_amount = player.take_damage(ennemi.attack_data, ennemi.rect, ennemi) # Appliquer les effets de recul au joueur si un ennemi le touche

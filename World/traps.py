@@ -45,6 +45,7 @@ class Spike(Rectangular_Obstacle):
         self.respawn_on_touch = True
         self.apply_knockback = True
 
+
 class Thorns(Rectangular_Obstacle):
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width, height, 1, "Assets/Images/insecte_sheet2.png")

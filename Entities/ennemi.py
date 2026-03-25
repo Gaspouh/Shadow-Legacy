@@ -13,6 +13,10 @@ class Ennemi(Animation, PhysicsEntity):
         self.alive = True
         self.ignore_invincibility = False
         self.respawn_on_touch = False 
+        self.is_shielded = False
+        self.can_receive_knockback = True
+        self.apply_knockback = True
+        self.is_knocked_back = False
 
         #Position initiale (pour le reset)
         self.position_initiale = pygame.math.Vector2(x, y)
@@ -38,16 +42,31 @@ class Ennemi(Animation, PhysicsEntity):
         )
         return trigger.colliderect(player_rect)
     
-    def knockback(self,player_rect, player):
-        if player_rect.centerx > self.rect.centerx:
-            recul_direction = -1 # Reculer vers la gauche si le joueur est à droite de l'ennemi
-        else:
-            recul_direction = 1
-        self.velocity.x += 10 * recul_direction # Reculer l'ennemi dans la direction opposée à laquelle il fait face lorsqu'il est touché
-        self.velocity.y = -5 # faire sauter légerement l'ennemi si touché
-        self.pv_ennemi -=  player.attack
+    def receive_hit(self, attack_data, source_rect, source):
+        now = pygame.time.get_ticks()
+
+        if not self.alive or self.is_shielded:
+            return
+        
+        damage_amount = attack_data["damage"]
+
+        if source.respawn_on_touch: # Tue ennemi lorsqu'il touche un piège
+            self.pv_ennemi = 0
+            return
+
+        self.pv_ennemi -= damage_amount # Réduire la santé de l'ennemi lorsqu'il est touché
+
+        if self.can_receive_knockback:
+            if source_rect.centerx > self.rect.centerx:
+                knockback_direction = -1
+            else :
+                knockback_direction = 1
+
+            self.velocity.x = attack_data["knockback_x"] * knockback_direction # Reculer le joueur dans la direction opposée à laquelle il fait face lorsqu'il est touché
+            self.velocity.y = attack_data["knockback_y"]  # faire sauter légerement le joueur si touché
+            self.is_knocked_back = False
         if self.pv_ennemi <= 0:
-            self.alive = False
+            self.alive = False      
 
 
 class Patrouilleur(Ennemi):
@@ -82,8 +101,13 @@ class Patrouilleur(Ennemi):
         capteur_vide.center = (devant + (self.direction * 5), self.rect.bottom + 5)
 
         # Appliquer la vitesse de patrouille
-        self.velocity.x = self.vitesse_deplacement * self.direction
-        self.physics_update(platforms)
+        if self.is_knocked_back:
+            self.physics_update(platforms)
+            if self.on_ground and abs(self.velocity.x) < 0.5:
+                self.is_knocked_back = False
+        else:
+            self.velocity.x = self.vitesse_deplacement * self.direction
+            self.physics_update(platforms)
 
         # Détecter collisions capteur pour changer de direction
         for platform in platforms:

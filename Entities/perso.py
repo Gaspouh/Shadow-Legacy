@@ -1,11 +1,8 @@
 import pygame 
+import random
 from Entities.player_abilities import Dash, Double_jump
 from Core.save import load_config
 from Entities.physics_entity import PhysicsEntity
-
-# PARAMETRES MONDE
-
-ACCELERATION = 3
 
 class Player(PhysicsEntity):
     def __init__(self, x, y, fenetre):
@@ -19,7 +16,9 @@ class Player(PhysicsEntity):
         self.max_health = p.get("max_health", 5)
         self.attack = p.get("attack", 1)
         self.jump_strength = p.get("jump_strength", -14)
+        self.pogo_strength = p.get("pogo_strength", -10)
         self.max_speed = p.get("max_speed", 10)
+        self.speed = p.get("speed", 3)
 
         # PHYSIQUE DU JOUEUR
         self.direction = 1 # 1 pour droite, -1 pour gauche
@@ -35,9 +34,13 @@ class Player(PhysicsEntity):
         self.attack_timer = 0
         self.attack_cooldown = p.get("attack_cooldown", 350)
         self.last_attack_time = -1000
+        self.attack_knockback_x = p.get("attack_knockback_x", 80)
+        self.attack_knockback_y = p.get("attack_knockback_y", -5)
         self.attack_direction = None #"UP", "DOWN", "RIGHT" ou "LEFT"
         self.attack_rect = pygame.Rect(0, 0, 0, 0) # Hitbox de l'attaque initialisée vide
-        self.ennemis_touches = []
+        self.crit_chance = p.get("crit_chance", 0.02)
+        self.entite_touches = []
+        self.attack_data = {}
 
         # IMAGE DU JOUEUR
         original_image = pygame.image.load('Assets/Player/player.png').convert_alpha()
@@ -70,6 +73,8 @@ class Player(PhysicsEntity):
         self.wind_force_y = 0
         self.on_ice = False
 
+        self.respawn_on_touch = False
+
     def update(self, platforms):
         now = pygame.time.get_ticks()
 
@@ -83,10 +88,10 @@ class Player(PhysicsEntity):
 
             if self.on_ice and self.on_ground :
                 friction = self.friction / 30
-                acceleration = ACCELERATION / 6
+                acceleration = self.speed / 6
 
             else :
-                acceleration = ACCELERATION
+                acceleration = self.speed
                 friction = self.friction
 
             self.acceleration.x = 0
@@ -107,7 +112,7 @@ class Player(PhysicsEntity):
             self.velocity.x += self.acceleration.x
             self.velocity.y += self.acceleration.y
 
-            # Cap de vitesse appliqué hors dash
+            # Caps de vitesse appliqué hors dash
             if not self.dash.in_use:
                 # Limiter vitesse hozitontal du joueur
                 if self.velocity.x < -self.max_speed  :
@@ -117,6 +122,9 @@ class Player(PhysicsEntity):
                 # Limiter la vitesse de chute du joueur     
                 if self.velocity.y > 20 :
                     self.velocity.y = 20
+                # Seuil d'arrêt horizontal
+                if abs(self.velocity.x) < 0.01:
+                    self.velocity.x = 0
 
             # Gestion du vent
             if not self.on_ground :
@@ -233,7 +241,7 @@ class Player(PhysicsEntity):
             self.is_attacking = True
             self.attack_timer = now
             self.last_attack_time = now
-            self.ennemis_touches = [] # On vide la liste pour ne pas toucher plusieurs fois le même ennemi avec une seule attaque
+            self.entite_touches = [] # On vide la liste pour ne pas toucher plusieurs fois le même ennemi avec une seule attaque
 
             if keys[pygame.K_z]: # Attaque vers le haut
                 self.attack_direction = "UP"
@@ -244,6 +252,34 @@ class Player(PhysicsEntity):
                     self.attack_direction = "RIGHT"
                 else:
                     self.attack_direction = "LEFT"
+        
+        self.attack_data = {
+            "damage" : self.attack,
+            "knockback_x" : self.attack_knockback_x,
+            "knockback_y" : self.attack_knockback_y,
+            "critical": random.random() < self.crit_chance
+        }
+
+    def attack_feedback(self, target):
+        
+        if not target.apply_knockback:
+            return
+        
+        if self.attack_direction == "DOWN": 
+            self.velocity.y = self.pogo_strength # Rebondir vers le haut après une attaque vers le bas
+            self.double_jump.reset()
+        
+        elif self.attack_direction == "UP": # Pour avoir un léger ressenti sans écraser le joeur au sol
+            if self.velocity.y < 0:
+                self.velocity.y *= 0.5
+        else :
+            if self.direction == 1: # Reculer vers la droite
+                self.velocity.x = -self.attack_knockback_x
+            else: # Reculer vers la gauche
+                self.velocity.x = self.attack_knockback_x
+
+            self.velocity.y = self.attack_knockback_y
+
     
     def take_damage(self, attack_data, source_rect, source):
         now = pygame.time.get_ticks()
@@ -280,6 +316,3 @@ class Player(PhysicsEntity):
             self.velocity.y = attack_data["knockback_y"]  # faire sauter légerement le joueur si touché
 
         return hitstop_duration, shake_amount
-
-
-
