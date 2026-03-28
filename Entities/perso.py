@@ -3,6 +3,7 @@ import random
 from Entities.player_abilities import Dash, Double_jump
 from Core.save import load_config
 from Entities.physics_entity import PhysicsEntity
+from Visual.sprite_sheet import VerticalAnimation
 
 class Player(PhysicsEntity):
     def __init__(self, x, y, fenetre):
@@ -76,6 +77,39 @@ class Player(PhysicsEntity):
         self.on_ice = False
 
         self.respawn_on_touch = False
+
+        # Spriteheets animations :
+        self.anim_idle = VerticalAnimation(fenetre, x, y, 'Assets/Player/idle.png',        57, 500, 500, 0, 0)
+        self.anim_run_right = VerticalAnimation(fenetre, x, y, 'Assets/Player/run_right.png',  16, 500, 500, 0, 0)
+        self.anim_run_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/run_left.png',   16, 500, 500, 0, 0)
+
+        v = 60
+
+        self.anim_idle.vitesse_animation = 57 / v / 3 # Plus lent
+        self.anim_run_right.vitesse_animation = 16 / v * 1.9 # Plus rapide
+        self.anim_run_left.vitesse_animation = 16 / v * 1.9
+
+        self.sprite_offset_y = 30
+
+    def animate(self):
+        if abs(self.velocity.x) > 4: # Seuil de vitesse pour declencher l'anim
+            if self.direction == 1: #droite
+                self.current_animation = self.anim_run_right # l'animation en cours
+            else:
+                self.current_animation = self.anim_run_left
+        else:
+            self.current_animation = self.anim_idle # Si le joueur bouge pas il est en idle
+        
+        self.current_animation.gestion_animation() # De sprite_sheet.py pour faire l'animation
+        
+        frame_index = int(self.current_animation.index_image)
+        frame_surface = self.current_animation.frames_droite[frame_index]
+        
+        # image du joueur redimmensionnée
+        if self.current_animation in (self.anim_run_right, self.anim_run_left):
+            self.image = pygame.transform.scale(frame_surface, (150, 150)) # Perso plus petit lors du run (à cause du pb de "pading" de chaque tiles)
+        else:
+            self.image = pygame.transform.scale(frame_surface, (160, 160))
 
     def update(self, platforms):
         now = pygame.time.get_ticks()
@@ -205,9 +239,11 @@ class Player(PhysicsEntity):
                     self.invincible = False
 
             self.dash.update(self) # Mettre à jour l'état du dash et appliquer les effets de dash sur le joueur
+            self.animate() # Joueur
             
         else:
             self.acceleration.x = 0 # Ne pas permettre au joueur de se déplacer pendant le stun
+            self.animate() # Forcer l'idle
 
     def press_jump(self):
 
