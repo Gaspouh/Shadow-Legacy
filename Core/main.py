@@ -58,7 +58,7 @@ player.rect.midbottom = player.position # pareil avec la hitbox
 # Liste des ennemis
 araignee = [araignee1]
 volant = [volant1]
-liste_ennemis = araignee + volant
+liste_ennemis = araignee + volant 
 
 # Liste des pièges
 spike = [Spike(300, 300, 40, 40), Spike(1560, 950, 40, 40)]
@@ -173,7 +173,13 @@ while continuer:
         # Gestion du recul et du pogo après une attaque
         for ennemi in liste_ennemis:
             if player.is_attacking and player.attack_rect.colliderect(ennemi.rect):
-                if ennemi not in player.entite_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque
+                if ennemi not in player.entite_touches and ennemi not in ennemi.ennemi_dead: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque ou est mort
+                    if player.sang < player.sang_max:
+                        player.sang += 11 # charge la jauge de sang 
+                        print(player.sang)
+                    else :
+                        player.sang = player.sang_max
+                        print("max")
                     player.entite_touches.append(ennemi) # Ajouter l'ennemi à la liste d'entités déjà touchées
                     if player.attack_data["critical"] : # Si coup critique
                         player.attack_data["damage"] = player.attack * 3
@@ -245,11 +251,19 @@ while continuer:
         golem.update(player.rect, player)
         golem.draw(fenetre, camera) # A modifier : Dans golem.py dans la fonction draw pour afficher les hitbox ou non
         if player.is_attacking and player.attack_rect.colliderect(golem.hitbox):
-            golem.knockback(player.rect, player)
-            fenetre.blit(golem.image, camera.apply(golem.rect))
-        if golem.hitbox.colliderect(player.rect):
-            hitstop_duration, shake_amount = player.take_damage(golem.attack_data, golem.rect, golem) # Recul du joueur
-            hitstop_until = pygame.time.get_ticks() + hitstop_duration
+            if golem not in player.entite_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque
+                player.entite_touches.append(golem)
+                golem.knockback(player.rect, player)
+                fenetre.blit(golem.image, camera.apply(golem.rect))
+                if player.sang < player.sang_max:
+                    player.sang += 11 # charge la jauge de sang 
+                    print(player.sang)
+                else :
+                    player.sang = player.sang_max
+                    print("max")
+            if golem.hitbox.colliderect(player.rect):
+                hitstop_duration, shake_amount = player.take_damage(golem.attack_data, golem.rect, golem) # Recul du joueur
+                hitstop_until = pygame.time.get_ticks() + hitstop_duration
 
         # Particules
         for p in particles[:]: # On utilise [:] pour copier la liste et éviter les erreurs de suppression

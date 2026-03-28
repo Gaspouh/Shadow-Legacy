@@ -19,6 +19,8 @@ class Player(PhysicsEntity):
         self.pogo_strength = p.get("pogo_strength", -10)
         self.max_speed = p.get("max_speed", 10)
         self.speed = p.get("speed", 3)
+        self.sang = 0
+        self.sang_max = 99
 
         # PHYSIQUE DU JOUEUR
         self.direction = 1 # 1 pour droite, -1 pour gauche

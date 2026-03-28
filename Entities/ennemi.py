@@ -17,6 +17,7 @@ class Ennemi(Animation, PhysicsEntity):
         self.can_receive_knockback = True
         self.apply_knockback = True
         self.is_knocked_back = False
+        self.ennemi_dead = []
 
         #Position initiale (pour le reset)
         self.position_initiale = pygame.math.Vector2(x, y)
@@ -46,7 +47,8 @@ class Ennemi(Animation, PhysicsEntity):
         now = pygame.time.get_ticks()
 
         if not self.alive or self.is_shielded:
-            return
+            self.ennemi_dead.append(self)
+            return 
         
         damage_amount = attack_data["damage"]
 
