@@ -228,8 +228,11 @@ while continuer:
             pygame.draw.rect(fenetre, (0, 255, 255), camera.apply(trap.rect), 2)
 
         # Joueur
-        image_rect = player.image.get_rect(midbottom=player.rect.midbottom)
-        if not player.invincible or (pygame.time.get_ticks() // 100) % 2 == 0: # Clignoter le sprite du joueur lorsqu'il est invincible
+        image_rect = player.image.get_rect(midbottom=(
+            player.rect.midbottom[0],
+            player.rect.midbottom[1] + player.sprite_offset_y  # offset
+        ))
+        if not player.invincible or (pygame.time.get_ticks() // 100) % 2 == 0: # Pour faire clignoter le joueur quand il est invincible
             fenetre.blit(player.image, camera.apply(image_rect))
 
         if player.is_attacking:
