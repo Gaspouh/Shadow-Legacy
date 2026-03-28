@@ -80,17 +80,44 @@ class Player(PhysicsEntity):
         self.anim_idle = VerticalAnimation(fenetre, x, y, 'Assets/Player/idle.png',        57, 500, 500, 0, 0)
         self.anim_run_right = VerticalAnimation(fenetre, x, y, 'Assets/Player/run_right.png',  16, 500, 500, 0, 0)
         self.anim_run_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/run_left.png',   16, 500, 500, 0, 0)
+        self.anim_jump_front = VerticalAnimation(fenetre, x, y, 'Assets/Player/jump.png', 12, 500, 500, 0, 0)
+        self.anim_jump_right = VerticalAnimation(fenetre, x, y, 'Assets/Player/jump_right.png', 12, 500, 500, 0, 0)
+        self.anim_jump_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/jump_left.png', 12, 500, 500, 0, 0)
+        self.anim_jump_air_right = VerticalAnimation(fenetre, x, y, 'Assets/Player/jump_air_right.png', 12, 500, 500, 0, 0)
+        self.anim_jump_air_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/jump_air_left.png', 12, 500, 500, 0, 0)
+        self.anim_dash_right = VerticalAnimation(fenetre, x, y, 'Assets/Player/dash_right.png', 15, 500, 500, 0, 0)
+        self.anim_dash_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/dash_left.png', 15, 500, 500, 0, 0)
 
-        v = 60
+        v = 60  # Vitesse par défaut pour chaque anim
 
         self.anim_idle.vitesse_animation = 57 / v / 3 # Plus lent
         self.anim_run_right.vitesse_animation = 16 / v * 1.9 # Plus rapide
         self.anim_run_left.vitesse_animation = 16 / v * 1.9
+        self.anim_jump_front.vitesse_animation = 12 / v * 3
+        self.anim_jump_right.vitesse_animation = 20 / v
+        self.anim_jump_left.vitesse_animation = 20 / v
+        self.anim_dash_right.vitesse_animation = 12 / v * 4
+        self.anim_dash_left.vitesse_animation = 12 / v * 4
 
         self.sprite_offset_y = 30
 
     def animate(self):
-        if abs(self.velocity.x) > 4: # Seuil de vitesse pour declencher l'anim
+        if self.dash.in_use and self.direction == 1:
+            self.current_animation = self.anim_dash_right
+        elif self.dash.in_use and self.direction == -1:
+            self.current_animation = self.anim_dash_left
+        elif self.is_jumping and self.velocity.x == 0:
+            self.current_animation = self.anim_jump_front
+        elif self.is_jumping and self.direction == 1:
+            self.current_animation = self.anim_jump_right
+        elif self.is_jumping and self.direction == -1:
+            self.current_animation = self.anim_jump_left
+        elif not self.on_ground and self.velocity.y > 0 and self.direction == 1:
+            self.current_animation = self.anim_jump_air_right
+        elif not self.on_ground and self.velocity.y > 0 and self.direction == -1:
+            self.current_animation = self.anim_jump_air_left
+        
+        elif abs(self.velocity.x) > 4: # Seuil de vitesse pour declencher l'anim
             if self.direction == 1: #droite
                 self.current_animation = self.anim_run_right # l'animation en cours
             else:
@@ -106,6 +133,7 @@ class Player(PhysicsEntity):
         # image du joueur redimmensionnée
         if self.current_animation in (self.anim_run_right, self.anim_run_left):
             self.image = pygame.transform.scale(frame_surface, (150, 150)) # Perso plus petit lors du run (à cause du pb de "pading" de chaque tiles)
+        
         else:
             self.image = pygame.transform.scale(frame_surface, (160, 160))
 
@@ -149,16 +177,18 @@ class Player(PhysicsEntity):
             # Caps de vitesse appliqué hors dash
             if not self.dash.in_use:
                 # Limiter vitesse hozitontal du joueur
-                if self.velocity.x < -self.max_speed  :
+                if self.velocity.x < -self.max_speed:
                     self.velocity.x += (-self.max_speed - self.velocity.x) / 15
                 elif self.velocity.x > self.max_speed:
                     self.velocity.x += (self.max_speed - self.velocity.x) / 15
                 # Limiter la vitesse de chute du joueur     
-                if self.velocity.y > 20 :
+                if self.velocity.y > 20:
                     self.velocity.y = 20
                 # Seuil d'arrêt horizontal
                 if abs(self.velocity.x) < 0.01:
                     self.velocity.x = 0
+                if self.velocity.y > 0:
+                    self.is_jumping = False
 
             # Gestion du vent
             if not self.on_ground :
@@ -259,7 +289,7 @@ class Player(PhysicsEntity):
                 self.velocity.y = self.jump_strength * self.current_jump_factor
             elif jump_type == "double" :
                 self.velocity.y = self.double_jump.strength
-                self.double_jump.used =True
+                self.double_jump.used =True # Flag
 
             self.coyote_timer = -1000 # Réinitialisation des timers pour ne pas sauter 2 fois
             self.jump_buffer_timer = -1000
