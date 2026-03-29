@@ -6,16 +6,8 @@ def menu(fenetre):
     noir_transparent = pygame.Surface((fenetre.get_width(), fenetre.get_height()))
     noir_transparent.fill((0, 0, 0)) # Remplir avec du noir
     noir_transparent.set_alpha(220) # Définir la transparence 
-    image_menu = pygame.image.load("Assets/Images/pause.jpg").convert_alpha()
-
-    for x in range(image_menu.get_width()):
-        for y in range(image_menu.get_height()):
-            r, g, b, a = image_menu.get_at((x, y))
-            
-            # si ce n'est PAS du blanc → transparent
-            if not (r > 200 and g > 200 and b > 200):
-                image_menu.set_at((x, y), (0, 0, 0, 0))
-    
+    image_menu = pygame.image.load("Assets/Images/pause.png").convert_alpha()
+        
     # Définir les boutons
     bouton_reprendre = pygame.Rect(fenetre.get_width() // 2 - 100, fenetre.get_height() // 2 - 50, 200, 40)
     bouton_options = pygame.Rect(fenetre.get_width() // 2 - 100, fenetre.get_height() // 2 + 20, 200, 40)
