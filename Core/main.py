@@ -40,6 +40,7 @@ ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /5.15, u
 
 # Sons
 set_spawn_sound = pygame.mixer.Sound("Assets/Sounds/set_spawn_sound.mp3")
+death_sound = pygame.mixer.Sound("Assets/Sounds/elden-ring-death.mp3")
 
 # Définir le titre de la fenêtre
 pygame.display.set_caption("Shadow Legacy")
@@ -285,11 +286,43 @@ while continuer:
         for heart in hearts:
             fenetre.blit(heart.image, heart.rect) # Les cœurs sont fixes à l'écran, pas besoin d'appliquer le décalage de la caméra
 
+    # Gestion de mort
     else:
-        fenetre.fill((0, 0, 30)) # Afficher un écran noir lorsque le joueur n'a plus de santé
-        pygame.display.update()
-        pygame.time.delay(1000)
-        reset(player, liste_ennemis, hearts, spawn_point) # Réinitialiser le jeu après la mort du joueur
+        death_sound.play()
+        debut_mort = pygame.time.get_ticks()
+        duree_mort = 6000
+
+        you_died = pygame.image.load("Assets/Images/YOU_DIED_text.png").convert_alpha()
+        w_base, h_base = you_died.get_width(), you_died.get_height()
+
+        while pygame.time.get_ticks() - debut_mort < duree_mort:
+            temps = pygame.time.get_ticks() - debut_mort
+
+            # Rouge qui monte
+            rouge = int((temps / duree_mort) * 40)
+            voile_rouge = pygame.Surface((GAME_WIDTH, GAME_HEIGHT), pygame.SRCALPHA)
+            voile_rouge.fill((15, 0, 0, rouge))
+            fenetre.blit(voile_rouge, (0, 0))
+
+            # "YOU DIED" s'affiche (opacité = 0) à partir de 1200ms
+            if temps >= 1200:
+                avancement = (temps - 2000) / (duree_mort - 2000)  # de 0 à 1
+
+                opacite = int(avancement * 255)
+                taille = 1.0 + avancement * 0.15
+                new_w = int(w_base * taille)
+                new_h = int(h_base * taille)
+
+                img = pygame.transform.scale(you_died, (new_w, new_h))
+                img.set_alpha(opacite)
+
+                pos = img.get_rect(center=(GAME_WIDTH // 2, GAME_HEIGHT // 2)) # centrer le txt
+                fenetre.blit(img, pos)
+
+            pygame.display.update()
+            clock.tick(60)
+
+        reset(player, liste_ennemis, hearts, spawn_point)
 
 # Mettre à jour l'affichage
     if not pause:
