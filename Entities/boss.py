@@ -5,16 +5,18 @@ from World.map import platforms
 import time
 import random
 import math
+from World.objets import Monnaie
 
 class Golem(pygame.sprite.Sprite):  # pas de "self" ici
     def __init__(self, fenetre, x, y):
         super().__init__()
         self.ecran = fenetre
 
-        # Variables d'état
-        self.pv = 1000
+    # Variables principales
+        self.pv = 10
         self.alive = True
         self.direction = 1
+        self.orbs_value = 30
 
         # Spriteheets, animations :
         self.anim_idle = VerticalAnimation(fenetre, x, y, 'Assets/Boss/golem/golem_idle_sheet.png',        40, 240, 240, 0, 0)
@@ -202,6 +204,7 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
                 if idx == 0:
                     self.is_attacking = False
                     self.played_sound = False
+
         # Poursuite
         elif self._joueur_dans_trigger(player_rect):
             if player_rect.centerx > self.rect.centerx:
@@ -236,8 +239,9 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
         self.velocity_x += 5 * recul_direction
         self.velocity_y = -5
         self.pv -= player.attack
-        if self.pv <= 0:
+        if self.pv <= 0: # Meurt
             self.alive = False
+            Monnaie.orbs += self.orbs_value
 
     def draw(self, fenetre, camera):
         

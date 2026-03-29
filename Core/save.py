@@ -1,6 +1,7 @@
 import json
 import os
 import pygame
+from World.objets import Monnaie
 
 # Path constants : use relative paths from Core directory
 CORE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -42,8 +43,9 @@ def sauvegarder(player, checkpoints):
     data = {    # on modifiera perso.py, abilities.py, et autres fichiers pour qu'ils dependent du json et pas l'inverse
         # player
         "player": {
-            "health":       player.health,      
-            "max_health":   player.max_health,  
+            "health": player.health,      
+            "max_health": player.max_health,
+            "orbs": Monnaie.orbs
         },
 
         # spawn
@@ -70,7 +72,7 @@ def sauvegarder(player, checkpoints):
 
     with open(SAVE_FILE, "w") as f:
         json.dump(data, f, indent=4)
-    print(f"[SAVE] Sauvegarde effectuée — spawn : ({spawn.x}, {spawn.y})")
+    print(f"[SAVE] Sauvegarde effectuée, spawn : ({spawn.x}, {spawn.y})")
 
 
 def charger(player, checkpoints):
@@ -85,6 +87,11 @@ def charger(player, checkpoints):
     # Player
     player.health = data["player"]["health"]
     player.max_health = data["player"]["max_health"]
+
+    if "orbs" in data["player"]:
+        Monnaie.orbs = data["player"]["orbs"]
+    else:
+        data["player"]["orbs"] = Monnaie.orbs
 
     # Abilities
         # quand y'aura d'autres abilities
