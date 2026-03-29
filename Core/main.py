@@ -173,7 +173,7 @@ while continuer:
         # Gestion du recul et du pogo après une attaque
         for ennemi in liste_ennemis:
             if player.is_attacking and player.attack_rect.colliderect(ennemi.rect):
-                if ennemi not in player.entite_touches and ennemi not in ennemi.ennemi_dead: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque ou est mort
+                if ennemi not in player.entite_touches and ennemi.alive: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque ou est mort
                     if player.sang < player.sang_max:
                         player.sang += 11 # charge la jauge de sang 
                         print(player.sang)
@@ -191,6 +191,11 @@ while continuer:
 
                     hitstop_until = now + 50 # Activer le hitstop pendant 50ms
                     shake_amount = 4 # Définir l'intensité du screen shake 
+            if not ennemi.alive:
+                ennemi.mort()
+            
+            if not ennemi.alive and ennemi.animation_mort.index_image >= len(ennemi.animation_mort.frames_droite)-1:
+                liste_ennemis.remove(ennemi)
             
             if ennemi.rect.colliderect(player.rect):
                 hitstop_duration, shake_amount = player.take_damage(ennemi.attack_data, ennemi.rect, ennemi) # Appliquer les effets de recul au joueur si un ennemi le touche
