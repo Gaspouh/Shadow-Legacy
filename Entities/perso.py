@@ -79,14 +79,42 @@ class Player(PhysicsEntity):
         self.respawn_on_touch = False
 
         # Spriteheets animations :
+
+        # idle
         self.anim_idle = VerticalAnimation(fenetre, x, y, 'Assets/Player/idle.png',        57, 500, 500, 0, 0)
+        self.anim_jump_air_right = VerticalAnimation(fenetre, x, y, 'Assets/Player/jump_air_right.png', 12, 500, 500, 0, 0)
+        self.anim_jump_air_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/jump_air_left.png', 12, 500, 500, 0, 0)
+
+        # déplacement
         self.anim_run_right = VerticalAnimation(fenetre, x, y, 'Assets/Player/run_right.png',  16, 500, 500, 0, 0)
         self.anim_run_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/run_left.png',   16, 500, 500, 0, 0)
+
+        # jump
         self.anim_jump_front = VerticalAnimation(fenetre, x, y, 'Assets/Player/jump.png', 12, 500, 500, 0, 0)
         self.anim_jump_right = VerticalAnimation(fenetre, x, y, 'Assets/Player/jump_right.png', 12, 500, 500, 0, 0)
         self.anim_jump_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/jump_left.png', 12, 500, 500, 0, 0)
-        self.anim_jump_air_right = VerticalAnimation(fenetre, x, y, 'Assets/Player/jump_air_right.png', 12, 500, 500, 0, 0)
-        self.anim_jump_air_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/jump_air_left.png', 12, 500, 500, 0, 0)
+        
+        # attaque
+        self.anim_basic_attack1_right = VerticalAnimation(fenetre, x, y, 'Assets/Player/basic_attack1_right.png', 10, 500, 500, 0, 0)
+        self.anim_basic_attack2_right = VerticalAnimation(fenetre, x, y, 'Assets/Player/basic_attack2_right.png', 10, 500, 500, 0, 0)
+        self.anim_basic_attack1_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/basic_attack1_left.png', 10, 500, 500, 0, 0)
+        self.anim_basic_attack2_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/basic_attack2_left.png', 10, 500, 500, 0, 0)
+
+
+        self.basic_attacks_right = [
+        self.anim_basic_attack1_right,
+        self.anim_basic_attack2_right
+        ]
+
+        self.basic_attacks_left = [
+        self.anim_basic_attack1_left,
+        self.anim_basic_attack2_left
+        ]
+
+        """
+        self.anim_basic_attack3 = VerticalAnimation(fenetre, x, y, 'Assets/Player/basic_attack3.png', 10, 500, 500, 0, 0)
+        """
+        # dash
         self.anim_dash_right = VerticalAnimation(fenetre, x, y, 'Assets/Player/dash_right.png', 15, 500, 500, 0, 0)
         self.anim_dash_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/dash_left.png', 15, 500, 500, 0, 0)
 
@@ -100,14 +128,24 @@ class Player(PhysicsEntity):
         self.anim_jump_left.vitesse_animation = 20 / v
         self.anim_dash_right.vitesse_animation = 12 / v * 4
         self.anim_dash_left.vitesse_animation = 12 / v * 4
+        self.anim_basic_attack1_right.vitesse_animation = 10 / v * 3.2
+        self.anim_basic_attack1_left.vitesse_animation = 10 / v * 3.2
+        self.anim_basic_attack2_right.vitesse_animation = 10 / v * 3.2
+        self.anim_basic_attack2_left.vitesse_animation = 10 / v * 3.2
 
         self.sprite_offset_y = 30
 
+    # foret de if pour chaque anims
     def animate(self):
+        # dash
         if self.dash.in_use and self.direction == 1:
             self.current_animation = self.anim_dash_right
         elif self.dash.in_use and self.direction == -1:
             self.current_animation = self.anim_dash_left
+        # attack (direction deja gérée dans press_attack)
+        elif self.is_attacking:
+            self.current_animation = self.current_attack_anim
+        # jump / air idle (ai_jump)
         elif self.is_jumping and self.velocity.x == 0:
             self.current_animation = self.anim_jump_front
         elif self.is_jumping and self.direction == 1:
@@ -134,7 +172,7 @@ class Player(PhysicsEntity):
         
         # image du joueur redimmensionnée
         if self.current_animation in (self.anim_run_right, self.anim_run_left):
-            self.image = pygame.transform.scale(frame_surface, (150, 150)) # Perso plus petit lors du run (à cause du pb de "pading" de chaque tiles)
+            self.image = pygame.transform.scale(frame_surface, (150, 150)) # Perso plus petit lors du run (à cause du pb de "pading" de chaque tiles du spritesheet)
         
         else:
             self.image = pygame.transform.scale(frame_surface, (160, 160))
@@ -246,11 +284,12 @@ class Player(PhysicsEntity):
 
             # ATTAQUE
             now = pygame.time.get_ticks()
-
+    
             if self.is_attacking:
                 if now - self.attack_timer >= self.attack_duration: # Si la durée de l'attaque est écoulée
                     self.is_attacking = False
                     self.attack_rect = pygame.Rect(0, 0, 0, 0) # Réinitialiser la hitbox de l'attaque lorsque l'attaque est terminée
+                
                 else :
                     if self.attack_direction == "UP":
                         self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.top - 70, 50, 70)
@@ -310,6 +349,13 @@ class Player(PhysicsEntity):
             self.attack_timer = now
             self.last_attack_time = now
             self.entite_touches = [] # On vide la liste pour ne pas toucher plusieurs fois le même ennemi avec une seule attaque
+            # Choix d'animation d'attaque
+            if self.direction == 1:
+                self.current_attack_anim = random.choice(self.basic_attacks_right)
+            else:
+                self.current_attack_anim = random.choice(self.basic_attacks_left)
+
+            self.anim_basic_attack1_right.index_image = 0 # Reset l'anim a chaque attaques
 
             if keys[pygame.K_z]: # Attaque vers le haut
                 self.attack_direction = "UP"

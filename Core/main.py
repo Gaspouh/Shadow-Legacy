@@ -1,7 +1,7 @@
 import pygame
 import os
 import sys
-
+from random import randint
 # Add project root to path for imports
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
@@ -97,6 +97,7 @@ while continuer:
                 if event.button == 1:  # Clic gauche
                     # faire attaquer le joueur
                     player.press_attack()
+                    shake_amount = randint(2, 3)
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
                     # arrêter le saut du joueur pour permettre un saut plus court
@@ -243,12 +244,15 @@ while continuer:
 
         # Boss
         golem.update(player.rect, player)
+        if golem.shake > 0:
+            shake_amount = golem.shake
+            golem.shake = 0
         golem.draw(fenetre, camera) # A modifier : Dans golem.py dans la fonction draw pour afficher les hitbox ou non
         if player.is_attacking and player.attack_rect.colliderect(golem.hitbox):
             if golem not in player.entite_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque
                 player.entite_touches.append(golem)
                 golem.knockback(player.rect, player)
-                fenetre.blit(golem.image, camera.apply(golem.rect))
+                shake_amount = randint(8, 10) # addictif sah
 
                 if player.sang < player.sang_max:
                     player.sang += 11 # charge la jauge de sang 
@@ -259,6 +263,8 @@ while continuer:
             if golem.hitbox.colliderect(player.rect):
                 hitstop_duration, shake_amount = player.take_damage(golem.attack_data, golem.rect, golem) # Recul du joueur
                 hitstop_until = pygame.time.get_ticks() + hitstop_duration
+        
+
 
         # Joueur
         image_rect = player.image.get_rect(midbottom=(
@@ -268,8 +274,10 @@ while continuer:
         if not player.invincible or (pygame.time.get_ticks() // 100) % 2 == 0: # Pour faire clignoter le joueur quand il est invincible
             fenetre.blit(player.image, camera.apply(image_rect))
 
+        """
         if player.is_attacking:
             pygame.draw.rect(fenetre, (255, 0, 0), camera.apply(player.attack_rect)) # Afficher la hitbox de l'attaque pour les tests
+        """
 
 
         # Ennemis

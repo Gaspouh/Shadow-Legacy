@@ -17,6 +17,7 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
         self.alive = True
         self.direction = 1
         self.orbs_value = 30
+        self.shake = 0
 
         # Spriteheets, animations :
         self.anim_idle = VerticalAnimation(fenetre, x, y, 'Assets/Boss/golem/golem_idle_sheet.png',        40, 240, 240, 0, 0)
@@ -25,12 +26,14 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
         self.anim_smash_right = VerticalAnimation(fenetre, x, y, 'Assets/Boss/golem/golem_smash_right_sheet.png', 12, 240, 240, 0, 0)
         self.anim_smash_left = VerticalAnimation(fenetre, x, y, 'Assets/Boss/golem/golem_smash_left_sheet.png',  12, 240, 240, 0, 0)
 
-        # Sons : dans le dossier : C:\Users\user\Shadow-Legacy\Assets\Sounds
+        # Sons
         self.sound_smash1 = pygame.mixer.Sound('Assets/Sounds/golem_smash_sound1.MP3')
         self.sound_smash2 = pygame.mixer.Sound('Assets/Sounds/golem_smash_sound2.MP3')
         self.smash_sounds = [self.sound_smash1, self.sound_smash2]        
+        self.smash_played_sound = False # flag pour pas que le son se joue chaque frames
 
-        self.played_sound = False # flag pour pas que le son se joue chaque frames
+        self.death_sound = pygame.mixer.Sound('Assets/Sounds/golem_death.MP3')
+        self.death_sound_played = False
 
         v = 120
         # Vitesses d'animation (divisé par 60 pour chaque frame)
@@ -137,29 +140,44 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
         self.rect.midbottom = self.hitbox.midbottom
         
         """ IA du golem """
-        
-        # Blocage de l'attaque
         if self.is_attacking:
             self.velocity_x = 0
             if self.direction == 1:
-                
-                idx = self.anim_smash_right.gestion_animation() # "idx" = index de l'animation
+                idx = self.anim_smash_right.gestion_animation()  # 1 fois
                 self.image = self.anim_smash_right.frames_droite[int(idx)]
-                if self.played_sound == False:
-                    random.choice(self.smash_sounds).play()  # jouer un son de smash random
-                    self.played_sound = True  # Joue une fois
-                if idx == 0: 
-                    self.is_attacking = False
-                    self.played_sound = False
-            else:
-                idx = self.anim_smash_left.gestion_animation()
-                self.image = self.anim_smash_left.frames_droite[int(idx)]   
-                if self.played_sound == False:
+                
+                if not self.smash_played_sound:
                     random.choice(self.smash_sounds).play()
-                    self.played_sound = True
-                if idx == 0: 
+                    self.smash_played_sound = True
+
+                if not self.has_dealt_damage and time.time() - self.start_attack_time >= 0.35:
+                    self.shake = 17
+                    if self.joueur_dans_attack(player_rect):
+                        player.take_damage(self.attack_data, self.rect, self)
+                    self.has_dealt_damage = True
+
+                if idx == 0:
                     self.is_attacking = False
-                    self.played_sound = False
+                    self.smash_played_sound = False
+
+            else:  # direction == -1
+                idx = self.anim_smash_left.gestion_animation()
+                self.image = self.anim_smash_left.frames_droite[int(idx)]
+
+                if not self.smash_played_sound:
+                    random.choice(self.smash_sounds).play()
+                    self.smash_played_sound = True
+                    
+
+                if not self.has_dealt_damage and time.time() - self.start_attack_time >= 0.35:
+                    self.shake = 17
+                    if self.joueur_dans_attack(player_rect):
+                        player.take_damage(self.attack_data, self.rect, self)
+                    self.has_dealt_damage = True
+
+                if idx == 0:
+                    self.is_attacking = False
+                    self.smash_played_sound = False
 
         # Attaque quand le joueur est dans l'attack range, et bloque dans l'état d'attaque. le joueur prend du degat au moment de l'impact du smash de l'animation
         elif self.joueur_dans_attack(player_rect):
@@ -175,35 +193,6 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
             else:
                 self.velocity_x = 0
                 self.image = self.anim_idle.frames_droite[int(self.anim_idle.gestion_animation())]
-
-        # On vérifie le delai
-        if self.is_attacking:
-            self.velocity_x = 0
-            if self.direction == 1:
-                idx = self.anim_smash_right.gestion_animation()
-                self.image = self.anim_smash_right.frames_droite[int(idx)]
-                
-                # degat a l'impact de l'animation
-                if not self.has_dealt_damage and time.time() - self.start_attack_time >= 0.3:
-                    if self.joueur_dans_attack(player_rect):
-                        player.take_damage(self.attack_data, self.rect, self)
-                    self.has_dealt_damage = True
-                
-                if idx == 0:
-                    self.is_attacking = False
-                    self.played_sound = False
-            else:
-                idx = self.anim_smash_left.gestion_animation()
-                self.image = self.anim_smash_left.frames_droite[int(idx)]
-                
-                if not self.has_dealt_damage and time.time() - self.start_attack_time >= 0.4:
-                    if self.joueur_dans_attack(player_rect):
-                        player.take_damage(self.attack_data, self.rect, self)
-                    self.has_dealt_damage = True
-                
-                if idx == 0:
-                    self.is_attacking = False
-                    self.played_sound = False
 
         # Poursuite
         elif self._joueur_dans_trigger(player_rect):
@@ -239,9 +228,12 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
         self.velocity_x += 5 * recul_direction
         self.velocity_y = -5
         self.pv -= player.attack
-        if self.pv <= 0: # Meurt
+        if self.pv <= 0: # meurt
             self.alive = False
             Monnaie.orbs += self.orbs_value
+            if not self.death_sound_played:
+                self.death_sound.play()
+                self.death_sound_played = True
 
     def draw(self, fenetre, camera):
         
