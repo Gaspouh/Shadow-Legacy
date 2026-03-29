@@ -56,3 +56,17 @@ checkpoints = [
     Checkpoint(600, 417),
     Checkpoint(1155, 217)
 ]
+
+# Arène de Gravelion (après les plateformes existantes)
+ARENE_X = 4000  # loin sur la map
+
+arene_platforms = [
+    Platform(ARENE_X,        400, 1200, 20,  (80, 80, 80)),   # sol
+    #Platform(ARENE_X,        0,   20,   420, (80, 80, 80)),   # mur gauche
+    Platform(ARENE_X + 1180, 0,   20,   420, (80, 80, 80)),   # mur droit
+    Platform(ARENE_X,        0,   1200, 20,  (80, 80, 80)),   # plafond
+]
+
+arene_rect = pygame.Rect(ARENE_X, 0, 1200, 420)  # délimitation de l'arène
+
+platforms += arene_platforms
