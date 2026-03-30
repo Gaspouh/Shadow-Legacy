@@ -91,7 +91,6 @@ class Projectile:
         }
 
         #Etat
-        self.alive = True
         self.ignore_invincibility = False
         self.respawn_on_touch = False 
         self.apply_knockback = True
@@ -110,36 +109,38 @@ class Projectile:
 
         self.angle = math.degrees(math.atan2(-self.velocity.y, self.velocity.x))
         
-        def update(self):
-            if self.use_gravity:
-                self.velocity.y += self.gravity
+    def update(self):
+        if self.use_gravity:
+            self.velocity.y += self.gravity
 
-            self.position += self.velocity
-            self.rect.center = (int(self.position.x), int(self.position.y))
+        self.position += self.velocity
+        self.rect.center = (int(self.position.x), int(self.position.y))
 
-            self.angle = math.degrees(math.atan2(-self.velocity.y, self.velocity.x))
+        self.angle = math.degrees(math.atan2(-self.velocity.y, self.velocity.x))
 
-        def lifetime_expired(self):
-            if pygame.time.get_ticks() - self.birth_time > self.lifetime:
-                self.alive = False
+    def lifetime_expired(self):
+        return pygame.time.get_ticks() - self.birth_time > self.lifetime
 
-        def out_of_bounds(self, limite_rect):
-            return not limite_rect.colliderect(self.rect)
+    def out_of_bounds(self, limite_rect):
+        return not limite_rect.colliderect(self.rect)
         
-        def draw(self, fenetre, camera):
-            rotated_image = pygame.transform.rotate(self.image, self.angle)
-            new_rect = rotated_image.get_rect(center=camera.apply(self.rect.center))
-            fenetre.blit(rotated_image, new_rect)
+    def draw(self, fenetre, camera):
+        rotated_image = pygame.transform.rotate(self.image, self.angle)
+        new_rect = rotated_image.get_rect(center=camera.apply(self.rect).center)
+        fenetre.blit(rotated_image, new_rect)
 
 class AttackZone():
-    def __init__ (self, x, y, width, height, damage, image):
+    def __init__ (self, x, y, width, height, attack_data, image, duration):
         self.rect = pygame.Rect(x, y, width, height)
         self.position = pygame.math.Vector2(x, y)
-        self.attack_data = {
-            "damage": damage,
-            "knockback_x": 0,
-            "knockback_y": 0
-        }
+        self.attack_data = attack_data
+        self.birth_time = -1000
+        self.duration = duration
+
+        #Etat
+        self.ignore_invincibility = False
+        self.respawn_on_touch = False 
+        self.apply_knockback = True
 
         if image:
             self.image = pygame.transform.scale(image, (width, height))
@@ -147,9 +148,25 @@ class AttackZone():
             self.image = pygame.Surface((width, height), pygame.SRCALPHA)
             self.image.fill((255, 0, 0))  # Couleur rouge pour les projectiles sans image
 
+        if image:
+            self.image = pygame.transform.scale(image, (width, height))
+        else:
+            self.image = pygame.Surface((width, height), pygame.SRCALPHA)
+            self.image.fill((255, 0, 0))  # Couleur rouge pour les projectiles sans image
+
+    def update(self):
+        pass
+
     def lifetime_expired(self):
-        if pygame.time.get_ticks() - self.birth_time > self.lifetime:
-            self.alive = False
+        return pygame.time.get_ticks() - self.birth_time > self.duration
+
+
+    def out_of_bounds(self, limite_rect):
+        pass
+
+    def draw(self, fenetre, camera):
+        pygame.draw.rect(fenetre, (255,0,0), camera.apply(self.rect), 2)
+        fenetre.blit(self.image, camera.apply(self.rect))
 
 class Patrouilleur(Ennemi):
     def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data):

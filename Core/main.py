@@ -16,7 +16,7 @@ from World.traps import *
 from World.objets import Coeur
 from Visual.sprite_sheet import *
 from Core.save import sauvegarder, charger, get_spawn_from_checkpoints
-from Entities.boss import Golem
+from Entities.boss import Golem, Gravelion
 from Visual.interface import menu
 from Core.reset import reset
 
@@ -25,7 +25,7 @@ pygame.init()
 
 # Créer une fenêtre de jeu
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
-MAP_WIDTH, MAP_HEIGHT = 5000, 2000
+MAP_WIDTH, MAP_HEIGHT = 7000, 2000
 
 fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.SCALED | pygame.DOUBLEBUF, vsync=1)
 
@@ -41,6 +41,10 @@ ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /5.15, u
 # Sons
 set_spawn_sound = pygame.mixer.Sound("Assets/Sounds/set_spawn_sound.mp3")
 
+arene_gravelion = pygame.Rect(5000, 0, 1000, 600) 
+trigger_combat = pygame.Rect(5100, 0, 50, 600)
+porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche
+
 # Définir le titre de la fenêtre
 pygame.display.set_caption("Shadow Legacy")
  
@@ -50,6 +54,7 @@ volant1 = Volant(fenetre, 400, 200)
 player = Player(100, 100, fenetre)
 hearts = [Coeur(fenetre, 100 + i*110, 35) for i in range(player.max_health)]
 golem = Golem(fenetre, 800, 500) # spawn
+gravelion = Gravelion(fenetre, 5600, 300, arene_gravelion) # spawn dans l'arène de Gravelion
 
 spawn_point = charger(player, checkpoints)  # charge la save si elle existe, sinon spawn par défaut
 player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
@@ -163,7 +168,7 @@ while continuer:
 
             for elem in araignee:
                 if elem.alive: # Vérifier que l'ennemi est vivant avant de le mettre à jour
-                #lancer la fonction de patrouille pour chaque araignée
+                #lancer la fonction de patrouille pour chaque qaraignée
                     elem.patrouille(platforms)
             """
             for elem in volant:
@@ -272,6 +277,51 @@ while continuer:
             if golem.hitbox.colliderect(player.rect):
                 hitstop_duration, shake_amount = player.take_damage(golem.attack_data, golem.rect, golem) # Recul du joueur
                 hitstop_until = pygame.time.get_ticks() + hitstop_duration
+
+        # --- GESTION DU GRAVELION ---
+        if gravelion.alive:
+            # 1. Mise à jour et affichage
+            gravelion.update(player.rect, player)
+            gravelion.draw(fenetre, camera)
+
+            # 2. Le joueur tape le Gravelion
+            if player.is_attacking and player.attack_rect.colliderect(gravelion.hitbox):
+                if gravelion not in player.entite_touches:
+                    player.entite_touches.append(gravelion)
+                    # On utilise receive_hit (ta méthode de boss) plutôt que knockback
+                    gravelion.receive_hit(player.attack_data, player.rect, player) 
+                    
+                    # Feedback visuel et sang (identique à tes autres ennemis)
+                    if player.sang < player.sang_max:
+                        player.sang += 11
+                    else:
+                        player.sang = player.sang_max
+                    
+                    for _ in range(15):
+                        particles.append(Particle(gravelion.rect.centerx, gravelion.rect.centery))
+                    
+                    hitstop_until = now + 50
+                    shake_amount = 4
+
+            # 3. Le boss touche le joueur avec son corps
+            if gravelion.hitbox.colliderect(player.rect):
+                hitstop_duration, shake_amount = player.take_damage(gravelion.attack_data, gravelion.rect, gravelion)
+                hitstop_until = pygame.time.get_ticks() + hitstop_duration
+
+            # 4. Les attaques/projectiles du boss touchent le joueur
+            # On parcourt la liste des hitboxs générées par le boss (bras, ondes, laser...)
+            for attaque in gravelion.hitboxs:
+                # Si l'attaque a un rect et touche le joueur
+                if hasattr(attaque, 'rect') and attaque.rect.colliderect(player.rect):
+                    # On passe les dégâts spécifiques de l'attaque
+                    hitstop_duration, shake_amount = player.take_damage(attaque.attack_data, attaque.rect, gravelion)
+                    hitstop_until = pygame.time.get_ticks() + hitstop_duration
+
+        if not gravelion.combat_lance and player.rect.colliderect(trigger_combat):
+            gravelion.combat_lance = True
+            platforms.append(porte_arene) # Fermer l'arène en ajoutant le mur gauche
+            gravelion.enter_state(gravelion.IDLE)
+            shake_amount = 10 # Gros screen shake pour annoncer le début du combat
 
         # Particules
         for p in particles[:]: # On utilise [:] pour copier la liste et éviter les erreurs de suppression

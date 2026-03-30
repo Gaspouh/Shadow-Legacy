@@ -28,7 +28,7 @@ class Special_Platform(Platform):
             self.surface = None
 
 platforms = [
-    Platform(0, 500, 8000, 100, (100, 100, 100)),
+    Platform(0, 500, 5000, 100, (100, 100, 100)),
     Platform(300, 350, 200, 20, (100, 100, 100)),
     Platform(500, 200, 200, 20, (100, 100, 100)),
     Platform(800, 0, 20, 350, (100, 100, 100)),
@@ -58,15 +58,13 @@ checkpoints = [
 ]
 
 # Arène de Gravelion (après les plateformes existantes)
-ARENE_X = 4000  # loin sur la map
 
 arene_platforms = [
-    Platform(ARENE_X,        400, 1200, 20,  (80, 80, 80)),   # sol
-    #Platform(ARENE_X,        0,   20,   420, (80, 80, 80)),   # mur gauche
-    Platform(ARENE_X + 1180, 0,   20,   420, (80, 80, 80)),   # mur droit
-    Platform(ARENE_X,        0,   1200, 20,  (80, 80, 80)),   # plafond
+    Platform(5000,    600,  1000,    20,  (80, 80, 80)),   # sol
+    Platform(6000,      0,    20,   600,  (80, 80, 80)),   # mur droit
+    Platform(5000,      0,  1000,    20,  (80, 80, 80)),   # plafond
 ]
 
-arene_rect = pygame.Rect(ARENE_X, 0, 1200, 420)  # délimitation de l'arène
+arene_rect = pygame.Rect(5000, 0, 1000, 600)  # délimitation de l'arène
 
 platforms += arene_platforms

@@ -10,7 +10,9 @@ class Animation:
         frames_gauche = []
         for i in range(nb_frames): 
             # stocker les frames d'animation dans des listes pour la droite et la gauche
-            frame = self.changer_frame(i, width, height, marge, sheet, ligne)
+            frame = pygame.Surface((width, height), pygame.SRCALPHA)
+            frame.blit(sheet, (0, 0),(marge + (i * width), ligne * height, width, height))
+
             frames_droite.append(frame)
             frames_gauche.append(pygame.transform.flip(frame, True, False))
         
@@ -29,12 +31,6 @@ class Animation:
         self.index_image = index_image
         self.vitesse_animation = vitesse_animation
         self.image = image  # Ajouter l'attribut image manquant
-
-    def changer_frame(self, index, width, height, marge, sheet, ligne):
-            # Extraire une frame de la feuille de sprite
-            frame = pygame.Surface((width, height), pygame.SRCALPHA)
-            frame.blit(sheet, (0, 0), (marge + (index * width), ligne * height , width, height))
-            return frame
         
     def gestion_animation(self):
             # Mettre à jour l'index de la frame pour l'animation
@@ -42,8 +38,18 @@ class Animation:
             if self.index_image >= len(self.frames_droite):
                 # Réinitialiser l'index pour recommencer l'animation
                 self.index_image = 0.0
+            self.image = self.frames_droite[int(self.index_image)]
             return self.index_image
     
+    def gestion_animation_once(self):
+        self.index_image += self.vitesse_animation
+
+        if self.index_image >= len(self.frames_droite) - 1:
+            self.index_image = len(self.frames_droite) - 1  # Rester sur la dernière frame
+            return True
+        return False
+    
+
 # 2eme classe pour d'autres types de spritesheet
 class VerticalAnimation:
     def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne):
