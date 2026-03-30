@@ -46,3 +46,32 @@ class Coeur(Animation):
         elif self.state == "DEAD":
            self.image = self.frames_droite[-1]  
             
+class Monnaie:
+    orbs = 0 # Globale
+    def __init__(self, fenetre, x, y):
+        self.fenetre = fenetre
+
+        self.image = pygame.image.load("Assets/Images/orbs.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (55, 55))
+        self.font = pygame.font.SysFont("Playfair Display", 60, bold=True)
+        self.rect = self.image.get_rect(topright=(fenetre.get_width() - 50, 50))
+
+    def draw(self, fenetre):
+        texte = str(self.orbs)
+
+        # effet de brillance, on décale autour du texte pour créer un halo + blit vertical pour que ça recouvre tout le texte (halo)
+        for ox in range(-8, 9, 3):
+            for oy in range(-8, 9, 3):
+                glow_surf = self.font.render(texte, True, (210, 225, 255)) # version plus "bleu"
+                glow_surf.set_alpha(11) # Fondue plus moins forte
+                fenetre.blit(glow_surf, (self.rect.left - glow_surf.get_width() - 8 + ox,
+                    self.rect.centery - glow_surf.get_height() // 2 + oy))
+
+
+        # Texte en blanc
+        texte_surf = self.font.render(texte, True, (255, 255, 255))
+        fenetre.blit(texte_surf, (self.rect.left - texte_surf.get_width() - 8,
+                                   self.rect.centery - texte_surf.get_height() // 2))
+
+        # Image orb à droite
+        fenetre.blit(self.image, self.rect)

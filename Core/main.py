@@ -1,7 +1,7 @@
 import pygame
 import os
 import sys
-
+from random import randint
 # Add project root to path for imports
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
@@ -13,7 +13,7 @@ from World.map import Platform, platforms, special_platforms, Checkpoint, checkp
 from Visual.camera import Camera
 from Visual.vfx import particles, Particle
 from World.traps import *
-from World.objets import Coeur
+from World.objets import Coeur, Monnaie
 from Visual.sprite_sheet import *
 from Core.save import sauvegarder, charger, get_spawn_from_checkpoints
 from Entities.boss import Golem, Gravelion
@@ -40,6 +40,7 @@ ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /5.15, u
 
 # Sons
 set_spawn_sound = pygame.mixer.Sound("Assets/Sounds/set_spawn_sound.mp3")
+death_sound = pygame.mixer.Sound("Assets/Sounds/elden-ring-death.mp3")
 
 arene_gravelion = pygame.Rect(5000, 0, 1000, 600) 
 trigger_combat = pygame.Rect(5100, 0, 50, 600)
@@ -47,14 +48,16 @@ porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche
 
 # Définir le titre de la fenêtre
 pygame.display.set_caption("Shadow Legacy")
- 
+
 # Création des objets du jeu
 araignee1 = Araignee(fenetre, 300, 10)
 volant1 = Volant(fenetre, 400, 200)
 player = Player(100, 100, fenetre)
 hearts = [Coeur(fenetre, 100 + i*110, 35) for i in range(player.max_health)]
+monnaie = Monnaie(fenetre, 200, 200)
 golem = Golem(fenetre, 800, 500) # spawn
 gravelion = Gravelion(fenetre, 5600, 300, arene_gravelion) # spawn dans l'arène de Gravelion
+
 
 spawn_point = charger(player, checkpoints)  # charge la save si elle existe, sinon spawn par défaut
 player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
@@ -94,11 +97,12 @@ while continuer:
                     # faire dasher le joueur
                     player.dash.start_dash(player) # Dash dans la direction du joueur
                 if event.key == pygame.K_ESCAPE:
-                    pause = menu(fenetre)
+                    pause = menu(fenetre, player, checkpoints)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Clic gauche
                     # faire attaquer le joueur
                     player.press_attack()
+                    shake_amount = randint(2, 3)
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
                     # arrêter le saut du joueur pour permettre un saut plus court
@@ -243,31 +247,18 @@ while continuer:
             fenetre.blit(trap.image, camera.apply(trap.rect)) 
             pygame.draw.rect(fenetre, (0, 255, 255), camera.apply(trap.rect), 2)
 
-        # Joueur
-        image_rect = player.image.get_rect(midbottom=(
-            player.rect.midbottom[0],
-            player.rect.midbottom[1] + player.sprite_offset_y  # offset
-        ))
-        if not player.invincible or (pygame.time.get_ticks() // 100) % 2 == 0: # Pour faire clignoter le joueur quand il est invincible
-            fenetre.blit(player.image, camera.apply(image_rect))
-
-        if player.is_attacking:
-            pygame.draw.rect(fenetre, (255, 0, 0), camera.apply(player.attack_rect)) # Afficher la hitbox de l'attaque pour les tests
-
-        # Ennemis
-        for elem in araignee:
-            fenetre.blit(elem.image, camera.apply(elem.rect)) # Shake
-        for elem in volant:
-            fenetre.blit(elem.image, camera.apply(elem.rect))
-        
         # Boss
         golem.update(player.rect, player)
+        if golem.shake > 0:
+            shake_amount = golem.shake
+            golem.shake = 0
         golem.draw(fenetre, camera) # A modifier : Dans golem.py dans la fonction draw pour afficher les hitbox ou non
         if player.is_attacking and player.attack_rect.colliderect(golem.hitbox):
             if golem not in player.entite_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque
                 player.entite_touches.append(golem)
                 golem.knockback(player.rect, player)
-                fenetre.blit(golem.image, camera.apply(golem.rect))
+                shake_amount = randint(8, 10) # addictif sah
+
                 if player.sang < player.sang_max:
                     player.sang += 11 # charge la jauge de sang 
                     print(player.sang)
@@ -277,6 +268,29 @@ while continuer:
             if golem.hitbox.colliderect(player.rect):
                 hitstop_duration, shake_amount = player.take_damage(golem.attack_data, golem.rect, golem) # Recul du joueur
                 hitstop_until = pygame.time.get_ticks() + hitstop_duration
+        
+
+
+        # Joueur
+        image_rect = player.image.get_rect(midbottom=(
+            player.rect.midbottom[0],
+            player.rect.midbottom[1] + player.sprite_offset_y  # offset
+        ))
+        if not player.invincible or (pygame.time.get_ticks() // 100) % 2 == 0: # Pour faire clignoter le joueur quand il est invincible
+            fenetre.blit(player.image, camera.apply(image_rect))
+
+        """
+        if player.is_attacking:
+            pygame.draw.rect(fenetre, (255, 0, 0), camera.apply(player.attack_rect)) # Afficher la hitbox de l'attaque pour les tests
+        """
+
+
+        # Ennemis
+        for elem in araignee:
+            fenetre.blit(elem.image, camera.apply(elem.rect)) # Shake
+        for elem in volant:
+            fenetre.blit(elem.image, camera.apply(elem.rect))
+        
 
         # --- GESTION DU GRAVELION ---
         if gravelion.alive:
@@ -331,15 +345,50 @@ while continuer:
             else:
                 p.draw(fenetre, camera)
         
-         # Afficher les cœurs
+        # Afficher les cœurs
         for heart in hearts:
             fenetre.blit(heart.image, heart.rect) # Les cœurs sont fixes à l'écran, pas besoin d'appliquer le décalage de la caméra
 
+        # Afficher les orbs
+        monnaie.draw(fenetre)
+
+    # Gestion de mort
     else:
-        fenetre.fill((0, 0, 30)) # Afficher un écran noir lorsque le joueur n'a plus de santé
-        pygame.display.update()
-        pygame.time.delay(1000)
-        reset(player, liste_ennemis, hearts, spawn_point) # Réinitialiser le jeu après la mort du joueur
+        death_sound.play()
+        debut_mort = pygame.time.get_ticks()
+        duree_mort = 6000
+
+        you_died = pygame.image.load("Assets/Images/YOU_DIED_text.png").convert_alpha()
+        w_base, h_base = you_died.get_width(), you_died.get_height()
+
+        while pygame.time.get_ticks() - debut_mort < duree_mort:
+            temps = pygame.time.get_ticks() - debut_mort
+
+            # Rouge qui monte
+            rouge = int((temps / duree_mort) * 40)
+            voile_rouge = pygame.Surface((GAME_WIDTH, GAME_HEIGHT), pygame.SRCALPHA)
+            voile_rouge.fill((15, 0, 0, rouge))
+            fenetre.blit(voile_rouge, (0, 0))
+
+            # "YOU DIED" s'affiche (opacité = 0) à partir de 1200ms
+            if temps >= 1200:
+                avancement = (temps - 2000) / (duree_mort - 2000)  # de 0 à 1
+
+                opacite = int(avancement * 255)
+                taille = 1.0 + avancement * 0.15
+                new_w = int(w_base * taille)
+                new_h = int(h_base * taille)
+
+                img = pygame.transform.scale(you_died, (new_w, new_h))
+                img.set_alpha(opacite)
+
+                pos = img.get_rect(center=(GAME_WIDTH // 2, GAME_HEIGHT // 2)) # centrer le txt
+                fenetre.blit(img, pos)
+
+            pygame.display.update()
+            clock.tick(60)
+
+        reset(player, liste_ennemis, hearts, spawn_point)
 
 # Mettre à jour l'affichage
     if not pause:
