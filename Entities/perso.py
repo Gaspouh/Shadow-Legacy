@@ -1,6 +1,6 @@
 import pygame 
 import random
-from Entities.player_abilities import Dash, Double_jump
+from Entities.player_abilities import Dash, Double_jump, sort
 from Core.save import load_config
 from Entities.physics_entity import PhysicsEntity
 from Visual.sprite_sheet import VerticalAnimation
@@ -61,6 +61,7 @@ class Player(PhysicsEntity):
         # ABILITIES
         self.dash = Dash()
         self.double_jump = Double_jump()
+        self.sort = sort()
 
         # SAFE POSITION
         self.last_safe_position = pygame.math.Vector2(x,y)

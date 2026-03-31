@@ -8,7 +8,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from Entities.perso import Player
-from Entities.ennemi import Ennemi, Araignee, Volant
+from Entities.ennemi import Ennemi, Araignee, Volant, Projectile
 from World.map import Platform, platforms, special_platforms, Checkpoint, checkpoints
 from Visual.camera import Camera
 from Visual.vfx import particles, Particle
@@ -19,6 +19,7 @@ from Core.save import sauvegarder, charger, get_spawn_from_checkpoints
 from Entities.boss import Golem, Gravelion
 from Visual.interface import menu
 from Core.reset import reset
+from Entities.player_abilities import sort
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
 pygame.init()
@@ -72,8 +73,10 @@ liste_ennemis = araignee + volant
 spike = [Spike(300, 300, 40, 40), Spike(1560, 950, 40, 40)]
 thorn = []
 lava = []
-
 traps = spike + thorn + lava
+
+# Liste des projectiles
+projectiles = []
 
 # Variables pour le screen shake et le hitstop à initialiser
 hitstop_until = -1 # Temps jusqu'auquel le hitstop est actif (initialisé à une valeur passée)
@@ -98,6 +101,16 @@ while continuer:
                     player.dash.start_dash(player) # Dash dans la direction du joueur
                 if event.key == pygame.K_ESCAPE:
                     pause = menu(fenetre, player, checkpoints)
+                if event.key == pygame.K_f:
+                    # faire lancer le sort
+                    if player.sort.use(player):
+                        direction = player.direction
+                        x = player.rect.centerx + (direction * 30)
+                        y = player.rect.centery
+                        target_x = x + (direction * 1000)  # tire loin devant
+                        target_y = y
+                        projectile = Projectile(x, y, target_x, target_y, 15, 20, 20, 20)
+                        projectiles.append(projectile)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Clic gauche
                     # faire attaquer le joueur
@@ -185,7 +198,6 @@ while continuer:
                 if ennemi not in player.entite_touches and ennemi.alive: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque ou est mort
                     if player.sang < player.sang_max:
                         player.sang += 11 # charge la jauge de sang 
-                        print(player.sang)
                     else :
                         player.sang = player.sang_max
                         print("max")
@@ -351,6 +363,18 @@ while continuer:
 
         # Afficher les orbs
         monnaie.draw(fenetre)
+
+        # Afficher la jauge de sang
+        font = pygame.font.Font(None, 50)
+        barre_sang = font.render(str(player.sang), True, (255, 0, 0))
+        fenetre.blit(barre_sang, (10, 40))
+
+        for elem in projectiles:
+            elem.update()
+            elem.draw(fenetre, camera)
+         # supprimer si trop vieux ou hors map
+            if elem.lifetime_expired() or elem.out_of_bounds(pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)):
+                projectiles.remove(elem)
 
     # Gestion de mort
     else:

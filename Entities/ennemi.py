@@ -3,7 +3,7 @@ import math
 import pygame
 from World.map import Platform, platforms
 from Visual.sprite_sheet import *
-from Entities.perso import Player
+#from Entities.perso import Player
 from Entities.physics_entity import PhysicsEntity
 
 class Ennemi(Animation, PhysicsEntity):
