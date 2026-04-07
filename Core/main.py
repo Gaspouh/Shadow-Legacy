@@ -56,7 +56,7 @@ volant1 = Volant(fenetre, 400, 200)
 player = Player(100, 100, fenetre)
 hearts = [Coeur(fenetre, 100 + i*110, 35) for i in range(player.max_health)]
 monnaie = Monnaie(fenetre, 200, 200)
-golem = Golem(fenetre, 800, 500) # spawn
+golem = Golem(fenetre, 800, 300) # spawn
 gravelion = Gravelion(fenetre, 5600, 300, arene_gravelion) # spawn dans l'arène de Gravelion
 
 
@@ -109,7 +109,7 @@ while continuer:
                         y = player.rect.centery
                         target_x = x + (direction * 1000)  # tire loin devant
                         target_y = y
-                        projectile = Projectile(x, y, target_x, target_y, 15, 20, 20, 20)
+                        projectile = Projectile(x, y, target_x, target_y, 15, 80, 80, 3)
                         projectiles.append(projectile)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Clic gauche
@@ -187,11 +187,12 @@ while continuer:
                 if elem.alive: # Vérifier que l'ennemi est vivant avant de le mettre à jour
                 #lancer la fonction de patrouille pour chaque qaraignée
                     elem.patrouille(platforms)
-            """
+            
             for elem in volant:
-                #lancer la fonction de poursuite pour chaque volant
-                elem.poursuite(player.rect)
-            """
+                if elem.alive and abs(elem.position.x - player.position.x) < 700: # Vérifier que l'ennemi est vivant et proche avant de le mettre à jour
+                    #lancer la fonction de poursuite pour chaque volant
+                    elem.poursuite(player.rect)
+            
         # Gestion du recul et du pogo après une attaque
         for ennemi in liste_ennemis:
             if player.is_attacking and player.attack_rect.colliderect(ennemi.rect):
@@ -200,7 +201,6 @@ while continuer:
                         player.sang += 11 # charge la jauge de sang 
                     else :
                         player.sang = player.sang_max
-                        print("max")
                     player.entite_touches.append(ennemi) # Ajouter l'ennemi à la liste d'entités déjà touchées
                     if player.attack_data["critical"] : # Si coup critique
                         player.attack_data["damage"] = player.attack * 3
@@ -221,6 +221,14 @@ while continuer:
             if ennemi.rect.colliderect(player.rect):
                 hitstop_duration, shake_amount = player.take_damage(ennemi.attack_data, ennemi.rect, ennemi) # Appliquer les effets de recul au joueur si un ennemi le touche
                 hitstop_until = pygame.time.get_ticks() + hitstop_duration
+            
+        for tir in projectiles:
+            if tir.rect.colliderect(ennemi.rect):
+                if ennemi not in player.tir_touches and ennemi.alive:
+                    player.tir_touches.append(ennemi)  
+                    ennemi.receive_hit(tir.attack_data, tir.rect, player)
+                    for _ in range(15):
+                        particles.append(Particle(ennemi.rect.centerx, ennemi.rect.centery))
 
         # Dessiner les éléments du jeu sur la fenêtre
         fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
@@ -273,16 +281,19 @@ while continuer:
 
                 if player.sang < player.sang_max:
                     player.sang += 11 # charge la jauge de sang 
-                    print(player.sang)
                 else :
                     player.sang = player.sang_max
-                    print("max")
+
             if golem.hitbox.colliderect(player.rect):
                 hitstop_duration, shake_amount = player.take_damage(golem.attack_data, golem.rect, golem) # Recul du joueur
                 hitstop_until = pygame.time.get_ticks() + hitstop_duration
-        
-
-
+        for tir in projectiles:
+            if tir.rect.colliderect(golem.hitbox):
+                if golem not in player.tir_touches:
+                    player.tir_touches.append(golem)
+                    golem.knockback(player.rect, player)
+                    shake_amount = randint(8, 10) # addictif sah
+    
         # Joueur
         image_rect = player.image.get_rect(midbottom=(
             player.rect.midbottom[0],
@@ -328,6 +339,13 @@ while continuer:
                     
                     hitstop_until = now + 50
                     shake_amount = 4
+            for tir in projectiles:
+                if tir.rect.colliderect(gravelion.hitbox):
+                    if gravelion not in player.tir_touches:
+                        player.tir_touches.append(gravelion)  
+                        gravelion.receive_hit(tir.attack_data, tir.rect, player)
+                        for _ in range(15):
+                            particles.append(Particle(gravelion.rect.centerx, gravelion.rect.centery))
 
             # 3. Le boss touche le joueur avec son corps
             if gravelion.hitbox.colliderect(player.rect):

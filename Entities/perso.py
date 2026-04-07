@@ -44,6 +44,7 @@ class Player(PhysicsEntity):
         self.crit_chance = p.get("crit_chance", 0.02)
         self.entite_touches = []
         self.attack_data = {}
+        self.tir_touches = [] # Liste des entités déjà touchées par ce sort pour éviter de les toucher plusieurs fois
 
         # IMAGE DU JOUEUR
         original_image = pygame.image.load('Assets/Player/player.png').convert_alpha()

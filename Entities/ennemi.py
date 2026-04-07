@@ -68,7 +68,17 @@ class Ennemi(Animation, PhysicsEntity):
             self.is_knocked_back = True
         if self.pv_ennemi <= 0:
             self.alive = False      
-
+    
+    def mort(self):
+        if not self.alive and not self.dead:
+            self.dead = True
+            self.animation_mort.gestion_animation() # Jouer l'animation de mort
+        if self.dead:
+            index = int(self.animation_mort.gestion_animation())
+            if self.direction == 1:
+                self.image = self.animation_mort.frames_droite[index]
+            else:
+                self.image = self.animation_mort.frames_gauche[index]
 class Projectile:
     def __init__(self, x, y, target_x, target_y, speed, width, height, damage, gravity=0.4, \
                   lifetime=3000, disappear_on_contact=True, image=None, use_gravity=False):
@@ -229,20 +239,8 @@ class Araignee(Patrouilleur):
     def __init__(self, fenetre, x, y):
         super().__init__(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 5, 3, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4})
 
-        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7)
-        self.dead = True
-    
-
-    def mort(self):
-        if not self.alive and self.dead:
-            self.dead = True
-            self.animation_mort.gestion_animation() # Jouer l'animation de mort
-        if self.dead:
-            index = int(self.animation_mort.gestion_animation())
-            if self.direction == 1:
-                self.image = self.animation_mort.frames_droite[index]
-            else:
-                self.image = self.animation_mort.frames_gauche[index]
+        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 7, 62, 50, 27, 7)
+        self.dead = False
 
 class Volant(Ennemi):
     def __init__(self, fenetre, x, y):
@@ -253,6 +251,7 @@ class Volant(Ennemi):
         self.image = self.frames_droite[0]
         self.use_gravity = False
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7)
+        self.dead = False
 
     def poursuite(self, player_rect):
         Animation.gestion_animation(self)

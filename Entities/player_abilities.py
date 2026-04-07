@@ -80,8 +80,8 @@ class Double_jump:
 
 class sort(Projectile):
     def __init__(self):
-        self.cost = 20 # Coût en sang pour utiliser le sort
-
+        self.cost = 33 # Coût en sang pour utiliser le sort
+        
     def use(self, player):
         if player.sang >= self.cost: # Vérifie que le joueur a assez de sang pour utiliser le sort
             player.sang -= self.cost # Consomme du sang
