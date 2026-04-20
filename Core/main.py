@@ -8,7 +8,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from Entities.perso import Player
-from Entities.ennemi import Ennemi, Araignee, Volant, Projectile
+from Entities.ennemi import Ennemi, Araignee, Volant, Projectile, Tourelle
 from World.map import Platform, platforms, special_platforms, Checkpoint, checkpoints
 from Visual.camera import Camera
 from Visual.vfx import particles, Particle
@@ -58,6 +58,7 @@ hearts = [Coeur(fenetre, 100 + i*110, 35) for i in range(player.max_health)]
 monnaie = Monnaie(fenetre, 200, 200)
 golem = Golem(fenetre, 800, 300) # spawn
 gravelion = Gravelion(fenetre, 5600, 300, arene_gravelion) # spawn dans l'arène de Gravelion
+tourelle1 = Tourelle(fenetre, 600, 300)
 
 
 spawn_point = charger(player, checkpoints)  # charge la save si elle existe, sinon spawn par défaut
@@ -67,7 +68,8 @@ player.rect.midbottom = player.position # pareil avec la hitbox
 # Liste des ennemis
 araignee = [araignee1]
 volant = [volant1]
-liste_ennemis = araignee + volant 
+tourelle = [tourelle1]
+liste_ennemis = araignee + volant + tourelle
 
 # Liste des pièges
 spike = [Spike(300, 300, 40, 40), Spike(1560, 950, 40, 40)]
@@ -77,6 +79,7 @@ traps = spike + thorn + lava
 
 # Liste des projectiles
 projectiles = []
+tir_tourelle = []
 
 # Variables pour le screen shake et le hitstop à initialiser
 hitstop_until = -1 # Temps jusqu'auquel le hitstop est actif (initialisé à une valeur passée)
@@ -184,7 +187,7 @@ while continuer:
                 shake_amount -= 1 # Réduire progressivement l'intensité du screen shake
 
             for elem in araignee:
-                if elem.alive: # Vérifier que l'ennemi est vivant avant de le mettre à jour
+                if elem.alive and abs(elem.position.x - player.position.x) < 700: # Vérifier que l'ennemi est vivant et proche avant de le mettre à jour
                 #lancer la fonction de patrouille pour chaque qaraignée
                     elem.patrouille(platforms)
             
@@ -192,6 +195,11 @@ while continuer:
                 if elem.alive and abs(elem.position.x - player.position.x) < 700: # Vérifier que l'ennemi est vivant et proche avant de le mettre à jour
                     #lancer la fonction de poursuite pour chaque volant
                     elem.poursuite(player.rect)
+            
+            for elem in tourelle: 
+                if elem.alive and abs(elem.position.x - player.position.x) < 700: # Vérifier que l'ennemi est vivant et proche avant de le mettre à jour
+                    elem.update(player.rect)
+                    elem.tir(player.rect, tir_tourelle)#lancer la fonction de tir pour chaque tourelle
             
         # Gestion du recul et du pogo après une attaque
         for ennemi in liste_ennemis:
@@ -289,8 +297,8 @@ while continuer:
                 hitstop_until = pygame.time.get_ticks() + hitstop_duration
         for tir in projectiles:
             if tir.rect.colliderect(golem.hitbox):
-                if golem not in player.tir_touches:
-                    player.tir_touches.append(golem)
+                if not tir.hit:
+                    tir.hit = True
                     golem.knockback(player.rect, player)
                     shake_amount = randint(8, 10) # addictif sah
     
@@ -309,12 +317,9 @@ while continuer:
 
 
         # Ennemis
-        for elem in araignee:
+        for elem in liste_ennemis:
             fenetre.blit(elem.image, camera.apply(elem.rect)) # Shake
-        for elem in volant:
-            fenetre.blit(elem.image, camera.apply(elem.rect))
         
-
         # --- GESTION DU GRAVELION ---
         if gravelion.alive:
             # 1. Mise à jour et affichage
@@ -341,8 +346,8 @@ while continuer:
                     shake_amount = 4
             for tir in projectiles:
                 if tir.rect.colliderect(gravelion.hitbox):
-                    if gravelion not in player.tir_touches:
-                        player.tir_touches.append(gravelion)  
+                    if not tir.hit:
+                        tir.hit = True
                         gravelion.receive_hit(tir.attack_data, tir.rect, player)
                         for _ in range(15):
                             particles.append(Particle(gravelion.rect.centerx, gravelion.rect.centery))
@@ -393,7 +398,18 @@ while continuer:
          # supprimer si trop vieux ou hors map
             if elem.lifetime_expired() or elem.out_of_bounds(pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)):
                 projectiles.remove(elem)
-
+        
+        for elem in tir_tourelle:# On parcourt la liste des projectiles tirés par les tourelles
+            elem.update()
+            elem.draw(fenetre, camera)
+            if elem.rect.colliderect(player.rect) and not elem.hit:# Si un projectile de tourelle touche le joueur
+                elem.hit = True # Pour éviter que le même projectile touche plusieurs fois
+                hitstop_duration, shake_amount = player.take_damage(elem.attack_data, elem.rect, elem)# Appliquer les dégâts et le recul au joueur
+                hitstop_until = pygame.time.get_ticks() + hitstop_duration # Activer le hitstop
+         # supprimer si trop vieux ou hors map
+            if elem.lifetime_expired() or elem.out_of_bounds(pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)):
+                tir_tourelle.remove(elem)
+            
     # Gestion de mort
     else:
         death_sound.play()
