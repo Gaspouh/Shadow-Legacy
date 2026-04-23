@@ -1,45 +1,39 @@
 import pygame
+import pytmx
+from World.traps import *
+
+TILE_SIZE = 32
 
 class Platform(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, color):
+    def __init__(self, x, y, image):
         super().__init__()
-        self.image = pygame.Surface((width, height))
-        self.image.fill(color)
+        self.image = image
         self.rect = self.image.get_rect(topleft=(x, y))
 
 class Special_Platform(Platform):
-    def __init__(self, x, y, width, height, color, effect=None, slow_factor = 1, jump_factor = 1):
-        super().__init__(x, y, width, height, color)
+    def __init__(self, x, y, image, effect=None, slow_factor = 1, jump_factor = 1):
+        super().__init__(x, y, image)
         self.effect = effect
         self.slow_factor = slow_factor
         self.jump_factor = jump_factor    
+        
+        width = image.get_width()
+        height = image.get_height()
 
         if effect == "mud":
-            marge = 10
-        elif effect == "ice":
-            marge = 1
-        else :
-            marge = 30
-        
-        if effect != "quicksand":
-            self.surface = Platform(x,y, width, 5, color)
-            self.rect = pygame.Rect(x, y - marge, width, height + marge)
+            self.surface = Platform(x, y + 5, pygame.Surface((width, 5)))
+            
+        elif effect =="ice" :
+           self.surface = Platform(x, y + 1, pygame.Surface((width, 5)))
+
         else :
             self.surface = None
 
-platforms = [
-    Platform(0, 500, 5000, 100, (100, 100, 100)),
-    Platform(300, 350, 200, 20, (100, 100, 100)),
-    Platform(500, 200, 200, 20, (100, 100, 100)),
-    Platform(800, 0, 20, 350, (100, 100, 100)),
-    Platform(1100, 300, 200, 20, (100, 100, 100))
-]
-
-special_platforms = [
-    Special_Platform(2000, 400, 470, 150, (194, 178, 128), effect="quicksand"),  # même hauteur que le sol
-    Special_Platform(3000, 400, 1500, 150, (200, 230, 255), effect="ice"),
-    Special_Platform(2500, 400, 470, 150, (100, 80, 40),  effect="mud", slow_factor=0.5, jump_factor = 0.6)
-]
+class Map_Object(pygame.sprite.Sprite):
+    def __init__(self, x, y, image):
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect(topleft=(x,y))
 
 class Checkpoint(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -52,19 +46,121 @@ class Checkpoint(pygame.sprite.Sprite):
 
         #pygame.draw.rect(self.image, (0, 255, 0), self.image.get_rect(), 2) # hitbox pour test du gameplay
 
-checkpoints = [
-    Checkpoint(600, 417),
-    Checkpoint(1155, 217)
-]
-
+class SpawnPoint: #L'endoit ou le joeur spawn apres un changement de salle
+    def __init__(self, x, y, name):
+        self.position = pygame.math.Vector2(x, y)
+        self.name = name #Pour différencier les spawn ponit d'une meme salle
+    
 # Arène de Gravelion (après les plateformes existantes)
 
-arene_platforms = [
+"""arene_platforms = [
     Platform(5000,    600,  1000,    20,  (80, 80, 80)),   # sol
     Platform(6000,      0,    20,   600,  (80, 80, 80)),   # mur droit
     Platform(5000,      0,  1000,    20,  (80, 80, 80)),   # plafond
-]
+]"""
 
 arene_rect = pygame.Rect(5000, 0, 1000, 600)  # délimitation de l'arène
 
-platforms += arene_platforms
+def load_map(path):
+    tmx_data = pytmx.load_pygame(path, pixelalpha=True)
+    return tmx_data
+
+def create_map(tmx_data):
+    platforms = []
+    special_platforms = []
+    traps = []
+
+    decorations = []
+    checkpoints = []
+    spawnpoints = []
+    entities_to_spawn = []
+
+    for layer in tmx_data.visible_layers:
+        if not hasattr(layer, 'data'):
+             continue
+
+        for x, y, gid in layer: 
+            if gid == 0: #Si la tuile est vide
+                continue
+
+            props = tmx_data.get_tile_properties_by_gid(gid)
+            image = tmx_data.get_tile_image_by_gid(gid)
+
+            if image is None or props is None:
+                continue
+
+            tile_type = props.get("type")
+
+            pos_x = x * TILE_SIZE
+            pos_y = y * TILE_SIZE
+
+            #Platformes classiques
+            if tile_type == "ground":
+                platforms.append(Platform(pos_x, pos_y, image))
+
+            #Platformes spéciales
+            elif tile_type == "quicksand":
+                sp = Special_Platform(pos_x, pos_y, image, effect="quicksand")
+                special_platforms.append(sp)
+
+            elif tile_type == "mud":
+                sp = Special_Platform(pos_x, pos_y, image, effect="mud", slow_factor=0.5, jump_factor=0.6)
+                special_platforms.append(sp)
+
+            elif tile_type == "ice":
+                special_platforms.append(
+                    Special_Platform(pos_x, pos_y, image, effect="ice")
+                )
+
+            #Pièges
+            elif tile_type == "lava":
+                traps.append(Lava(pos_x, pos_y, TILE_SIZE, TILE_SIZE))
+                    
+            elif tile_type == "acid":
+                traps.append(Acid(pos_x, pos_y, TILE_SIZE, TILE_SIZE))
+                    
+            elif tile_type == "thorns":
+                traps.append(Thorns(pos_x, pos_y, TILE_SIZE, TILE_SIZE))
+
+            elif tile_type == "spike":
+                traps.append(Spike(pos_x, pos_y, TILE_SIZE, TILE_SIZE))
+
+    for obj in tmx_data.objects:
+        obj_type = obj.properties.get("obj_type")
+        image = getattr(obj, "image")
+
+        x = int(obj.x)
+        y = int(obj.y)
+
+        if obj_type == "decor":
+            decorations.append(Map_Object(x, y, image))
+            print(2)
+        
+        elif obj_type == "banc":
+            checkpoints.append(Checkpoint(x, y))
+
+        elif obj_type == "spawnpoint":
+            name = obj.name
+            spawnpoints.append(SpawnPoint(x, y, name))
+
+        elif obj_type == "mob":
+            name = obj.name
+            entities_to_spawn.append({
+                "type": "mob",
+                "name": name,
+                "x": x,
+                "y": y
+            })
+
+        elif obj_type == "boss":
+            name = obj.name
+            entities_to_spawn.append({
+                "type": "boss",
+                "name": name,
+                "x": x,
+                "y": y
+            })
+
+
+    return platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, entities_to_spawn
+

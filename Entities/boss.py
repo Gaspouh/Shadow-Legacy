@@ -1,13 +1,12 @@
 import pygame
 from Entities.ennemi import Ennemi, Projectile, AttackZone
 from Visual.sprite_sheet import VerticalAnimation, Animation
-from World.map import platforms
 import time
 import random
 import math
 from World.objets import Monnaie
 
-class Golem(pygame.sprite.Sprite):  # pas de "self" ici
+"""class Golem(pygame.sprite.Sprite):  # pas de "self" ici
     def __init__(self, fenetre, x, y):
         super().__init__()
         self.ecran = fenetre
@@ -139,7 +138,8 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
 
         self.rect.midbottom = self.hitbox.midbottom
         
-        """ IA du golem """
+        #IA du golem
+
         if self.is_attacking:
             self.velocity_x = 0
             if self.direction == 1:
@@ -242,8 +242,8 @@ class Golem(pygame.sprite.Sprite):  # pas de "self" ici
         # Afficher simplement le sprite du golem
         visual_rect = self.rect.move(0, self.sprite_offset_y)
         fenetre.blit(self.image, camera.apply(visual_rect))
-
-        """
+"""
+"""
         # La hitbox en rouge
         pygame.draw.rect(fenetre, (255, 0, 0), camera.apply(self.hitbox), 2)
         

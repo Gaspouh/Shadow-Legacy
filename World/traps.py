@@ -79,19 +79,9 @@ class Wind_Vertical(Rectangular_Obstacle):
         self.special_effect = "wind"
         self.force_y = force
 
-class Saw :
+class Saw(Rectangular_Obstacle) :
     def __init__(self, x, y, radius):
-        super().__init__()
-    # Charger une image de scie circulaire
-        self.sheet = pygame.image.load("Assets/Images/insecte_sheet2.png").convert_alpha()
-        self.image = pygame.transform.scale(self.sheet, (radius*2, radius*2))
-        
-
-        self.attack_data = {
-            "damage" : 1,
-            "knockback_x" : 0,
-            "knockback_y" : 0
-        }
+        super().__init__(x, y, radius * 2, radius * 2, 1, "Assets/Images/insecte_sheet2.png")
 
 class Retractable_spike :
     pass

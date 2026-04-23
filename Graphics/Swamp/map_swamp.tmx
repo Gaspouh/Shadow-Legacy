@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="20">
+ <tileset firstgid="1" name="platform" tilewidth="32" tileheight="32" tilecount="60" columns="10">
+  <image source="Tiles/Tileset.png" width="320" height="192"/>
+  <tile id="0">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="4">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="5">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="6">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="7">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="8">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="9">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="10">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="11">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="12">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="13">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="14">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="15">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="16">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="17">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="18">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="19">
+   <properties>
+    <property name="type" value="lava"/>
+   </properties>
+  </tile>
+  <tile id="20">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="21">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="22">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="23">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="24">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="25">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="26">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="27">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="28">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="29">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="30">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="31">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="32">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="33">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="34">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="35">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="36">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="37">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="38">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="39">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="40">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="41">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="42">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="43">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="44">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="45">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="46">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="47">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="48">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="49">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="50">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="51">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="52">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="53">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="54">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="55">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="56">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="57">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="58">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+  <tile id="59">
+   <properties>
+    <property name="type" value="ground"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="61" source="Objects/objects.tsx"/>
+ <tileset firstgid="103" source="../traps.tsx"/>
+ <layer id="1" name="Ground" width="30" height="20">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,12,12,12,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,12,12,12,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,175,0,0,0,0,0,0,0,0,0,0,11,12,12,12,
+0,0,0,0,0,0,0,0,0,0,0,0,0,7,8,9,0,0,0,0,0,0,0,0,0,0,11,12,12,12,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,54,0,0,0,0,0,0,0,0,21,22,22,22,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,55,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,55,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,55,0,0,0,0,0,0,0,0,0,0,0,0,
+0,4,5,1073741881,0,0,32,33,3,0,0,0,0,0,0,0,0,56,0,0,0,0,0,0,0,0,0,1,2,2,
+0,14,0,0,0,0,0,0,55,0,0,0,0,104,104,104,0,0,0,0,0,49,39,39,59,0,0,11,12,12,
+0,14,5,6,0,0,0,0,55,0,0,0,0,110,110,110,0,0,0,0,0,0,0,0,0,0,0,11,12,12,
+0,14,0,16,0,0,0,0,55,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,12,12,
+0,24,25,26,0,0,0,0,55,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,12,12,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,12,12,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,12,12,
+0,0,0,0,0,0,0,0,0,0,0,0,0,173,1,2,3,0,0,0,106,106,106,2,2,123,123,26,12,12,
+121,121,121,121,121,121,121,121,121,121,121,2,2,2,26,12,13,0,0,0,11,12,12,12,12,12,12,12,12,12,
+12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,13,0,0,0,11,12,12,12,12,12,12,12,12,12,
+12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,24,108,108,108,26,12,12,12,12,12,12,12,12,12,
+12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12
+</data>
+ </layer>
+ <objectgroup id="3" name="Objects">
+  <object id="3" gid="86" x="732.518" y="480.123" width="65" height="61"/>
+  <object id="4" gid="72" x="362.905" y="511.632" width="16" height="13"/>
+  <object id="5" gid="66" x="699.055" y="289.286" width="31" height="26"/>
+  <object id="6" gid="89" x="225.101" y="258.346" width="63" height="59"/>
+  <object id="7" gid="102" x="692.654" y="479.047" width="14.7847" height="85"/>
+  <object id="12" gid="102" x="79.5259" y="254.485" width="14.7847" height="85"/>
+  <object id="8" gid="94" x="10.5559" y="258.899" width="101" height="103"/>
+  <object id="9" gid="75" x="423.676" y="95.5722" width="9" height="11"/>
+  <object id="10" gid="76" x="521.864" y="482.093" width="17" height="18"/>
+  <object id="11" gid="68" x="170.853" y="512.324" width="63" height="27"/>
+  <object id="14" name="araignee" x="744.333" y="264.932">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="16" name="araignee" x="389.829" y="492.017">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="17" name="volant" x="211.946" y="240.962">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

@@ -1,7 +1,7 @@
 import math
 
 import pygame
-from World.map import Platform, platforms
+from World.map import Platform
 from Visual.sprite_sheet import *
 #from Entities.perso import Player
 from Entities.physics_entity import PhysicsEntity
@@ -280,5 +280,3 @@ if __name__ == "__main__":
     araignee = Araignee(ecran, 100, 100)
     volant = Volant(ecran, 200, 100)
     pygame.quit()
-
-
