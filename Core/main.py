@@ -9,7 +9,7 @@ if project_root not in sys.path:
 print(sys.executable)
 
 from Entities.perso import Player
-from Entities.ennemi import Araignee, Volant, Projectile
+from Entities.ennemi import Araignee, Volant, Projectile, Tourelle
 from World.map import Platform, load_map, create_map
 from Visual.camera import Camera
 from Visual.vfx import particles, Particle
@@ -70,6 +70,7 @@ for e in entities_to_spawn:
 gravelion = Gravelion(fenetre, 5600, 300, pygame.Rect(5000, 0, 1000, 600)) # spawn dans l'arène de Gravelion
 trigger_combat = pygame.Rect(5100, 0, 50, 600)
 #porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche
+tourelle1 = Tourelle(fenetre, 600, 300)
 
 liste_entites = araignee + volant + [gravelion] #+golem
 
@@ -87,6 +88,7 @@ monnaie = Monnaie(fenetre, 200, 200)
 
 # Liste des projectiles
 projectiles = []
+tir_tourelle = []
 
 # Variables pour le screen shake et le hitstop à initialiser
 hitstop_until = -1 # Temps jusqu'auquel le hitstop est actif (initialisé à une valeur passée)
@@ -167,7 +169,11 @@ while continuer:
             #update joueur
             player.update(platforms + special_surfaces)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
-
+            """for elem in tourelle: 
+                if elem.alive and abs(elem.position.x - player.position.x) < 700: # Vérifier que l'ennemi est vivant et proche avant de le mettre à jour
+                    elem.update(player.rect)
+                    elem.tir(player.rect, tir_tourelle)#lancer la fonction de tir pour chaque tourelle""" #bug de merge à resoudre
+            
             #update ennemis
             for e in liste_entites[:]:
                 if not e.alive:
@@ -335,7 +341,18 @@ while continuer:
          # supprimer si trop vieux ou hors map
             if elem.lifetime_expired() or elem.out_of_bounds(pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)):
                 projectiles.remove(elem)
-
+        
+        for elem in tir_tourelle:# On parcourt la liste des projectiles tirés par les tourelles
+            elem.update()
+            elem.draw(fenetre, camera)
+            if elem.rect.colliderect(player.rect) and not elem.hit:# Si un projectile de tourelle touche le joueur
+                elem.hit = True # Pour éviter que le même projectile touche plusieurs fois
+                hitstop_duration, shake_amount = player.take_damage(elem.attack_data, elem.rect, elem)# Appliquer les dégâts et le recul au joueur
+                hitstop_until = pygame.time.get_ticks() + hitstop_duration # Activer le hitstop
+         # supprimer si trop vieux ou hors map
+            if elem.lifetime_expired() or elem.out_of_bounds(pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)):
+                tir_tourelle.remove(elem)
+            
     # Gestion de mort
     else:
         death_sound.play()

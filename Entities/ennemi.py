@@ -1,9 +1,7 @@
 import math
-
 import pygame
 from World.map import Platform
 from Visual.sprite_sheet import *
-#from Entities.perso import Player
 from Entities.physics_entity import PhysicsEntity
 
 class Ennemi(Animation, PhysicsEntity):
@@ -74,11 +72,11 @@ class Ennemi(Animation, PhysicsEntity):
             self.dead = True
             self.animation_mort.gestion_animation() # Jouer l'animation de mort
         if self.dead:
-            index = int(self.animation_mort.gestion_animation())
-            if self.direction == 1:
-                self.image = self.animation_mort.frames_droite[index]
-            else:
-                self.image = self.animation_mort.frames_gauche[index]
+            image = self.animation_mort.gestion_animation()
+        if self.direction == 1:
+            self.image = self.animation_mort.frames_droite[int(self.animation_mort.index_image)]
+        else:
+            self.image = self.animation_mort.frames_gauche[int(self.animation_mort.index_image)]
 class Projectile:
     def __init__(self, x, y, target_x, target_y, speed, width, height, damage, gravity=0.4, \
                   lifetime=3000, disappear_on_contact=True, image=None, use_gravity=False):
@@ -104,6 +102,7 @@ class Projectile:
         self.ignore_invincibility = False
         self.respawn_on_touch = False 
         self.apply_knockback = True
+        self.hit = False
 
         # Durée de vie du projectile
         self.birth_time = pygame.time.get_ticks()
@@ -264,15 +263,97 @@ class Volant(Ennemi):
         else:
             self.direction = -1 # Aller vers la gauche
             
-        # Appliquer la vitesse de poursuite
-        self.velocity.x = self.vitesse_deplacement * self.direction
-        if player_rect.y > self.rect.y: # Si le joueur est en dessous de l'ennemi, descendre
-            self.velocity.y = self.vitesse_deplacement
-        else: # Si le joueur est au dessus de l'ennemi, monter
-            self.velocity.y = -self.vitesse_deplacement
+       # Calculer les composantes du vecteur de déplacement vers le joueur
+        dx = player_rect.centerx - self.rect.centerx
+        dy = player_rect.centery - self.rect.centery
+
+        # norme du vecteur de déplacement pour une vitesse constante
+        vecteur_deplacement = math.sqrt(dx**2 + dy**2)
+        if vecteur_deplacement != 0:
+            self.velocity.x = (dx / vecteur_deplacement) * self.vitesse_deplacement
+            self.velocity.y = (dy / vecteur_deplacement) * self.vitesse_deplacement
             
         # Appliquer la physique (déplacements et collisions)
         self.physics_update([])  # Pas de plateformes pour les volants
+
+class Tourelle(Ennemi):
+    def __init__(self, fenetre, x, y):
+        
+        # On applique les caractéristique de l'ennemi débutant a la tourelle
+        super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4})
+
+        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7)
+        self.animation_tir = Animation(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0)
+        self.dead = False
+        self.use_gravity = False
+        self.can_receive_knockback = False
+        self.apply_knockback = False
+        self.coldown = 0
+        self.shooting = False
+
+        self.angle = 0              # Angle actuel du canon
+        self.vitesse_rotation = 3  # orientation des frames de tir
+        self.oriente = False        # alignement du canon avec le joueur pour tirer
+
+    def get_angle_vers_joueur(self, player_rect):
+        dx = player_rect.centerx - self.rect.centerx #composante x du vecteur entre la tourelle et le joueur
+        dy = player_rect.centery - self.rect.centery #composante y du vecteur entre la tourelle et le joueur
+        return math.degrees(math.atan2(-dy, dx)) # Calculer l'angle entre la tourelle et le joueur pour orienter le tir
+    
+    
+    def update(self,player_rect):
+        
+        if self.coldown > 0:
+            self.coldown -= 1
+
+        # rotation permanente
+        if self.dans_trigger(player_rect, trigger_range=300):
+            self.rotation_vers_joueur(player_rect)
+
+        # image de base par défaut
+        base_image = self.frames_droite[0]
+
+        # animation tir
+        if self.shooting:
+            base_image = self.animation_tir.gestion_animation_once()
+
+            if self.animation_tir.index_image >= len(self.animation_tir.frames_droite) - 1:
+                self.shooting = False
+                self.animation_tir.index_image = 0
+
+        # rotation de la tourelle vers le joueur
+        self.image = pygame.transform.rotate(base_image, self.angle)
+        self.rect = self.image.get_rect(center=self.rect.center)
+        
+    def rotation_vers_joueur(self, player_rect):
+        angle_cible = self.get_angle_vers_joueur(player_rect)
+
+        # Chemin de rotation le plus court
+        diff = (angle_cible - self.angle + 180) % 360 - 180
+
+        if abs(diff) < self.vitesse_rotation:  # orientation proche du jpueur
+            self.angle = angle_cible
+            self.oriente = True   # Le canon est orienté vers le joueur
+        elif diff > 0:
+            self.angle += self.vitesse_rotation
+            self.oriente = False
+        else:
+            self.angle -= self.vitesse_rotation
+            self.oriente = False
+
+        self.angle %= 360
+
+    def tir(self, player_rect, tir_tourelle):
+        if self.dans_trigger(player_rect, trigger_range=300) and self.coldown == 0 and self.oriente:
+            self.shooting = True
+            self.animation_tir.index_image = 0 
+            # Créer un projectile qui se dirige vers le joueur
+            projectile = Projectile(self.rect.centerx, self.rect.centery, player_rect.centerx, player_rect.centery, speed=5, width=20, height=20, damage= 1, gravity=False) 
+            tir_tourelle.append(projectile)
+            self.coldown = 150  # Mettre un cooldown entre les tirs
+            
+    
+
 
 if __name__ == "__main__":
     # Créer une fenêtre de jeu de test
