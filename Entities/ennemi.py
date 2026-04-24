@@ -143,7 +143,7 @@ class AttackZone():
         self.rect = pygame.Rect(x, y, width, height)
         self.position = pygame.math.Vector2(x, y)
         self.attack_data = attack_data
-        self.birth_time = -1000
+        self.birth_time = pygame.time.get_ticks()
         self.duration = duration
 
         #Etat
@@ -315,7 +315,7 @@ class Tourelle(Ennemi):
 
         # animation tir
         if self.shooting:
-            base_image = self.animation_tir.gestion_animation_once()
+            base_image, fin = self.animation_tir.gestion_animation_once()
 
             if self.animation_tir.index_image >= len(self.animation_tir.frames_droite) - 1:
                 self.shooting = False
@@ -351,6 +351,79 @@ class Tourelle(Ennemi):
             projectile = Projectile(self.rect.centerx, self.rect.centery, player_rect.centerx, player_rect.centery, speed=5, width=20, height=20, damage= 1, gravity=False) 
             tir_tourelle.append(projectile)
             self.coldown = 150  # Mettre un cooldown entre les tirs
+    
+class Fighter(Ennemi):
+    def __init__(self, fenetre, x, y):
+        
+        # On applique les caractéristique de l'ennemi débutant a la tourelle
+        super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4})
+
+        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7)
+        self.animation_attaque = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 6, 64, 64, 0, 0)
+        self.dead = False
+        self.use_gravity = True
+        self.cooldown = 0
+        self.attacking = False
+        self.hitbox = None
+     
+    def mouvement(self, player_rect, player, platforms):
+        Animation.gestion_animation(self)
+        # Afficher la bonne frame en fonction de la direction (orientation perso)
+        self.image = self.frames_droite[int(self.index_image)] if self.direction == 1 else self.frames_gauche[int(self.index_image)]
+
+        if self.cooldown > 0: # Gérer le cooldown pour limiter la fréquence des attaques
+            self.cooldown -= 1
+        # Calculer la direction vers le joueur
+        if player_rect.x > self.rect.x and abs(player_rect.centerx - self.rect.centerx) > 120:
+            self.direction = 1 # Aller vers la droite
+        elif player_rect.x < self.rect.x and abs(player_rect.centerx - self.rect.centerx) > 120:
+            self.direction = -1 # Aller vers la gauche
+        else:
+            self.attaque() # Attaquer si proche du joueur
+        
+        if self.is_knocked_back:
+            # Appliquer la physique (déplacements et collisions) pendant le knockback
+            self.physics_update(platforms)
+            if self.on_ground and abs(self.velocity.x) < 0.5:
+                self.is_knocked_back = False
+        else:
+            self.velocity.x = self.vitesse_deplacement * self.direction
+            self.physics_update(platforms)
+        
+        if self.attacking:
+            if self.hitbox:
+                        print("a")
+                        if self.hitbox.rect.colliderect(player.rect):
+                            print("b")
+                            if self.hitbox not in player.entite_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque
+                                print("c")
+                                player.entite_touches.append(self.hitbox) # Ajouter l'ennemi à la liste d'entités déjà touchées
+                                hitstop_duration, shake_amount = player.take_damage(self.attack_data, self.rect, self)
+                                print
+                                hitstop_until = pygame.time.get_ticks() + hitstop_duration
+            image, fin = self.animation_attaque.gestion_animation_once()
+            self.image = image if self.direction == 1 else pygame.transform.flip(image, True, False)
+            
+            print(f"fin animation attaque : {fin}")
+            if fin:
+                self.attacking = False
+                self.animation_attaque.index_image = 0
+        if self.hitbox is not None and self.hitbox.lifetime_expired():
+                self.hitbox = None  # Supprimer la hitbox après la durée de l'attaque
+
+    def attaque(self):
+        if self.attacking:   
+            return
+        # Attaquer si le cooldown est écoulé
+        if self.cooldown == 0:
+            print("Attaque du fighter !")
+            self.attacking = True
+            self.animation_attaque.index_image = 0 
+            self.cooldown = 60  # Mettre un cooldown entre les attaques
+            self.hitbox = AttackZone(self.rect.centerx , self.rect.centery , 120, 50, self.attack_data, None, duration=500)
+            self.hitbox.rect.center = (self.rect.centerx + (120 * self.direction), self.rect.centery)  # Positionner la hitbox devant le fighter en fonction de sa direction
+            return self.hitbox
+
             
     
 
