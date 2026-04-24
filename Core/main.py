@@ -26,10 +26,10 @@ pygame.init()
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
 MAP_WIDTH, MAP_HEIGHT = 7000, 2000
 
-fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.DOUBLEBUF, vsync=1) 
+fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.SCALED | pygame.DOUBLEBUF, vsync=1) 
 pygame.display.set_caption("Shadow Legacy") # Définir le titre de la fenêtre
 
-zoom = 2 # zoom
+zoom = 1.5 # zoom
 game_fenetre = pygame.Surface((GAME_WIDTH//zoom, GAME_HEIGHT//zoom))
 camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT, zoom=zoom)
 clock = pygame.time.Clock()
@@ -188,13 +188,13 @@ while continuer:
                     else :
                         liste_entites.remove(e)
                     continue
-                """
+                
                 if hasattr(e, "patrouille"): #pour les patrouilleurs
                     e.patrouille(platforms)
                 
                 if hasattr(e, "poursuite"): #pour les volants
                     e.poursuite(player.rect)
-                """
+                
                 if hasattr(e, "update"): #pour tous les ennemis
                     e.update(player.rect, player)
                
@@ -307,6 +307,8 @@ while continuer:
         if player.is_attacking:
             pygame.draw.rect(game_fenetre, (255, 0, 0), camera.apply(player.attack_rect)) # Afficher la hitbox de l'attaque pour les tests
 
+        pygame.draw.rect(game_fenetre, (0, 255, 0), camera.apply(player.rect), 2) # Afficher la hitbox de l'attaque pour les tests
+
         """#Lancement Gravelion (à supprimer du main)
         if not gravelion.combat_lance and player.rect.colliderect(trigger_combat):
             gravelion.combat_lance = True
@@ -398,5 +400,5 @@ while continuer:
     if not pause:
         fenetre.blit(pygame.transform.scale(game_fenetre, (GAME_WIDTH, GAME_HEIGHT)), (0, 0))
         pygame.display.update()
-    clock.tick(70)
+    clock.tick(60)
 pygame.quit()

@@ -136,30 +136,32 @@ def create_map(tmx_data):
             decorations.append(Map_Object(x, y, image))
             print(2)
         
-        elif obj_type == "banc":
-            checkpoints.append(Checkpoint(x, y))
+        else:
+            y = int (y - obj.height*2)
+            if obj_type == "banc":
+                checkpoints.append(Checkpoint(x, y))
 
-        elif obj_type == "spawnpoint":
-            name = obj.name
-            spawnpoints.append(SpawnPoint(x, y, name))
+            elif obj_type == "spawnpoint":
+                name = obj.name
+                spawnpoints.append(SpawnPoint(x, y, name))
 
-        elif obj_type == "mob":
-            name = obj.name
-            entities_to_spawn.append({
-                "type": "mob",
-                "name": name,
-                "x": x,
-                "y": y
-            })
+            elif obj_type == "mob":
+                name = obj.name
+                entities_to_spawn.append({
+                    "type": "mob",
+                    "name": name,
+                    "x": x,
+                    "y": y
+                })
 
-        elif obj_type == "boss":
-            name = obj.name
-            entities_to_spawn.append({
-                "type": "boss",
-                "name": name,
-                "x": x,
-                "y": y
-            })
+            elif obj_type == "boss":
+                name = obj.name
+                entities_to_spawn.append({
+                    "type": "boss",
+                    "name": name,
+                    "x": x,
+                    "y": y
+                })
 
 
     return platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, entities_to_spawn

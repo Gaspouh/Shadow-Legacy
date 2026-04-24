@@ -7,7 +7,7 @@ from Visual.sprite_sheet import VerticalAnimation
 
 class Player(PhysicsEntity):
     def __init__(self, x, y, fenetre):
-        super().__init__(x, y, 40, 60, gravity=0.4 , friction=-0.5, use_gravity=True)
+        super().__init__(x, y, 25, 60, gravity=0.4 , friction=-0.5, use_gravity=True)
         self.window = fenetre
 
         p = load_config().get("player", {}) if load_config() else {}
@@ -45,10 +45,6 @@ class Player(PhysicsEntity):
         self.entite_touches = []
         self.attack_data = {}
         self.tir_touches = [] # Liste des entités déjà touchées par ce sort pour éviter de les toucher plusieurs fois
-
-        # IMAGE DU JOUEUR
-        original_image = pygame.image.load('Assets/Player/player.png').convert_alpha()
-        self.image = pygame.transform.scale(original_image, (75, 90))
 
         # INVINCIBILITE
         self.invincible = False
@@ -174,10 +170,10 @@ class Player(PhysicsEntity):
         
         # image du joueur redimmensionnée
         if self.current_animation in (self.anim_run_right, self.anim_run_left):
-            self.image = pygame.transform.scale(frame_surface, (100, 100)) # Perso plus petit lors du run (à cause du pb de "pading" de chaque tiles du spritesheet)
+            self.image = pygame.transform.scale(frame_surface, (110, 110)) # Perso plus petit lors du run (à cause du pb de "pading" de chaque tiles du spritesheet)
         
         else:
-            self.image = pygame.transform.scale(frame_surface, (105, 105))
+            self.image = pygame.transform.scale(frame_surface, (115, 115))
 
     def update(self, platforms):
         now = pygame.time.get_ticks()
@@ -248,10 +244,10 @@ class Player(PhysicsEntity):
                 self.velocity.y = min(self.velocity.y, 0.3)  # tombe très lentement
 
                 # Ralentissement lié à la profondeur
-                self.current_slow_factor = 1 - self.quicksand_sink / 100
+                self.current_slow_factor = 1 - self.quicksand_sink / 65
                 self.velocity.x *= self.current_slow_factor  # ralentissement horizontal progressif
 
-                if self.quicksand_sink >= 80:
+                if self.quicksand_sink >= 62:
                     self.health -= 1
                     self.position = self.last_safe_position.copy()
                     self.velocity = pygame.math.Vector2(0, 0)
@@ -278,7 +274,7 @@ class Player(PhysicsEntity):
             can_jump = now - self.coyote_timer <= 150
             want_to_jump = now - self.jump_buffer_timer <= 150
 
-            if want_to_jump and self.quicksand_sink < 5:
+            if want_to_jump and self.quicksand_sink < 3:
                 if can_jump:
                     self.execute_jump(jump_type="simple") # Exécuter le saut si le jump buffer est actif (c-à-d que le joeur a préssé le bouton de saut) et que le joueur peut sauter (c-à-d que le joueur est dans la fenêtre de coyote time)
                 elif self.double_jump.can_execute(self):
