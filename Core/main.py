@@ -6,7 +6,6 @@ from random import randint
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-print(sys.executable)
 from Entities.perso import Player
 from Entities.ennemi import Araignee, Volant, Projectile, Tourelle
 from World.map import Platform, load_map, create_map
@@ -26,7 +25,7 @@ pygame.init()
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
 MAP_WIDTH, MAP_HEIGHT = 7000, 2000
 
-fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.SCALED | pygame.DOUBLEBUF, vsync=1) 
+fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.DOUBLEBUF, vsync=1) 
 pygame.display.set_caption("Shadow Legacy") # Définir le titre de la fenêtre
 
 zoom = 1.5 # zoom
@@ -40,9 +39,6 @@ Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
 platforms, special_platforms, traps, decorations, \
     checkpoints, spawnpoints, entities_to_spawn = create_map(tmx_data)
-print("PLATFORMS:", len(platforms))
-print("SPECIAL:", len(special_platforms))
-print("TRAPS:", len(traps))
 special_surfaces = [sp.surface for sp in special_platforms if sp.surface is not None]
 
 #Joueur
@@ -250,7 +246,10 @@ while continuer:
 
             # Pieges
             for trap in traps:
-                game_fenetre.blit(trap.image, camera.apply(trap.rect))
+                trap.update()
+                game_fenetre.blit(trap.image, camera.apply(trap.image_rect))
+                if pygame.key.get_pressed()[pygame.K_a]:
+                    pygame.draw.rect(game_fenetre, (0, 255, 0), camera.apply(trap.rect), 2)
 
                 if player.is_attacking and player.attack_rect.colliderect(trap.rect):
                     if trap not in player.entite_touches: # Vérifier que ce piège n'a pas déjà été touché par cette attaque
@@ -306,8 +305,8 @@ while continuer:
 
         if player.is_attacking:
             pygame.draw.rect(game_fenetre, (255, 0, 0), camera.apply(player.attack_rect)) # Afficher la hitbox de l'attaque pour les tests
-
-        pygame.draw.rect(game_fenetre, (0, 255, 0), camera.apply(player.rect), 2) # Afficher la hitbox de l'attaque pour les tests
+        if pygame.key.get_pressed()[pygame.K_a]:
+            pygame.draw.rect(game_fenetre, (0, 0, 255), camera.apply(player.rect), 2) # Afficher la hitbox de l'attaque pour les tests
 
         """#Lancement Gravelion (à supprimer du main)
         if not gravelion.combat_lance and player.rect.colliderect(trigger_combat):

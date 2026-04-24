@@ -113,17 +113,22 @@ def create_map(tmx_data):
                 )
 
             #Pièges
-            elif tile_type == "lava":
-                traps.append(Lava(pos_x, pos_y, TILE_SIZE, TILE_SIZE))
+            elif tile_type == "lava": #'198, 69, 36) - 1
+                traps.append(Lava(pos_x, pos_y, TILE_SIZE))
                     
-            elif tile_type == "acid":
-                traps.append(Acid(pos_x, pos_y, TILE_SIZE, TILE_SIZE))
+            elif tile_type == "acid": #(30, 110, 80) - 2
+                traps.append(Acid(pos_x, pos_y, TILE_SIZE))
                     
             elif tile_type == "thorns":
-                traps.append(Thorns(pos_x, pos_y, TILE_SIZE, TILE_SIZE))
+                direction = props.get("direction")
+                traps.append(Thorns(pos_x, pos_y, TILE_SIZE, direction))
 
             elif tile_type == "spike":
-                traps.append(Spike(pos_x, pos_y, TILE_SIZE, TILE_SIZE))
+                direction = props.get("direction")
+                traps.append(Spike(pos_x, pos_y, TILE_SIZE, direction))
+
+            elif tile_type == "wind":
+                pass
 
     for obj in tmx_data.objects:
         obj_type = obj.properties.get("obj_type")
@@ -134,7 +139,6 @@ def create_map(tmx_data):
 
         if obj_type == "decor":
             decorations.append(Map_Object(x, y, image))
-            print(2)
         
         else:
             y = int (y - obj.height*2)

@@ -1,8 +1,9 @@
 import pygame
 
 class Animation:
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne):
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, scale=1):
         self.ecran = fenetre
+        self.scale = scale
 
         # Charger une image d'ennemi
         sheet = pygame.image.load(sprite_sheet).convert_alpha()
@@ -12,6 +13,10 @@ class Animation:
             # stocker les frames d'animation dans des listes pour la droite et la gauche
             frame = pygame.Surface((width, height), pygame.SRCALPHA)
             frame.blit(sheet, (0, 0),(marge + (i * width), ligne * height, width, height))
+
+            #Rescale pour pièges
+            if scale != 1:
+                frame = pygame.transform.scale(frame, (width * self.scale, height * self.scale))
 
             frames_droite.append(frame)
             frames_gauche.append(pygame.transform.flip(frame, True, False))

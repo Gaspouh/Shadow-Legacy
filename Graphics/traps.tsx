@@ -51,9 +51,52 @@
    <property name="type" value="saw"/>
   </properties>
  </tile>
- <tile id="72">
+ <tile id="76">
   <properties>
+   <property name="direction" value="up"/>
    <property name="type" value="thorns"/>
+  </properties>
+ </tile>
+ <tile id="77">
+  <properties>
+   <property name="direction" value="down"/>
+   <property name="type" value="thorns"/>
+  </properties>
+ </tile>
+ <tile id="78">
+  <properties>
+   <property name="direction" value="left"/>
+   <property name="type" value="thorns"/>
+  </properties>
+ </tile>
+ <tile id="79">
+  <properties>
+   <property name="direction" value="right"/>
+   <property name="type" value="thorns"/>
+  </properties>
+ </tile>
+ <tile id="90">
+  <properties>
+   <property name="direction" value="up"/>
+   <property name="type" value="spike"/>
+  </properties>
+ </tile>
+ <tile id="91">
+  <properties>
+   <property name="direction" value="down"/>
+   <property name="type" value="spike"/>
+  </properties>
+ </tile>
+ <tile id="92">
+  <properties>
+   <property name="direction" value="left"/>
+   <property name="type" value="spike"/>
+  </properties>
+ </tile>
+ <tile id="93">
+  <properties>
+   <property name="direction" value="right"/>
+   <property name="type" value="spike"/>
   </properties>
  </tile>
 </tileset>
