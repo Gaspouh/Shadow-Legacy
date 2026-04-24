@@ -8,7 +8,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 print(sys.executable)
 from Entities.perso import Player
-from Entities.ennemi import Araignee, Volant, Projectile, Tourelle
+from Entities.ennemi import Ennemi, Araignee, Volant, Projectile, Tourelle, Fighter
 from World.map import Platform, load_map, create_map
 from Visual.camera import Camera
 from Visual.vfx import particles, Particle
@@ -74,6 +74,7 @@ gravelion = Gravelion(fenetre, 5600, 300, pygame.Rect(5000, 0, 1000, 600)) # spa
 trigger_combat = pygame.Rect(5100, 0, 50, 600)
 #porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche
 tourelle1 = Tourelle(fenetre, 600, 300)
+epeiste1 = Fighter(fenetre, 700, 300)
 
 liste_entites = araignee + volant + [gravelion] #+golem
 
@@ -178,6 +179,10 @@ while continuer:
                     elem.tir(player.rect, tir_tourelle)#lancer la fonction de tir pour chaque tourelle""" #bug de merge à resoudre
             
             #update ennemis
+            '''for elem in fighter: 
+                if elem.alive and abs(elem.position.x - player.position.x) < 700: # Vérifier que l'ennemi est vivant et proche avant de le mettre à jour
+                    elem.mouvement(player.rect,player, platforms)
+                    print(elem.attacking, elem.hitbox)''' #bug de merge à resoudre
             for e in liste_entites[:]:
                 if not e.alive:
                     if hasattr(e, "mort"):

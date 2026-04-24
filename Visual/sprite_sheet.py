@@ -47,8 +47,9 @@ class Animation:
 
         if self.index_image >= len(self.frames_droite) - 1:
             self.index_image = len(self.frames_droite) - 1  # Rester sur la dernière frame
+
         self.image = self.frames_droite[int(self.index_image)]
-        return self.image
+        return self.image, True  # Retourner True pour indiquer que l'animation est terminée
     
 
 # 2eme classe pour d'autres types de spritesheet
