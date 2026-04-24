@@ -7,7 +7,6 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 print(sys.executable)
-
 from Entities.perso import Player
 from Entities.ennemi import Araignee, Volant, Projectile, Tourelle
 from World.map import Platform, load_map, create_map
@@ -20,21 +19,25 @@ from Entities.boss import Gravelion #,Golem
 from Visual.interface import menu
 from Core.reset import reset
 
-os.environ['SDL_RENDER_SCALE_QUALITY'] = '0' 
+os.environ['SDL_RENDER_SCALE_QUALITY'] = '0'
 pygame.init()
 
 #Configs
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
 MAP_WIDTH, MAP_HEIGHT = 7000, 2000
 
-fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.SCALED | pygame.DOUBLEBUF, vsync=1)
+fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.DOUBLEBUF, vsync=1) 
 pygame.display.set_caption("Shadow Legacy") # Définir le titre de la fenêtre
 
-camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT)
+zoom = 2 # zoom
+game_fenetre = pygame.Surface((GAME_WIDTH//zoom, GAME_HEIGHT//zoom))
+camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT, zoom=zoom)
 clock = pygame.time.Clock()
 
+Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 #Map
-tmx_data = load_map("Graphics\Swamp\map_swamp.tmx")
+tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
 platforms, special_platforms, traps, decorations, \
     checkpoints, spawnpoints, entities_to_spawn = create_map(tmx_data)
 print("PLATFORMS:", len(platforms))
@@ -185,16 +188,16 @@ while continuer:
                     else :
                         liste_entites.remove(e)
                     continue
-
+                """
                 if hasattr(e, "patrouille"): #pour les patrouilleurs
                     e.patrouille(platforms)
                 
                 if hasattr(e, "poursuite"): #pour les volants
                     e.poursuite(player.rect)
-
+                """
                 if hasattr(e, "update"): #pour tous les ennemis
                     e.update(player.rect, player)
-
+               
                 if e.rect.colliderect(player.rect):
                     hitstop_duration, shake_amount = player.take_damage(e.attack_data, e.rect, e) # Appliquer les effets de recul au joueur si un ennemi le touche
                     hitstop_until = now + hitstop_duration
@@ -235,19 +238,19 @@ while continuer:
                             particles.append(Particle(e.rect.centerx, e.rect.centery))
 
             # Dessiner les éléments du jeu sur la fenêtre
-            fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
+            game_fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
                 
             # Plateformes
             for platform in platforms:
-                fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
+                game_fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
 
             # Plateformes spéciales (boue, sable mouvant, eau)
             for sp in special_platforms:
-                fenetre.blit(sp.image, camera.apply(sp.rect)) 
+                game_fenetre.blit(sp.image, camera.apply(sp.rect)) 
 
             # Pieges
             for trap in traps:
-                fenetre.blit(trap.image, camera.apply(trap.rect))
+                game_fenetre.blit(trap.image, camera.apply(trap.rect))
 
                 if player.is_attacking and player.attack_rect.colliderect(trap.rect):
                     if trap not in player.entite_touches: # Vérifier que ce piège n'a pas déjà été touché par cette attaque
@@ -269,13 +272,13 @@ while continuer:
                 shake_amount -= 1 # Réduire progressivement l'intensité du screen shake
 
             for deco in decorations:
-                fenetre.blit(deco.image, camera.apply(deco.rect))
+                game_fenetre.blit(deco.image, camera.apply(deco.rect))
 
         # Checkpoints
         for cp in checkpoints:
-            # 1. On calcule la position à l'écran 
+            # On calcule la position à l'écran 
             cp_screen_rect = camera.apply(cp.rect)
-            fenetre.blit(cp.image, cp_screen_rect)
+            game_fenetre.blit(cp.image, cp_screen_rect)
 
             # Quand le joueur est proche du banc
             if cp.rect.colliderect(player.rect) and not cp.activated:
@@ -283,10 +286,10 @@ while continuer:
                 # UI (centrage)
                 ui_x = cp_screen_rect.centerx - (ui_reposer.get_width() // 2)
                 ui_y = cp_screen_rect.top - ui_reposer.get_height() - 10
-                fenetre.blit(ui_reposer, (ui_x, ui_y)) 
+                game_fenetre.blit(ui_reposer, (ui_x, ui_y)) 
 
-                # Au lieu de juste "if 'E' pressed" qui appuierai 60 fois/s :
-                if pygame.key.get_pressed()[pygame.K_e]:
+                # Au lieu de juste "if 'Z' pressed" qui appuierai 60 fois/s :
+                if pygame.key.get_pressed()[pygame.K_z]:
                     cp.activated = True
                     player.health = player.max_health
                     spawn_point = pygame.math.Vector2(cp.rect.topleft)
@@ -299,10 +302,10 @@ while continuer:
             player.rect.midbottom[1] + player.sprite_offset_y  # offset
         ))
         if not player.invincible or (pygame.time.get_ticks() // 100) % 2 == 0: # Pour faire clignoter le joueur quand il est invincible
-            fenetre.blit(player.image, camera.apply(image_rect))
+            game_fenetre.blit(player.image, camera.apply(image_rect))
 
         if player.is_attacking:
-            pygame.draw.rect(fenetre, (255, 0, 0), camera.apply(player.attack_rect)) # Afficher la hitbox de l'attaque pour les tests
+            pygame.draw.rect(game_fenetre, (255, 0, 0), camera.apply(player.attack_rect)) # Afficher la hitbox de l'attaque pour les tests
 
         """#Lancement Gravelion (à supprimer du main)
         if not gravelion.combat_lance and player.rect.colliderect(trigger_combat):
@@ -317,26 +320,26 @@ while continuer:
             if p.life <= 0:
                 particles.remove(p)
             else:
-                p.draw(fenetre, camera)
+                p.draw(game_fenetre, camera)
         
         # Afficher les cœurs
         for heart in hearts:
-            fenetre.blit(heart.image, heart.rect) # Les cœurs sont fixes à l'écran, pas besoin d'appliquer le décalage de la caméra
+            game_fenetre.blit(heart.image, heart.rect) # Les cœurs sont fixes à l'écran, pas besoin d'appliquer le décalage de la caméra
 
         for e in liste_entites:
-            fenetre.blit(e.image, camera.apply(e.rect))
+            game_fenetre.blit(e.image, camera.apply(e.rect))
 
         # Afficher les orbs
-        monnaie.draw(fenetre)
+        monnaie.draw(game_fenetre)
 
         # Afficher la jauge de sang
         font = pygame.font.Font(None, 50)
         barre_sang = font.render(str(player.sang), True, (255, 0, 0))
-        fenetre.blit(barre_sang, (10, 40))
+        game_fenetre.blit(barre_sang, (10, 40))
 
         for elem in projectiles[:]:
             elem.update()
-            elem.draw(fenetre, camera)
+            elem.draw(game_fenetre, camera)
 
          # supprimer si trop vieux ou hors map
             if elem.lifetime_expired() or elem.out_of_bounds(pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)):
@@ -344,7 +347,7 @@ while continuer:
         
         for elem in tir_tourelle:# On parcourt la liste des projectiles tirés par les tourelles
             elem.update()
-            elem.draw(fenetre, camera)
+            elem.draw(game_fenetre, camera)
             if elem.rect.colliderect(player.rect) and not elem.hit:# Si un projectile de tourelle touche le joueur
                 elem.hit = True # Pour éviter que le même projectile touche plusieurs fois
                 hitstop_duration, shake_amount = player.take_damage(elem.attack_data, elem.rect, elem)# Appliquer les dégâts et le recul au joueur
@@ -393,7 +396,7 @@ while continuer:
 
 # Mettre à jour l'affichage
     if not pause:
+        fenetre.blit(pygame.transform.scale(game_fenetre, (GAME_WIDTH, GAME_HEIGHT)), (0, 0))
         pygame.display.update()
-        clock.tick(60)
-
+    clock.tick(70)
 pygame.quit()

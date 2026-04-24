@@ -7,7 +7,7 @@ from Visual.sprite_sheet import VerticalAnimation
 
 class Player(PhysicsEntity):
     def __init__(self, x, y, fenetre):
-        super().__init__(x, y, 60, 90, gravity=0.4 , friction=-0.5, use_gravity=True)
+        super().__init__(x, y, 40, 60, gravity=0.4 , friction=-0.5, use_gravity=True)
         self.window = fenetre
 
         p = load_config().get("player", {}) if load_config() else {}
@@ -135,7 +135,7 @@ class Player(PhysicsEntity):
         self.anim_basic_attack2_right.vitesse_animation = 10 / v * 3.2
         self.anim_basic_attack2_left.vitesse_animation = 10 / v * 3.2
 
-        self.sprite_offset_y = 30
+        self.sprite_offset_y = 25
 
     # foret de if pour chaque anims
     def animate(self):
@@ -174,10 +174,10 @@ class Player(PhysicsEntity):
         
         # image du joueur redimmensionnée
         if self.current_animation in (self.anim_run_right, self.anim_run_left):
-            self.image = pygame.transform.scale(frame_surface, (150, 150)) # Perso plus petit lors du run (à cause du pb de "pading" de chaque tiles du spritesheet)
+            self.image = pygame.transform.scale(frame_surface, (100, 100)) # Perso plus petit lors du run (à cause du pb de "pading" de chaque tiles du spritesheet)
         
         else:
-            self.image = pygame.transform.scale(frame_surface, (160, 160))
+            self.image = pygame.transform.scale(frame_surface, (105, 105))
 
     def update(self, platforms):
         now = pygame.time.get_ticks()

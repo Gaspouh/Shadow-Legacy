@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tileset version="1.10" tiledversion="1.12.1" name="traps" tilewidth="32" tileheight="32" tilecount="98" columns="14">
- <image source="../../../../Downloads/platformPack_tilesheet (1).png" width="448" height="224"/>
+ <image source="pic_test.png" width="448" height="224"/>
  <tile id="1">
   <properties>
    <property name="type" value="quicksand"/>
