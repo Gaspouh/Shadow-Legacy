@@ -288,8 +288,8 @@ class Boss(Ennemi):
     TRANSITION  = "TRANSITION"    # changement de phase
     DYING       = "DYING"
 
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data, tp_points, stagger_threshold=150):
-        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data)
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data, tp_points, stagger_threshold=150, scale=1):
+        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data, scale=1)
         
         self.can_receive_knockback = False # Pas de recul pour les boss
 
@@ -404,21 +404,21 @@ class Gravelion(Boss):
             (arene_rect.right - marge_x, hauteur_air)
         ]
         super().__init__(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 4, 400, 100, 0, 0, 500, 1,\
-                        {"damage": 1, "knockback_x": 80, "knockback_y": -5}, tp_points)
+                        {"damage": 1, "knockback_x": 80, "knockback_y": -5}, tp_points,scale=1)
 
         self.arene_rect = arene_rect
         self.use_gravity = False # Pas de gravité pour ce boss lévitant
 
         # Animations 
         self.anims = {
-            "idle":         Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 4, 100, 100, 0, 0),
-            "glowing":      Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 8, 100, 100, 0, 1),
-            "arm":          Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 9, 100, 100, 0, 2),
-            "cocon":        Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 8, 100, 100, 0, 3),
-            "melee":        Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 7, 100, 100, 0, 4),
-            "laser_charge": Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 7, 100, 100, 0, 5),
-            "transition":   Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 10, 100, 100, 0, 6),
-            "death":        Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 10, 1000, 100, 0, 7) #Probleme avec la classe a regler pour fonctionner sur deux lignes
+            "idle":         Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 4, 100, 100, 0, 0, 1),
+            "glowing":      Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 8, 100, 100, 0, 1, 1),
+            "arm":          Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 9, 100, 100, 0, 2, 1),
+            "cocon":        Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 8, 100, 100, 0, 3, 1),
+            "melee":        Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 7, 100, 100, 0, 4, 1),
+            "laser_charge": Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 7, 100, 100, 0, 5, 1),
+            "transition":   Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 10, 100, 100, 0, 6, 1),
+            "death":        Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 10, 1000, 100, 0, 7, 1) #Probleme avec la classe a regler pour fonctionner sur deux lignes
         }
 
         #Vitesse d'animation 

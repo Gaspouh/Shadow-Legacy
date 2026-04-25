@@ -5,8 +5,8 @@ from Visual.sprite_sheet import *
 from Entities.physics_entity import PhysicsEntity
 
 class Ennemi(Animation, PhysicsEntity):
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data):
-        Animation.__init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne)
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data, scale):
+        Animation.__init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, scale)
         PhysicsEntity.__init__(self, x, y, width, height, gravity = 0.4, friction = -0.5, use_gravity=True)
 
         #Etat
@@ -178,8 +178,8 @@ class AttackZone():
         fenetre.blit(self.image, camera.apply(self.rect))
 
 class Patrouilleur(Ennemi):
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data):
-        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data)
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data, scale):
+        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data, scale)
 
         # Capteurs pour patrouille
         self.mur = False
@@ -232,36 +232,42 @@ class Patrouilleur(Ennemi):
             if self.mur or not self.capteur_on_ground :
                 self.direction *= -1
 
-
-
 class Araignee(Patrouilleur):
     def __init__(self, fenetre, x, y):
-        super().__init__(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 5, 3, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4})
+        super().__init__(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 5, 3, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale = 1)
 
-        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 7, 62, 50, 27, 7)
+        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 7, 62, 50, 27, 7, scale=1)
+        self.dead = False
+
+class Scorpion(Patrouilleur):
+    def __init__(self, fenetre, x, y):
+        super().__init__(fenetre, x, y, 'Assets/Images/scorpion.png', 8, 64, 64, 0, 0, 4, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1)
+
+        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
         self.dead = False
 
 class Volant(Ennemi):
     def __init__(self, fenetre, x, y):
         
         # On applique les caractéristique de l'ennemi débutant au volant
-        super().__init__(fenetre, x, y, 'Assets/Images/sprit_sheet_volant.png', 4, 50, 50, 5, 3, 3, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4})
+        super().__init__(fenetre, x, y, 'Assets/Images/bat.png', 8, 16, 30, 0, 0, 3, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=2)
 
         self.image = self.frames_droite[0]
         self.use_gravity = False
-        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7)
+        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
         self.dead = False
 
     def poursuite(self, player_rect):
         Animation.gestion_animation(self)
-        # Afficher la bonne frame en fonction de la direction (orientation perso)
-        self.image = self.frames_droite[int(self.index_image)] if self.direction == 1 else self.frames_gauche[int(self.index_image)]
         
         # Calculer la direction vers le joueur
         if player_rect.x > self.rect.x:
             self.direction = 1 # Aller vers la droite
         else:
             self.direction = -1 # Aller vers la gauche
+        
+         # Afficher la bonne frame en fonction de la direction (orientation perso)
+        self.image = self.frames_droite[int(self.index_image)] if self.direction == 1 else self.frames_gauche[int(self.index_image)]
             
        # Calculer les composantes du vecteur de déplacement vers le joueur
         dx = player_rect.centerx - self.rect.centerx
@@ -280,10 +286,10 @@ class Tourelle(Ennemi):
     def __init__(self, fenetre, x, y):
         
         # On applique les caractéristique de l'ennemi débutant a la tourelle
-        super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4})
+        super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1)
 
-        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7)
-        self.animation_tir = Animation(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0)
+        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
+        self.animation_tir = Animation(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, scale=1)
         self.dead = False
         self.use_gravity = False
         self.can_receive_knockback = False
@@ -356,10 +362,10 @@ class Fighter(Ennemi):
     def __init__(self, fenetre, x, y):
         
         # On applique les caractéristique de l'ennemi débutant a la tourelle
-        super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4})
+        super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1)
 
-        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7)
-        self.animation_attaque = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 6, 64, 64, 0, 0)
+        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
+        self.animation_attaque = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 6, 64, 64, 0, 0, scale=1)
         self.dead = False
         self.use_gravity = True
         self.cooldown = 0
@@ -392,19 +398,14 @@ class Fighter(Ennemi):
         
         if self.attacking:
             if self.hitbox:
-                        print("a")
                         if self.hitbox.rect.colliderect(player.rect):
-                            print("b")
                             if self.hitbox not in player.entite_touches: # Vérifier que cet ennemi n'a pas déjà été touché par cette attaque
-                                print("c")
                                 player.entite_touches.append(self.hitbox) # Ajouter l'ennemi à la liste d'entités déjà touchées
-                                hitstop_duration, shake_amount = player.take_damage(self.attack_data, self.rect, self)
-                                print
+                                hitstop_duration, shake_amount = player.take_damage(self.attack_data, self.rect, self)# Appliquer les effets de l'attaque au joueur
                                 hitstop_until = pygame.time.get_ticks() + hitstop_duration
             image, fin = self.animation_attaque.gestion_animation_once()
             self.image = image if self.direction == 1 else pygame.transform.flip(image, True, False)
             
-            print(f"fin animation attaque : {fin}")
             if fin:
                 self.attacking = False
                 self.animation_attaque.index_image = 0
@@ -424,7 +425,36 @@ class Fighter(Ennemi):
             self.hitbox.rect.center = (self.rect.centerx + (120 * self.direction), self.rect.centery)  # Positionner la hitbox devant le fighter en fonction de sa direction
             return self.hitbox
 
-            
+class Chargeur(Ennemi):
+    def __init__(self, fenetre, x, y):
+        super().__init__(fenetre, x, y, 'Assets/Images/chargeur.png', 8, 64, 64, 5, 0, 3, 1.7, {"damage": 1, "knockback_x": 150, "knockback_y": -4}, scale=1)
+
+        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/chargeur_mort.png', 8, 64, 64, 5, 0, scale=1)
+        self.dead = False
+        self.vitesse_deplacement = 3
+        self.charge_timer = 0
+
+    def mouvement(self, player_rect, platforms):
+        Animation.gestion_animation(self)
+        # Afficher la bonne frame en fonction de la direction (orientation perso)
+        self.image = self.frames_droite[int(self.index_image)] if self.direction == 1 else self.frames_gauche[int(self.index_image)]
+
+        # Calculer la direction vers le joueur
+        if player_rect.x > self.rect.x:
+            self.direction = 1 # Aller vers la droite
+        else:
+            self.direction = -1 # Aller vers la gauche
+
+        if abs(player_rect.centerx - self.rect.centerx) < 200:  # Si le joueur est à portée de charge
+            self.charge_timer += 1
+            if self.charge_timer >= 60:  # Temps de charge avant de se lancer
+                self.velocity.x = self.vitesse_deplacement * 3 * self.direction  # Se lancer vers le joueur à grande vitesse
+                self.charge_timer = 0
+        else:
+            self.velocity.x = self.vitesse_deplacement * self.direction  # Se déplacer normalement
+
+        # Appliquer la physique (déplacements et collisions)
+        self.physics_update(platforms)
     
 
 

@@ -1,7 +1,7 @@
 import pygame
 
 class Animation:
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, scale=1):
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, scale):
         self.ecran = fenetre
         self.scale = scale
 

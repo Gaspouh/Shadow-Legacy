@@ -3,7 +3,7 @@ from Visual.sprite_sheet import *
  
 class Coeur(Animation):
     def __init__(self, fenetre, x, y):
-        super().__init__(fenetre, x, y, 'Assets/Images/coeur2.png', 8, 88, 88, 0, 2)
+        super().__init__(fenetre, x, y, 'Assets/Images/coeur2.png', 8, 88, 88, 0, 2, scale=1)
         self.state = "ALIVE"
         self.vitesse_animation = 0.3
 

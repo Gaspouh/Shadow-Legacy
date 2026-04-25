@@ -400,7 +400,6 @@ class Player(PhysicsEntity):
             return 0, 0
         
         damage_amount = attack_data["damage"]
-        print(f"Damage taken: {damage_amount}")
 
         self.health -= damage_amount # Réduire la santé du joueur lorsqu'il est touché
 
