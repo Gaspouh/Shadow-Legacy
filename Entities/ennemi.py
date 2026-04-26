@@ -43,29 +43,33 @@ class Ennemi(Animation, PhysicsEntity):
         return trigger.colliderect(player_rect)
     
     def receive_hit(self, attack_data, source_rect, source):
-
+        # ne pas infliger de dégats si il est mort ou invincible
         if not self.alive or self.is_shielded:
-            return 
-        
+            return
         damage_amount = attack_data["damage"]
 
-        if source.respawn_on_touch: # Tue ennemi lorsqu'il touche un piège
+        if source.respawn_on_touch:
             self.pv_ennemi = 0
+            self.alive = False
             return
+        self.pv_ennemi -= damage_amount
 
-        self.pv_ennemi -= damage_amount # Réduire la santé de l'ennemi lorsqu'il est touché
-
+        # knockback
         if self.can_receive_knockback:
             if source_rect.centerx > self.rect.centerx:
                 knockback_direction = -1
-            else :
+            else:
                 knockback_direction = 1
 
-            self.velocity.x = attack_data["knockback_x"] * knockback_direction # Reculer le joueur dans la direction opposée à laquelle il fait face lorsqu'il est touché
-            self.velocity.y = attack_data["knockback_y"]  # faire sauter légerement le joueur si touché
+            self.velocity.x = attack_data["knockback_x"] * knockback_direction
+            self.velocity.y = attack_data["knockback_y"]
             self.is_knocked_back = True
+
+        # meurte si les PV sont à 0 ou moins
         if self.pv_ennemi <= 0:
-            self.alive = False      
+            self.pv_ennemi = 0
+            self.alive = False
+        
     
     def mort(self):
         if not self.alive and not self.dead:

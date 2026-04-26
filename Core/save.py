@@ -37,7 +37,10 @@ def get_spawn_from_checkpoints(checkpoints, map):
 
 
 def sauvegarder(player, checkpoints, map):
-    """Sauvegarder l'état du jeu dans un fichier json"""
+    ...
+    
+    """
+    # Sauvegarder l'état du jeu dans un fichier json
     spawn = get_spawn_from_checkpoints(checkpoints, map)
 
     data = {    # on modifiera perso.py, abilities.py, et autres fichiers pour qu'ils dependent du json et pas l'inverse
@@ -74,7 +77,8 @@ def sauvegarder(player, checkpoints, map):
         json.dump(data, f, indent=4)
     print(f"[SAVE] Sauvegarde effectuée, spawn : ({spawn.x}, {spawn.y})")
 
-
+    """
+    
 def charger(player, checkpoints, map):
     """Pour load le json et mettre à jour les données du joueur"""
 

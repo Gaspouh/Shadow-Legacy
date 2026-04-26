@@ -14,7 +14,7 @@ from Visual.vfx import particles, Particle
 from World.traps import *
 from World.objets import Coeur, Monnaie
 from Core.save import sauvegarder, charger
-from Entities.boss import Gravelion #,Golem
+from Entities.boss import Gravelion,Golem
 from Visual.interface import menu
 from Core.reset import reset
 
@@ -36,9 +36,9 @@ clock = pygame.time.Clock()
 Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 #Map
-#tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
+tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
 # map = "swamp"
-tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "terre_aride", "ascension.tmx"))
+#tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "terre_aride", "ascension.tmx"))
 map = "terre_aride" 
 platforms, special_platforms, traps, decorations, \
     checkpoints, spawnpoints, entities_to_spawn = create_map(tmx_data)
@@ -64,8 +64,8 @@ for e in entities_to_spawn:
             araignee.append(Araignee(fenetre, e["x"], e["y"]))
         elif e["name"] == "volant":
             volant.append(Volant(fenetre, e["x"], e["y"]))
-        #elif e["name"] == "golem":
-            #volant.append(Golem(fenetre, e["x"], e["y"]))""" #en commentaire tant que Golem non refactor
+        elif e["name"] == "golem":
+            golem.append(Golem(fenetre, e["x"], e["y"]))
         elif e["name"] == "chargeur":
             chargeur.append(Chargeur(fenetre, e["x"], e["y"]))
         elif e["name"] == "tourelle":
@@ -81,7 +81,7 @@ gravelion = Gravelion(fenetre, 5600, 300, pygame.Rect(5000, 0, 1000, 600)) # spa
 trigger_combat = pygame.Rect(5100, 0, 50, 600)
 #porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche
 
-liste_entites = araignee + volant + chargeur + tourelle + fighter + [gravelion] #+golem
+liste_entites = araignee + volant + chargeur + tourelle + fighter + golem + [gravelion]
 
 # UI
 ui_reposer = pygame.image.load("Assets/Images/UI_'Pressez_E'.png").convert_alpha()
@@ -181,13 +181,21 @@ while continuer:
 
             for e in liste_entites[:]:
                 if not e.alive:
-                    if hasattr(e, "mort"):
-                        e.mort()
-                    if hasattr(e, "animation_mort"):
-                        if e.animation_mort.index_image >= len(e.animation_mort.frames_droite)-1:
-                            liste_entites.remove(e)
-                    else :
-                        liste_entites.remove(e)
+                    liste_entites.remove(e)
+
+                    if e in golem:
+                        golem.remove(e)
+                    if e in araignee:
+                        araignee.remove(e)
+                    if e in volant:
+                        volant.remove(e)
+                    if e in chargeur:
+                        chargeur.remove(e)
+                    if e in tourelle:
+                        tourelle.remove(e)
+                    if e in fighter:
+                        fighter.remove(e)
+
                     continue
                 
                 if hasattr(e, "patrouille"): #pour les patrouilleurs
@@ -206,7 +214,7 @@ while continuer:
                     e.charge(player.rect, platforms)
 
                 if hasattr(e, "update"): #pour tous les ennemis
-                    e.update(player.rect, player)
+                    e.update(player.rect, player, platforms)
                
                 if e.rect.colliderect(player.rect):
                     hitstop_duration, shake_amount = player.take_damage(e.attack_data, e.rect, e) # Appliquer les effets de recul au joueur si un ennemi le touche
@@ -322,12 +330,14 @@ while continuer:
         if pygame.key.get_pressed()[pygame.K_a]:
             pygame.draw.rect(game_fenetre, (0, 0, 255), camera.apply(player.rect), 2) # Afficher la hitbox de l'attaque pour les tests
 
-        """#Lancement Gravelion (à supprimer du main)
+        """
+        #Lancement Gravelion
         if not gravelion.combat_lance and player.rect.colliderect(trigger_combat):
             gravelion.combat_lance = True
             platforms.append(porte_arene) # Fermer l'arène en ajoutant le mur gauche
             gravelion.enter_state(gravelion.IDLE)
-            shake_amount = 10 # Gros screen shake pour annoncer le début du combat"""
+            shake_amount = 10 # Gros screen shake pour annoncer le début du combat
+        """
 
         # Particules
         for p in particles[:]: # On utilise [:] pour copier la liste et éviter les erreurs de suppression
@@ -389,7 +399,7 @@ while continuer:
             voile_rouge.fill((15, 0, 0, rouge))
             fenetre.blit(voile_rouge, (0, 0))
 
-            # "YOU DIED" s'affiche (opacité = 0) à partir de 1200ms
+            # "YOU DIED" s'affiche (opacité à 0) à partir de 1200ms
             if temps >= 1200:
                 avancement = (temps - 2000) / (duree_mort - 2000)  # de 0 à 1
 
