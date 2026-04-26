@@ -9,9 +9,10 @@ SAVE_FILE = os.path.join(CORE_DIR, "save.json")
 CONFIG_FILE = os.path.join(CORE_DIR, "config.json")
 
 # Spawn
-DEFAULT_SPAWN = {"x": 100, "y": 100} # Position de spawn par défaut (si aucun checkpoint activé)
-
-
+DEFAULT_SPAWNS = {
+    "terre_aride": {"x": 10, "y": 1200},
+    "swamp": {"x": 100, "y": 100}
+} # Position de spawn par défaut selon la map(si aucun checkpoint activé)
 
 def load_config():
     """Charge les stats de base depuis config.json"""
@@ -20,8 +21,7 @@ def load_config():
     with open(CONFIG_FILE, "r") as f:
         return json.load(f)
     
-
-def get_spawn_from_checkpoints(checkpoints):
+def get_spawn_from_checkpoints(checkpoints, map):
     """
     Retourne la position du dernier checkpoint activé dans checkpoints[]
     """
@@ -33,12 +33,12 @@ def get_spawn_from_checkpoints(checkpoints):
     if dernier_checkpoint_actif:
         return pygame.math.Vector2(dernier_checkpoint_actif.rect.x, dernier_checkpoint_actif.rect.y)
     else:
-        return pygame.math.Vector2(DEFAULT_SPAWN["x"], DEFAULT_SPAWN["y"])
+        return pygame.math.Vector2(DEFAULT_SPAWNS[map]["x"], DEFAULT_SPAWNS[map]["y"])
 
 
-def sauvegarder(player, checkpoints):
+def sauvegarder(player, checkpoints, map):
     """Sauvegarder l'état du jeu dans un fichier json"""
-    spawn = get_spawn_from_checkpoints(checkpoints)
+    spawn = get_spawn_from_checkpoints(checkpoints, map)
 
     data = {    # on modifiera perso.py, abilities.py, et autres fichiers pour qu'ils dependent du json et pas l'inverse
         # player
@@ -75,11 +75,11 @@ def sauvegarder(player, checkpoints):
     print(f"[SAVE] Sauvegarde effectuée, spawn : ({spawn.x}, {spawn.y})")
 
 
-def charger(player, checkpoints):
+def charger(player, checkpoints, map):
     """Pour load le json et mettre à jour les données du joueur"""
 
     if not os.path.exists(SAVE_FILE):
-        return pygame.math.Vector2(DEFAULT_SPAWN["x"], DEFAULT_SPAWN["y"]) # si y'a pas de save : spawn par défaut
+        return pygame.math.Vector2(DEFAULT_SPAWNS[map]["x"], DEFAULT_SPAWNS[map]["y"]) # si y'a pas de save : spawn par défaut
 
     with open(SAVE_FILE, "r") as f:
         data = json.load(f)
@@ -102,7 +102,7 @@ def charger(player, checkpoints):
             cp.activated = data["checkpoints"][i]["activated"]
 
     # On recalcule depuis les checkpoints rechargés (pour etre sur)
-    spawn_point = get_spawn_from_checkpoints(checkpoints)
+    spawn_point = get_spawn_from_checkpoints(checkpoints, map)
     return spawn_point
 
 

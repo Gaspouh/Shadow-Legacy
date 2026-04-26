@@ -7,7 +7,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 from Entities.perso import Player
-from Entities.ennemi import Ennemi, Araignee, Volant, Projectile, Tourelle, Fighter
+from Entities.ennemi import Ennemi, Araignee, Volant, Projectile, Tourelle, Fighter, Chargeur
 from World.map import Platform, load_map, create_map
 from Visual.camera import Camera
 from Visual.vfx import particles, Particle
@@ -36,14 +36,17 @@ clock = pygame.time.Clock()
 Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 #Map
-tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
+#tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
+# map = "swamp"
+tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "terre_aride", "ascension.tmx"))
+map = "terre_aride" 
 platforms, special_platforms, traps, decorations, \
     checkpoints, spawnpoints, entities_to_spawn = create_map(tmx_data)
 special_surfaces = [sp.surface for sp in special_platforms if sp.surface is not None]
 
 #Joueur
 player = Player(100, 100, fenetre)
-spawn_point = charger(player, checkpoints)  # charge la save si elle existe, sinon spawn par défaut
+spawn_point = charger(player, checkpoints, map)  # charge la save si elle existe, sinon spawn par défaut
 player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
 player.rect.midbottom = player.position # pareil avec la hitbox
 
@@ -51,6 +54,9 @@ player.rect.midbottom = player.position # pareil avec la hitbox
 araignee = []
 volant = []
 golem = []
+chargeur = []
+tourelle = []
+fighter = []
 
 for e in entities_to_spawn:
     if e["type"] == "mob":
@@ -58,21 +64,24 @@ for e in entities_to_spawn:
             araignee.append(Araignee(fenetre, e["x"], e["y"]))
         elif e["name"] == "volant":
             volant.append(Volant(fenetre, e["x"], e["y"]))
-        """elif e["name"] == "golem":
-            volant.append(Golem(fenetre, e["x"], e["y"]))""" #en commentaire tant que Golem non refactor
+        #elif e["name"] == "golem":
+            #volant.append(Golem(fenetre, e["x"], e["y"]))""" #en commentaire tant que Golem non refactor
+        elif e["name"] == "chargeur":
+            chargeur.append(Chargeur(fenetre, e["x"], e["y"]))
+        elif e["name"] == "tourelle":
+            tourelle.append(Tourelle(fenetre, e["x"], e["y"]))
+        elif e["name"] == "fighter":
+            fighter.append(Fighter(fenetre, e["x"], e["y"]))
     
     if e["type"] == "boss":
         if e["name"] == "gravelion":
             pass
-
 #Boss
 gravelion = Gravelion(fenetre, 5600, 300, pygame.Rect(5000, 0, 1000, 600)) # spawn dans l'arène de Gravelion
 trigger_combat = pygame.Rect(5100, 0, 50, 600)
 #porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche
-tourelle1 = Tourelle(fenetre, 600, 300)
-epeiste1 = Fighter(fenetre, 700, 300)
 
-liste_entites = araignee + volant + [gravelion] #+golem
+liste_entites = araignee + volant + chargeur + tourelle + fighter + [gravelion] #+golem
 
 # UI
 ui_reposer = pygame.image.load("Assets/Images/UI_'Pressez_E'.png").convert_alpha()
@@ -169,16 +178,7 @@ while continuer:
             #update joueur
             player.update(platforms + special_surfaces)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
-            """for elem in tourelle: 
-                if elem.alive and abs(elem.position.x - player.position.x) < 700: # Vérifier que l'ennemi est vivant et proche avant de le mettre à jour
-                    elem.update(player.rect)
-                    elem.tir(player.rect, tir_tourelle)#lancer la fonction de tir pour chaque tourelle""" #bug de merge à resoudre
-            
-            #update ennemis
-            '''for elem in fighter: 
-                if elem.alive and abs(elem.position.x - player.position.x) < 700: # Vérifier que l'ennemi est vivant et proche avant de le mettre à jour
-                    elem.mouvement(player.rect,player, platforms)
-                    print(elem.attacking, elem.hitbox)''' #bug de merge à resoudre
+
             for e in liste_entites[:]:
                 if not e.alive:
                     if hasattr(e, "mort"):
@@ -195,7 +195,16 @@ while continuer:
                 
                 if hasattr(e, "poursuite"): #pour les volants
                     e.poursuite(player.rect)
+
+                if hasattr(e, "mouvement"): #pour les fighters
+                    e.mouvement(player.rect, player, platforms)
                 
+                if hasattr(e, "tir"): #pour les tourelles
+                    e.tir(player.rect, tir_tourelle)
+
+                if hasattr(e, "charge"): #pour les chargeurs
+                    e.charge(player.rect, platforms)
+
                 if hasattr(e, "update"): #pour tous les ennemis
                     e.update(player.rect, player)
                

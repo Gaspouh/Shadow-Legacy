@@ -130,6 +130,9 @@ def create_map(tmx_data):
             elif tile_type == "wind":
                 pass
 
+            elif tile_type == "saw":
+                traps.append(Saw(pos_x, pos_y, TILE_SIZE//2))
+
     for obj in tmx_data.objects:
         obj_type = obj.properties.get("obj_type")
         image = getattr(obj, "image")

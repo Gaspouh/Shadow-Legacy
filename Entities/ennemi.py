@@ -259,28 +259,28 @@ class Volant(Ennemi):
 
     def poursuite(self, player_rect):
         Animation.gestion_animation(self)
-        
-        # Calculer la direction vers le joueur
-        if player_rect.x > self.rect.x:
-            self.direction = 1 # Aller vers la droite
-        else:
-            self.direction = -1 # Aller vers la gauche
-        
-         # Afficher la bonne frame en fonction de la direction (orientation perso)
-        self.image = self.frames_droite[int(self.index_image)] if self.direction == 1 else self.frames_gauche[int(self.index_image)]
+        if abs(player_rect.x - self.rect.x) < 300 and abs(player_rect.y - self.rect.y) < 300:  # Si le joueur est à proximité
+            # Calculer la direction vers le joueur
+            if player_rect.x > self.rect.x:
+                self.direction = 1 # Aller vers la droite
+            else:
+                self.direction = -1 # Aller vers la gauche
             
-       # Calculer les composantes du vecteur de déplacement vers le joueur
-        dx = player_rect.centerx - self.rect.centerx
-        dy = player_rect.centery - self.rect.centery
+            # Afficher la bonne frame en fonction de la direction (orientation perso)
+            self.image = self.frames_gauche[int(self.index_image)] if self.direction == 1 else self.frames_droite[int(self.index_image)]
+                
+        # Calculer les composantes du vecteur de déplacement vers le joueur
+            dx = player_rect.centerx - self.rect.centerx
+            dy = player_rect.centery - self.rect.centery
 
-        # norme du vecteur de déplacement pour une vitesse constante
-        vecteur_deplacement = math.sqrt(dx**2 + dy**2)
-        if vecteur_deplacement != 0:
-            self.velocity.x = (dx / vecteur_deplacement) * self.vitesse_deplacement
-            self.velocity.y = (dy / vecteur_deplacement) * self.vitesse_deplacement
-            
-        # Appliquer la physique (déplacements et collisions)
-        self.physics_update([])  # Pas de plateformes pour les volants
+            # norme du vecteur de déplacement pour une vitesse constante
+            vecteur_deplacement = math.sqrt(dx**2 + dy**2)
+            if vecteur_deplacement != 0:
+                self.velocity.x = (dx / vecteur_deplacement) * self.vitesse_deplacement
+                self.velocity.y = (dy / vecteur_deplacement) * self.vitesse_deplacement
+                
+            # Appliquer la physique (déplacements et collisions)
+            self.physics_update([])  # Pas de plateformes pour les volants
 
 class Tourelle(Ennemi):
     def __init__(self, fenetre, x, y):
@@ -305,9 +305,8 @@ class Tourelle(Ennemi):
         dx = player_rect.centerx - self.rect.centerx #composante x du vecteur entre la tourelle et le joueur
         dy = player_rect.centery - self.rect.centery #composante y du vecteur entre la tourelle et le joueur
         return math.degrees(math.atan2(-dy, dx)) # Calculer l'angle entre la tourelle et le joueur pour orienter le tir
-    
-    
-    def update(self,player_rect):
+     
+    def update(self,player_rect, player):
         
         if self.coldown > 0:
             self.coldown -= 1
@@ -427,37 +426,49 @@ class Fighter(Ennemi):
 
 class Chargeur(Ennemi):
     def __init__(self, fenetre, x, y):
-        super().__init__(fenetre, x, y, 'Assets/Images/chargeur.png', 8, 64, 64, 5, 0, 3, 1.7, {"damage": 1, "knockback_x": 150, "knockback_y": -4}, scale=1)
+        super().__init__(fenetre, x, y, 'Assets/Images/chargeur.png', 8, 80, 58, 0, 0, 3, 3, {"damage": 1, "knockback_x": 150, "knockback_y": -4}, scale=1)
 
-        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/chargeur_mort.png', 8, 64, 64, 5, 0, scale=1)
+        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/chargeur_dead.png', 8, 80, 58, 0, 0, scale=1)
         self.dead = False
-        self.vitesse_deplacement = 3
         self.charge_timer = 0
+        self.attacking = False
+        self.duree_charge = 0
 
-    def mouvement(self, player_rect, platforms):
+    def charge(self, player_rect, platforms):
         Animation.gestion_animation(self)
         # Afficher la bonne frame en fonction de la direction (orientation perso)
         self.image = self.frames_droite[int(self.index_image)] if self.direction == 1 else self.frames_gauche[int(self.index_image)]
-
-        # Calculer la direction vers le joueur
-        if player_rect.x > self.rect.x:
-            self.direction = 1 # Aller vers la droite
-        else:
-            self.direction = -1 # Aller vers la gauche
-
-        if abs(player_rect.centerx - self.rect.centerx) < 200:  # Si le joueur est à portée de charge
-            self.charge_timer += 1
-            if self.charge_timer >= 60:  # Temps de charge avant de se lancer
-                self.velocity.x = self.vitesse_deplacement * 3 * self.direction  # Se lancer vers le joueur à grande vitesse
+        
+        if self.attacking:
+            self.vitesse_animation = 0.2  # accélérer l'animation pendant la charge
+            self.duree_charge -= 1
+            if self.direction == 1:
+                self.velocity.x = self.vitesse_deplacement * 5 * 1  # Se lancer vers le joueur à grande vitesse
+            elif self.direction == -1:
+                self.velocity.x = self.vitesse_deplacement * 5 * -1  # Se lancer vers le joueur à grande vitesse
+            if self.duree_charge <= 0:
+                self.attacking = False
+                self.vitesse_animation = 0.1  # Réinitialiser la vitesse d'animation après la charge
                 self.charge_timer = 0
+
         else:
+            # Calculer la direction vers le joueur
+            if player_rect.x > self.rect.x:
+                self.direction = 1 # Aller vers la droite
+            else:
+                self.direction = -1 # Aller vers la gauche
+                 
+            if abs(player_rect.centerx - self.rect.centerx) < 300:  # Si le joueur est à portée de charge
+                self.charge_timer += 1
+                if self.charge_timer >= 70:  # Temps de charge avant de se lancer
+                    self.duree_charge = 90  # Durée pendant laquelle le chargeur reste en mode charge
+                    self.attacking = True
+
             self.velocity.x = self.vitesse_deplacement * self.direction  # Se déplacer normalement
 
         # Appliquer la physique (déplacements et collisions)
         self.physics_update(platforms)
     
-
-
 if __name__ == "__main__":
     # Créer une fenêtre de jeu de test
     ecran = pygame.display.set_mode((800, 600))
