@@ -310,7 +310,7 @@ class Tourelle(Ennemi):
         dy = player_rect.centery - self.rect.centery #composante y du vecteur entre la tourelle et le joueur
         return math.degrees(math.atan2(-dy, dx)) # Calculer l'angle entre la tourelle et le joueur pour orienter le tir
      
-    def update(self,player_rect, player):
+    def update(self,player_rect, player, platforms):    # j'ai ajouté platform en argument juste pour etre cohérent avec la physique des boss
         
         if self.coldown > 0:
             self.coldown -= 1

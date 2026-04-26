@@ -36,9 +36,9 @@ clock = pygame.time.Clock()
 Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 #Map
-tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
+#tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
 # map = "swamp"
-#tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "terre_aride", "ascension.tmx"))
+tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "terre_aride", "ascension.tmx"))
 map = "terre_aride" 
 platforms, special_platforms, traps, decorations, \
     checkpoints, spawnpoints, entities_to_spawn = create_map(tmx_data)

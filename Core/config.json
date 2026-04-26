@@ -1,6 +1,6 @@
 {
     "player": {
-        "health": 5,
+        "health": 4,
         "max_health": 5,
 
         "jump_strength": -13,
