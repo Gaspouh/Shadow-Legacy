@@ -1,6 +1,5 @@
 import math
 import pygame
-from World.map import Platform
 from Visual.sprite_sheet import *
 from Entities.physics_entity import PhysicsEntity
 
@@ -77,6 +76,7 @@ class Ennemi(Animation, PhysicsEntity):
             self.image = self.animation_mort.frames_droite[int(self.animation_mort.index_image)]
         else:
             self.image = self.animation_mort.frames_gauche[int(self.animation_mort.index_image)]
+
 class Projectile:
     def __init__(self, x, y, target_x, target_y, speed, width, height, damage, gravity=0.4, \
                   lifetime=3000, disappear_on_contact=True, image=None, use_gravity=False):
@@ -138,7 +138,7 @@ class Projectile:
         new_rect = rotated_image.get_rect(center=camera.apply(self.rect).center)
         fenetre.blit(rotated_image, new_rect)
 
-class AttackZone():
+class AttackZone:
     def __init__ (self, x, y, width, height, attack_data, image, duration):
         self.rect = pygame.Rect(x, y, width, height)
         self.position = pygame.math.Vector2(x, y)
@@ -157,18 +157,11 @@ class AttackZone():
             self.image = pygame.Surface((width, height), pygame.SRCALPHA)
             self.image.fill((255, 0, 0))  # Couleur rouge pour les projectiles sans image
 
-        if image:
-            self.image = pygame.transform.scale(image, (width, height))
-        else:
-            self.image = pygame.Surface((width, height), pygame.SRCALPHA)
-            self.image.fill((255, 0, 0))  # Couleur rouge pour les projectiles sans image
-
     def update(self):
         pass
 
     def lifetime_expired(self):
         return pygame.time.get_ticks() - self.birth_time > self.duration
-
 
     def out_of_bounds(self, limite_rect):
         pass
@@ -234,7 +227,7 @@ class Patrouilleur(Ennemi):
 
 class Araignee(Patrouilleur):
     def __init__(self, fenetre, x, y):
-        super().__init__(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 5, 3, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale = 1)
+        super().__init__(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 5, 3, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1)
 
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 7, 62, 50, 27, 7, scale=1)
         self.dead = False
@@ -250,14 +243,15 @@ class Volant(Ennemi):
     def __init__(self, fenetre, x, y):
         
         # On applique les caractéristique de l'ennemi débutant au volant
-        super().__init__(fenetre, x, y, 'Assets/Images/bat.png', 8, 16, 30, 0, 0, 3, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=2)
+        super().__init__(fenetre, x, y, 'Assets/Images/bat.png', 8, 16, 30, 0, 0, 3, 0.9, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=2)
 
         self.image = self.frames_droite[0]
         self.use_gravity = False
+        self.friction = -0.3
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
         self.dead = False
 
-    def poursuite(self, player_rect):
+    def poursuite(self, player_rect, platforms):
         Animation.gestion_animation(self)
         
         # Calculer la direction vers le joueur
@@ -276,11 +270,11 @@ class Volant(Ennemi):
         # norme du vecteur de déplacement pour une vitesse constante
         vecteur_deplacement = math.sqrt(dx**2 + dy**2)
         if vecteur_deplacement != 0:
-            self.velocity.x = (dx / vecteur_deplacement) * self.vitesse_deplacement
-            self.velocity.y = (dy / vecteur_deplacement) * self.vitesse_deplacement
+            self.velocity.x += (dx / vecteur_deplacement) * self.vitesse_deplacement
+            self.velocity.y += (dy / vecteur_deplacement) * self.vitesse_deplacement
             
         # Appliquer la physique (déplacements et collisions)
-        self.physics_update([])  # Pas de plateformes pour les volants
+        self.physics_update(platforms)  
 
 class Tourelle(Ennemi):
     def __init__(self, fenetre, x, y):

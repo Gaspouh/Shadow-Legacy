@@ -7,10 +7,10 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 from Entities.perso import Player
-from Entities.ennemi import Ennemi, Araignee, Volant, Projectile, Tourelle, Fighter
-from World.map import Platform, load_map, create_map
+from Entities.ennemi import Araignee, Volant, Projectile, Tourelle, Fighter
+from World.map import Map_Manager, create_map
 from Visual.camera import Camera
-from Visual.vfx import particles, Particle
+from Visual.vfx import particles, Particle, Fade
 from World.traps import *
 from World.objets import Coeur, Monnaie
 from Core.save import sauvegarder, charger
@@ -36,10 +36,21 @@ clock = pygame.time.Clock()
 Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 #Map
-tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
-platforms, special_platforms, traps, decorations, \
-    checkpoints, spawnpoints, entities_to_spawn = create_map(tmx_data)
+map_manager = Map_Manager()
+map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
+
+platforms = map_manager.platforms
+special_platforms = map_manager.special_platforms
+traps = map_manager.traps
+decorations = map_manager.decorations
+checkpoints = map_manager.checkpoints
+spawnpoints = map_manager.spawnpoints
+doors = map_manager.doors
+entities_to_spawn = map_manager.entities_to_spawn
+
 special_surfaces = [sp.surface for sp in special_platforms if sp.surface is not None]
+
+liste_entites = map_manager.spawn_entities(fenetre)
 
 #Joueur
 player = Player(100, 100, fenetre)
@@ -47,32 +58,12 @@ spawn_point = charger(player, checkpoints)  # charge la save si elle existe, sin
 player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
 player.rect.midbottom = player.position # pareil avec la hitbox
 
-#Ennemis
-araignee = []
-volant = []
-golem = []
-
-for e in entities_to_spawn:
-    if e["type"] == "mob":
-        if e["name"] == "araignee":
-            araignee.append(Araignee(fenetre, e["x"], e["y"]))
-        elif e["name"] == "volant":
-            volant.append(Volant(fenetre, e["x"], e["y"]))
-        """elif e["name"] == "golem":
-            volant.append(Golem(fenetre, e["x"], e["y"]))""" #en commentaire tant que Golem non refactor
-    
-    if e["type"] == "boss":
-        if e["name"] == "gravelion":
-            pass
-
 #Boss
 gravelion = Gravelion(fenetre, 5600, 300, pygame.Rect(5000, 0, 1000, 600)) # spawn dans l'arène de Gravelion
 trigger_combat = pygame.Rect(5100, 0, 50, 600)
 #porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche
 tourelle1 = Tourelle(fenetre, 600, 300)
 epeiste1 = Fighter(fenetre, 700, 300)
-
-liste_entites = araignee + volant + [gravelion] #+golem
 
 # UI
 ui_reposer = pygame.image.load("Assets/Images/UI_'Pressez_E'.png").convert_alpha()
@@ -85,6 +76,9 @@ death_sound = pygame.mixer.Sound("Assets/Sounds/elden-ring-death.mp3")
 #Attributs
 hearts = [Coeur(fenetre, 100 + i*110, 35) for i in range(player.max_health)]
 monnaie = Monnaie(fenetre, 200, 200)
+fade = Fade()
+door_collided = None
+wait = False
 
 # Liste des projectiles
 projectiles = []
@@ -194,7 +188,7 @@ while continuer:
                     e.patrouille(platforms)
                 
                 if hasattr(e, "poursuite"): #pour les volants
-                    e.poursuite(player.rect)
+                    e.poursuite(player.rect, platforms)
                 
                 if hasattr(e, "update"): #pour tous les ennemis
                     e.update(player.rect, player)
@@ -264,7 +258,7 @@ while continuer:
                 if trap.rect.colliderect(player.rect): #trap touche joueur
                     if trap.attack_data["damage"] > 0:
                         if trap.damage_cooldown == 0 or now - trap.last_damage_time >= trap.damage_cooldown :
-                            hitstop_duration, shake_amount = player.take_damage(trap.attack_data, trap.rect, trap)
+                            hitstop_duration, shake_amount = player.take_damage(trap.attack_data, trap.rect, trap, fade)
                             hitstop_until = now + hitstop_duration
                             trap.last_damage_time = now
 
@@ -299,7 +293,46 @@ while continuer:
                     spawn_point = pygame.math.Vector2(cp.rect.topleft)
                     sauvegarder(player, checkpoints)
                     set_spawn_sound.play()
-    
+
+        for door in doors:
+            if pygame.key.get_pressed()[pygame.K_a]:
+                pygame.draw.rect(game_fenetre, (255, 0, 255), camera.apply(door.rect))
+
+            if player.rect.colliderect(door.rect) and fade.state is None:
+                door_collided = door
+                player.stun_timer = pygame.time.get_ticks()
+                player.stun_duration = 1000
+                fade.start("out", 5)
+
+        if door_collided and fade.intensity >= 255 and fade.state == "out":
+                print("oui")
+                liste_entites.clear()
+
+                map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", door_collided.target_map))
+
+                platforms = map_manager.platforms
+                special_platforms = map_manager.special_platforms
+                traps = map_manager.traps
+                decorations = map_manager.decorations
+                checkpoints = map_manager.checkpoints
+                spawnpoints = map_manager.spawnpoints
+                doors = map_manager.doors
+                entities_to_spawn = map_manager.entities_to_spawn
+
+                liste_entites = map_manager.spawn_entities(fenetre)
+
+                spawn = map_manager.get_spawn(door_collided.target_spawn)
+
+                player.position = spawn.position
+                player.rect.midbottom = player.position
+                door_collided = None
+                player.on_ground=False
+                wait = True
+
+        if wait and player.on_ground:
+            wait = False
+            fade.start("in", 5)
+
         # Joueur
         image_rect = player.image.get_rect(midbottom=(
             player.rect.midbottom[0],
@@ -333,6 +366,8 @@ while continuer:
             game_fenetre.blit(heart.image, heart.rect) # Les cœurs sont fixes à l'écran, pas besoin d'appliquer le décalage de la caméra
 
         for e in liste_entites:
+            if pygame.key.get_pressed()[pygame.K_a]:
+                pygame.draw.rect(game_fenetre, (255, 255, 0), camera.apply(e.rect), 2)
             game_fenetre.blit(e.image, camera.apply(e.rect))
 
         # Afficher les orbs
@@ -394,7 +429,7 @@ while continuer:
 
                 pos = img.get_rect(center=(GAME_WIDTH // 2, GAME_HEIGHT // 2)) # centrer le txt
                 fenetre.blit(img, pos)
-
+            
             pygame.display.update()
             clock.tick(60)
 
@@ -403,6 +438,7 @@ while continuer:
 # Mettre à jour l'affichage
     if not pause:
         fenetre.blit(pygame.transform.scale(game_fenetre, (GAME_WIDTH, GAME_HEIGHT)), (0, 0))
+        fade.update(fenetre)
         pygame.display.update()
     clock.tick(60)
 pygame.quit()

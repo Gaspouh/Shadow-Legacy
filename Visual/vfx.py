@@ -31,3 +31,40 @@ class Particle:
             surface.blit(temp_surface, camera.apply(pygame.Rect(self.x - size, self.y - size, size*2, size*2)))
 
 particles = []
+
+class Fade:
+    def __init__(self):
+        self.intensity = 0
+        self.state = None #"in", "out", "wait" ou None
+        self.overlay = pygame.Surface ((1920, 1080)) #Taille de la fenetre
+        self.overlay.fill((0, 0, 0)) #Fond noir
+        self.wait_start = None
+
+    def start(self, state, speed, wait=0):
+        self.state = state
+        self.speed = speed
+        self.wait = wait
+
+        if state == "out":
+            self.intensity = 0 #Commence dans le noir pour passer au transparent
+        else : #pour le fade in et le wait
+            self.intensity = 255 #Commence dans le transparent pour passer au noir
+
+    def update(self, fenetre):
+        if self.state is not None:
+            if self.state == "out":
+                self.intensity = min(255, self.intensity + self.speed)
+
+            elif self.state == "wait":
+                if self.wait_start is None:
+                    self.wait_start = pygame.time.get_ticks()
+                if pygame.time.get_ticks() - self.wait_start >= self.wait:
+                    self.wait_start = None
+                    self.state = "in"
+
+            elif self.state == "in":
+                self.intensity = max(0, self.intensity - self.speed)
+                if self.intensity == 0:
+                    self.state = None
+            self.overlay.set_alpha(self.intensity) #Définir l'opacité du fond
+            fenetre.blit(self.overlay, (0, 0)) #Affiche le fondu sur la fenetre depuis le point 0,0

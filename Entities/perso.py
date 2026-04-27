@@ -4,6 +4,7 @@ from Entities.player_abilities import Dash, Double_jump, sort
 from Core.save import load_config
 from Entities.physics_entity import PhysicsEntity
 from Visual.sprite_sheet import VerticalAnimation
+from Visual.vfx import Fade
 
 class Player(PhysicsEntity):
     def __init__(self, x, y, fenetre):
@@ -53,7 +54,7 @@ class Player(PhysicsEntity):
 
         # STUN
         self.stun_timer = 0
-        self.stun_duration = p.get("stun_duration", 100) # Durée pendant laquelle les touches sont bloquées
+        self.stun_duration = 150 # Durée pendant laquelle les touches sont bloquées
 
         # ABILITIES
         self.dash = Dash()
@@ -136,7 +137,9 @@ class Player(PhysicsEntity):
     # foret de if pour chaque anims
     def animate(self):
         # dash
-        if self.dash.in_use and self.direction == 1:
+        if self.is_stunned:
+            self.current_animation = self.anim_idle
+        elif self.dash.in_use and self.direction == 1:
             self.current_animation = self.anim_dash_right
         elif self.dash.in_use and self.direction == -1:
             self.current_animation = self.anim_dash_left
@@ -182,8 +185,8 @@ class Player(PhysicsEntity):
             self.last_safe_position = pygame.math.Vector2(self.position.x, self.position.y)
             self.safe_position_timer = now
 
-        is_stunned = now - self.stun_timer < self.stun_duration # Vérifier si le joueur est encore en état de stun
-        if not is_stunned:
+        self.is_stunned = now - self.stun_timer < self.stun_duration # Vérifier si le joueur est encore en état de stun
+        if not self.is_stunned:
             keys = pygame.key.get_pressed()
 
             if self.on_ice and self.on_ground :
@@ -393,7 +396,7 @@ class Player(PhysicsEntity):
             self.velocity.y = self.attack_knockback_y
 
     
-    def take_damage(self, attack_data, source_rect, source):
+    def take_damage(self, attack_data, source_rect, source, fade=None):
         now = pygame.time.get_ticks()
 
         if self.invincible and not source.ignore_invincibility:
@@ -419,7 +422,11 @@ class Player(PhysicsEntity):
                 self.position = self.last_safe_position.copy()
                 self.velocity = pygame.math.Vector2(0, 0)
                 self.rect.midbottom = self.position
+                self.stun_duration = 1200
+                fade.start("wait", 3, 300)
+
         else : #si c'est un ennemi
+            self.stun_duration = 100
             if source_rect.centerx > self.rect.centerx:
                 knockback_direction = -1
             else :

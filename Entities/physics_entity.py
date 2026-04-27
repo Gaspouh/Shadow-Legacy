@@ -27,6 +27,7 @@ class PhysicsEntity:
             self.acceleration.y = self.gravity
 
         self.acceleration.x += self.velocity.x * self.friction
+        self.acceleration.y += self.velocity.y * self.friction
         self.velocity += self.acceleration
 
         # Seuil d'arrêt horizontal

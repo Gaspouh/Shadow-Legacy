@@ -16,8 +16,7 @@
         "attack_knockback_y": -5,
         "crit_chance": 0.02,
 
-        "invincibility_duration": 2000,
-        "stun_duration": 100
+        "invincibility_duration": 2000
     },
     "abilities": {
         "dash": {

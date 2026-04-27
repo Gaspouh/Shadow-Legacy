@@ -1,6 +1,7 @@
 import pygame
 import pytmx
 from World.traps import *
+from Entities.ennemi import Araignee, Volant
 
 TILE_SIZE = 32
 
@@ -51,6 +52,12 @@ class SpawnPoint: #L'endoit ou le joeur spawn apres un changement de salle
         self.position = pygame.math.Vector2(x, y)
         self.name = name #Pour différencier les spawn ponit d'une meme salle
     
+class Door:
+    def __init__(self, x, y, width, height, target_map, target_spawn):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.target_map = target_map
+        self.target_spawn = target_spawn
+
 # Arène de Gravelion (après les plateformes existantes)
 
 """arene_platforms = [
@@ -61,9 +68,39 @@ class SpawnPoint: #L'endoit ou le joeur spawn apres un changement de salle
 
 arene_rect = pygame.Rect(5000, 0, 1000, 600)  # délimitation de l'arène
 
-def load_map(path):
-    tmx_data = pytmx.load_pygame(path, pixelalpha=True)
-    return tmx_data
+class Map_Manager:
+    def __init__(self):
+        self.current_map = None
+
+    def load_map(self, path):
+        tmx_data = pytmx.load_pygame((path), pixelalpha=True)
+        
+        self.platforms, self.special_platforms, self.traps, self.decorations, \
+            self.checkpoints, self.spawnpoints, self.doors, self.entities_to_spawn = create_map(tmx_data)
+
+    def spawn_entities(self, fenetre):
+        araignee, volant, golem = [], [], []
+        #Ennemis
+
+        for e in self.entities_to_spawn:
+            if e["type"] == "mob":
+                if e["name"] == "araignee":
+                    araignee.append(Araignee(fenetre, e["x"], e["y"]))
+                elif e["name"] == "volant":
+                    volant.append(Volant(fenetre, e["x"], e["y"]))
+                """elif e["name"] == "golem":
+                    volant.append(Golem(fenetre, e["x"], e["y"]))""" #en commentaire tant que Golem non refactor
+            
+            if e["type"] == "boss":
+                if e["name"] == "gravelion":
+                    pass
+                    
+        liste_entites = araignee + volant
+        return liste_entites
+    
+    def get_spawn(self, name):
+        return self.spawnpoints.get(name)
+    
 
 def create_map(tmx_data):
     platforms = []
@@ -72,8 +109,10 @@ def create_map(tmx_data):
 
     decorations = []
     checkpoints = []
-    spawnpoints = []
+    doors = []
     entities_to_spawn = []
+
+    spawnpoints = {}
 
     for layer in tmx_data.visible_layers:
         if not hasattr(layer, 'data'):
@@ -132,7 +171,7 @@ def create_map(tmx_data):
 
     for obj in tmx_data.objects:
         obj_type = obj.properties.get("obj_type")
-        image = getattr(obj, "image")
+        image = getattr(obj, "image", None)
 
         x = int(obj.x)
         y = int(obj.y)
@@ -140,33 +179,38 @@ def create_map(tmx_data):
         if obj_type == "decor":
             decorations.append(Map_Object(x, y, image))
         
-        else:
-            y = int (y - obj.height*2)
-            if obj_type == "banc":
-                checkpoints.append(Checkpoint(x, y))
+  
+        elif obj_type == "banc":
+            y = int (y - obj.height)
+            checkpoints.append(Checkpoint(x, y))
 
-            elif obj_type == "spawnpoint":
-                name = obj.name
-                spawnpoints.append(SpawnPoint(x, y, name))
+        elif obj_type == "spawnpoint":
+            name = obj.name
+            spawnpoints[name] = (SpawnPoint(x, y, name))
 
-            elif obj_type == "mob":
-                name = obj.name
-                entities_to_spawn.append({
-                    "type": "mob",
-                    "name": name,
-                    "x": x,
-                    "y": y
-                })
+        elif obj_type == "door":
+            target_map = obj.properties.get("target_map")
+            target_spawn = obj.properties.get("target_spawn")
+            doors.append(Door(x, y, obj.width, obj.height, target_map, target_spawn))
 
-            elif obj_type == "boss":
-                name = obj.name
-                entities_to_spawn.append({
-                    "type": "boss",
-                    "name": name,
-                    "x": x,
-                    "y": y
-                })
+        elif obj_type == "mob":
+            name = obj.name
+            entities_to_spawn.append({
+                "type": "mob",
+                "name": name,
+                "x": x,
+                "y": y
+            })
+
+        elif obj_type == "boss":
+            name = obj.name
+            entities_to_spawn.append({
+                "type": "boss",
+                "name": name,
+                "x": x,
+                "y": y
+            })
 
 
-    return platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, entities_to_spawn
+    return platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, doors, entities_to_spawn
 
