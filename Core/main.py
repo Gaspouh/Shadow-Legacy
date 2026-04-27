@@ -7,21 +7,21 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 from Entities.perso import Player
-from Entities.ennemi import Araignee, Volant, Projectile, Tourelle, Fighter
+from Entities.ennemi import Araignee, Volant, Projectile, Tourelle, Fighter, Chargeur
 from World.map import Map_Manager, create_map
 from Visual.camera import Camera
 from Visual.vfx import particles, Particle, Fade
 from World.traps import *
 from World.objets import Coeur, Monnaie
 from Core.save import sauvegarder, charger
-from Entities.boss import Gravelion #,Golem
+from Entities.boss import Gravelion,Golem
 from Visual.interface import menu
 from Core.reset import reset
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0'
 pygame.init()
 
-#Configs
+# Configs
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
 MAP_WIDTH, MAP_HEIGHT = 7000, 2000
 
@@ -54,7 +54,7 @@ liste_entites = map_manager.spawn_entities(fenetre)
 
 #Joueur
 player = Player(100, 100, fenetre)
-spawn_point = charger(player, checkpoints)  # charge la save si elle existe, sinon spawn par défaut
+spawn_point = charger(player, checkpoints, map)  # charge la save si elle existe, sinon spawn par défaut
 player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
 player.rect.midbottom = player.position # pareil avec la hitbox
 
@@ -62,12 +62,10 @@ player.rect.midbottom = player.position # pareil avec la hitbox
 gravelion = Gravelion(fenetre, 5600, 300, pygame.Rect(5000, 0, 1000, 600)) # spawn dans l'arène de Gravelion
 trigger_combat = pygame.Rect(5100, 0, 50, 600)
 #porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche
-tourelle1 = Tourelle(fenetre, 600, 300)
-epeiste1 = Fighter(fenetre, 700, 300)
 
 # UI
-ui_reposer = pygame.image.load("Assets/Images/UI_'Pressez_E'.png").convert_alpha()
-ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /5.15, ui_reposer.get_height() / 5.15))
+ui_reposer = pygame.image.load("Assets/Images/UI_'Pressez_Z'.png").convert_alpha()
+ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /7, ui_reposer.get_height() / 7))
 
 # Sons
 set_spawn_sound = pygame.mixer.Sound("Assets/Sounds/set_spawn_sound.mp3")
@@ -163,25 +161,15 @@ while continuer:
             #update joueur
             player.update(platforms + special_surfaces)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
-            """for elem in tourelle: 
-                if elem.alive and abs(elem.position.x - player.position.x) < 700: # Vérifier que l'ennemi est vivant et proche avant de le mettre à jour
-                    elem.update(player.rect)
-                    elem.tir(player.rect, tir_tourelle)#lancer la fonction de tir pour chaque tourelle""" #bug de merge à resoudre
-            
-            #update ennemis
-            '''for elem in fighter: 
-                if elem.alive and abs(elem.position.x - player.position.x) < 700: # Vérifier que l'ennemi est vivant et proche avant de le mettre à jour
-                    elem.mouvement(player.rect,player, platforms)
-                    print(elem.attacking, elem.hitbox)''' #bug de merge à resoudre
+
             for e in liste_entites[:]:
-                if not e.alive:
-                    if hasattr(e, "mort"):
-                        e.mort()
-                    if hasattr(e, "animation_mort"):
-                        if e.animation_mort.index_image >= len(e.animation_mort.frames_droite)-1:
-                            liste_entites.remove(e)
-                    else :
+                if hasattr(e, "mort"):
+                    e.mort()
+                if hasattr(e, "animation_mort"):
+                    if e.animation_mort.index_image >= len(e.animation_mort.frames_droite)-1:
                         liste_entites.remove(e)
+                else :
+                    liste_entites.remove(e)
                     continue
                 
                 if hasattr(e, "patrouille"): #pour les patrouilleurs
@@ -189,9 +177,18 @@ while continuer:
                 
                 if hasattr(e, "poursuite"): #pour les volants
                     e.poursuite(player.rect, platforms)
+
+                if hasattr(e, "mouvement"): #pour les fighters
+                    e.mouvement(player.rect, player, platforms)
                 
+                if hasattr(e, "tir"): #pour les tourelles
+                    e.tir(player.rect, tir_tourelle)
+
+                if hasattr(e, "charge"): #pour les chargeurs
+                    e.charge(player.rect, platforms)
+
                 if hasattr(e, "update"): #pour tous les ennemis
-                    e.update(player.rect, player)
+                    e.update(player.rect, player, platforms)
                
                 if e.rect.colliderect(player.rect):
                     hitstop_duration, shake_amount = player.take_damage(e.attack_data, e.rect, e) # Appliquer les effets de recul au joueur si un ennemi le touche
@@ -283,15 +280,16 @@ while continuer:
                     
                 # UI (centrage)
                 ui_x = cp_screen_rect.centerx - (ui_reposer.get_width() // 2)
-                ui_y = cp_screen_rect.top - ui_reposer.get_height() - 10
+                ui_y = cp_screen_rect.top - ui_reposer.get_height() + 135
                 game_fenetre.blit(ui_reposer, (ui_x, ui_y)) 
 
                 # Au lieu de juste "if 'Z' pressed" qui appuierai 60 fois/s :
                 if pygame.key.get_pressed()[pygame.K_z]:
+                    player.is_sitting = True
                     cp.activated = True
                     player.health = player.max_health
                     spawn_point = pygame.math.Vector2(cp.rect.topleft)
-                    sauvegarder(player, checkpoints)
+                    sauvegarder(player, checkpoints, map)
                     set_spawn_sound.play()
 
         for door in doors:
@@ -346,12 +344,14 @@ while continuer:
         if pygame.key.get_pressed()[pygame.K_a]:
             pygame.draw.rect(game_fenetre, (0, 0, 255), camera.apply(player.rect), 2) # Afficher la hitbox de l'attaque pour les tests
 
-        """#Lancement Gravelion (à supprimer du main)
+        """
+        #Lancement Gravelion
         if not gravelion.combat_lance and player.rect.colliderect(trigger_combat):
             gravelion.combat_lance = True
             platforms.append(porte_arene) # Fermer l'arène en ajoutant le mur gauche
             gravelion.enter_state(gravelion.IDLE)
-            shake_amount = 10 # Gros screen shake pour annoncer le début du combat"""
+            shake_amount = 10 # Gros screen shake pour annoncer le début du combat
+        """
 
         # Particules
         for p in particles[:]: # On utilise [:] pour copier la liste et éviter les erreurs de suppression
@@ -415,7 +415,7 @@ while continuer:
             voile_rouge.fill((15, 0, 0, rouge))
             fenetre.blit(voile_rouge, (0, 0))
 
-            # "YOU DIED" s'affiche (opacité = 0) à partir de 1200ms
+            # "YOU DIED" s'affiche (opacité à 0) à partir de 1200ms
             if temps >= 1200:
                 avancement = (temps - 2000) / (duree_mort - 2000)  # de 0 à 1
 

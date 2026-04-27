@@ -1,7 +1,8 @@
 import pygame
 import pytmx
 from World.traps import *
-from Entities.ennemi import Araignee, Volant
+from Entities.ennemi import Araignee, Volant, Fighter, Chargeur, Tourelle
+from Entities.boss import Golem
 
 TILE_SIZE = 32
 
@@ -79,8 +80,7 @@ class Map_Manager:
             self.checkpoints, self.spawnpoints, self.doors, self.entities_to_spawn = create_map(tmx_data)
 
     def spawn_entities(self, fenetre):
-        araignee, volant, golem = [], [], []
-        #Ennemis
+        araignee, volant, golem, chargeur, tourelle, fighter = [], [], [], [], [], []
 
         for e in self.entities_to_spawn:
             if e["type"] == "mob":
@@ -88,8 +88,14 @@ class Map_Manager:
                     araignee.append(Araignee(fenetre, e["x"], e["y"]))
                 elif e["name"] == "volant":
                     volant.append(Volant(fenetre, e["x"], e["y"]))
-                """elif e["name"] == "golem":
-                    volant.append(Golem(fenetre, e["x"], e["y"]))""" #en commentaire tant que Golem non refactor
+                elif e["name"] == "golem":
+                    golem.append(Golem(fenetre, e["x"], e["y"]))
+                elif e["name"] == "chargeur":
+                    chargeur.append(Chargeur(fenetre, e["x"], e["y"]))
+                elif e["name"] == "tourelle":
+                    tourelle.append(Tourelle(fenetre, e["x"], e["y"]))
+                elif e["name"] == "fighter":
+                    fighter.append(Fighter(fenetre, e["x"], e["y"]))
             
             if e["type"] == "boss":
                 if e["name"] == "gravelion":
@@ -168,6 +174,9 @@ def create_map(tmx_data):
 
             elif tile_type == "wind":
                 pass
+
+            elif tile_type == "saw":
+                traps.append(Saw(pos_x, pos_y, TILE_SIZE//2))
 
     for obj in tmx_data.objects:
         obj_type = obj.properties.get("obj_type")
