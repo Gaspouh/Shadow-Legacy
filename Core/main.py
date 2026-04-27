@@ -84,8 +84,8 @@ trigger_combat = pygame.Rect(5100, 0, 50, 600)
 liste_entites = araignee + volant + chargeur + tourelle + fighter + golem + [gravelion]
 
 # UI
-ui_reposer = pygame.image.load("Assets/Images/UI_'Pressez_E'.png").convert_alpha()
-ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /5.15, ui_reposer.get_height() / 5.15))
+ui_reposer = pygame.image.load("Assets/Images/UI_'Pressez_Z'.png").convert_alpha()
+ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /7, ui_reposer.get_height() / 7))
 
 # Sons
 set_spawn_sound = pygame.mixer.Sound("Assets/Sounds/set_spawn_sound.mp3")
@@ -306,7 +306,7 @@ while continuer:
                     
                 # UI (centrage)
                 ui_x = cp_screen_rect.centerx - (ui_reposer.get_width() // 2)
-                ui_y = cp_screen_rect.top - ui_reposer.get_height() - 10
+                ui_y = cp_screen_rect.top - ui_reposer.get_height() + 135
                 game_fenetre.blit(ui_reposer, (ui_x, ui_y)) 
 
                 # Au lieu de juste "if 'Z' pressed" qui appuierai 60 fois/s :

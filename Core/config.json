@@ -17,7 +17,11 @@
         "crit_chance": 0.02,
 
         "invincibility_duration": 2000,
-        "stun_duration": 100
+        "stun_duration": 100,
+
+        "max_charms" : 2,
+        "found_charms" : [],
+        "equipped_charms" : []
     },
     "abilities": {
         "dash": {
@@ -28,5 +32,12 @@
         "double_jump": {
             "strength": -10
         }
+    },
+    "charms": {
+        "attack_long_range" : [],
+        "attack_speed" : [],
+        "jump_boost" : [],
+        "gaspard_t_ajoutera_ce_que_tu_veux" : null,
+        "Je pense que c'est mieux de passer les charms existant en python plutot (+ simple et direct de gérer les effets)" : null
     }
 }
