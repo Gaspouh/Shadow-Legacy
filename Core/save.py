@@ -111,3 +111,23 @@ def supprimer_sauvegarde():
     if os.path.exists(SAVE_FILE):
         os.remove(SAVE_FILE)
         print("save deleted")
+
+
+
+"""
+class joueur_assis():
+    is_sitting = False
+    # Pour gérer l'état du joueur quand il est sur un banc
+    def __init__(self):
+        self.current_checkpoint = None
+        # Animation :
+        self.seated_idle = 'Assets/Player/seated1.png'
+
+    def sit_on_bench(self, player, checkpoint):
+        # Déclence l'animation assise et save
+        is_sitting = True
+        self.current_checkpoint = checkpoint
+        checkpoint.activated = True
+        sauvegarder(player, checkpoint, map)
+
+"""

@@ -100,7 +100,7 @@ class Player(PhysicsEntity):
         self.anim_basic_attack2_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/basic_attack2_left.png', 10, 500, 500, 0, 0)
 
         # Banc (pas une anim)
-        self.seated_idle = VerticalAnimation(fenetre, x, y, 'Assets/Player/seated1.png', 1, 196, 206, 0, 0)
+        self.seated_idle = VerticalAnimation(fenetre, x, y, 'Assets/Player/seated1.png', 1, 345, 345, 0, 0)
 
 
         self.basic_attacks_right = [
