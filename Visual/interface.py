@@ -26,7 +26,7 @@ def menu(fenetre, player, checkpoints):
                 #elif bouton_options.collidepoint(event.pos):
                     
                 elif bouton_quitter.collidepoint(event.pos):
-                    sauvegarder(player, checkpoints)
+                    sauvegarder(player, checkpoints, map) # Sauvegarder avant de quitter
                     pygame.quit()  # Quitter le jeu
                     exit()
 

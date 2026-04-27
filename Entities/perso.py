@@ -22,6 +22,7 @@ class Player(PhysicsEntity):
         self.speed = p.get("speed", 3)
         self.sang = 0
         self.sang_max = 99
+        self.is_sitting = False
 
         # PHYSIQUE DU JOUEUR
         self.direction = 1 # 1 pour droite, -1 pour gauche
@@ -98,6 +99,9 @@ class Player(PhysicsEntity):
         self.anim_basic_attack1_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/basic_attack1_left.png', 10, 500, 500, 0, 0)
         self.anim_basic_attack2_left = VerticalAnimation(fenetre, x, y, 'Assets/Player/basic_attack2_left.png', 10, 500, 500, 0, 0)
 
+        # Banc (pas une anim)
+        self.seated_idle = VerticalAnimation(fenetre, x, y, 'Assets/Player/seated1.png', 1, 196, 206, 0, 0)
+
 
         self.basic_attacks_right = [
         self.anim_basic_attack1_right,
@@ -130,7 +134,7 @@ class Player(PhysicsEntity):
         self.anim_basic_attack1_left.vitesse_animation = 10 / v * 3.2
         self.anim_basic_attack2_right.vitesse_animation = 10 / v * 3.2
         self.anim_basic_attack2_left.vitesse_animation = 10 / v * 3.2
-
+        self.seated_idle.vitesse_animation = 1 # image
         self.sprite_offset_y = 25
 
     # foret de if pour chaque anims
@@ -154,6 +158,8 @@ class Player(PhysicsEntity):
             self.current_animation = self.anim_jump_air_right
         elif not self.on_ground and self.velocity.y > 0 and self.direction == -1:
             self.current_animation = self.anim_jump_air_left
+        elif self.is_sitting:
+            self.current_animation = self.seated_idle
         
         elif abs(self.velocity.x) > 4: # Seuil de vitesse pour declencher l'anim
             if self.direction == 1: #droite
@@ -197,13 +203,17 @@ class Player(PhysicsEntity):
             self.acceleration.x = 0
             self.acceleration.y = 0
             
-            if keys[pygame.K_q] and not keys[pygame.K_d]:
-                self.acceleration.x -= acceleration
-                self.direction = -1
+            if self.is_sitting:
+                if keys[pygame.K_q] or keys[pygame.K_d]:
+                    self.is_sitting = False  # se lève en bougeant
+            else:
+                if keys[pygame.K_q] and not keys[pygame.K_d]:
+                    self.acceleration.x -= acceleration
+                    self.direction = -1
 
-            elif keys[pygame.K_d] and not keys[pygame.K_q]:
-                self.acceleration.x += acceleration
-                self.direction = 1
+                elif keys[pygame.K_d] and not keys[pygame.K_q]:
+                    self.acceleration.x += acceleration
+                    self.direction = 1
 
             self.acceleration.x += self.velocity.x * friction
 
@@ -313,7 +323,9 @@ class Player(PhysicsEntity):
             self.animate() # Forcer l'idle
 
     def press_jump(self):
-
+        self.is_sitting = False # Si joueur assis et saute il se leve
+        now = pygame.time.get_ticks()
+        
         self.jump_buffer_timer = pygame.time.get_ticks() # Enregistrer le moment où le bouton de saut est préssé
 
         if self.in_quicksand:
@@ -340,6 +352,7 @@ class Player(PhysicsEntity):
     
     #GESTION DE L'ATTAQUE
     def press_attack(self):
+        self.is_sitting = False # Si joueur assis et attaque il se leve
         now = pygame.time.get_ticks()
         if not self.is_attacking and now - self.last_attack_time >= self.attack_cooldown:
             keys = pygame.key.get_pressed()
@@ -428,3 +441,4 @@ class Player(PhysicsEntity):
             self.velocity.y = attack_data["knockback_y"]  # faire sauter légerement le joueur si touché
 
         return hitstop_duration, shake_amount
+    

@@ -12,7 +12,7 @@ CONFIG_FILE = os.path.join(CORE_DIR, "config.json")
 DEFAULT_SPAWNS = {
     "terre_aride": {"x": 10, "y": 1200},
     "swamp": {"x": 100, "y": 100}
-} # Position de spawn par défaut selon la map(si aucun checkpoint activé)
+} # Position de spawn par défaut selon la map (si aucun checkpoint activé)
 
 def load_config():
     """Charge les stats de base depuis config.json"""
@@ -37,9 +37,6 @@ def get_spawn_from_checkpoints(checkpoints, map):
 
 
 def sauvegarder(player, checkpoints, map):
-    ...
-    
-    """
     # Sauvegarder l'état du jeu dans un fichier json
     spawn = get_spawn_from_checkpoints(checkpoints, map)
 
@@ -77,7 +74,6 @@ def sauvegarder(player, checkpoints, map):
         json.dump(data, f, indent=4)
     print(f"[SAVE] Sauvegarde effectuée, spawn : ({spawn.x}, {spawn.y})")
 
-    """
     
 def charger(player, checkpoints, map):
     """Pour load le json et mettre à jour les données du joueur"""
@@ -115,4 +111,3 @@ def supprimer_sauvegarde():
     if os.path.exists(SAVE_FILE):
         os.remove(SAVE_FILE)
         print("save deleted")
-

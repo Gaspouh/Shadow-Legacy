@@ -21,7 +21,7 @@ from Core.reset import reset
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0'
 pygame.init()
 
-#Configs
+# Configs
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
 MAP_WIDTH, MAP_HEIGHT = 7000, 2000
 
@@ -36,10 +36,10 @@ clock = pygame.time.Clock()
 Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 #Map
-#tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
-# map = "swamp"
-tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "terre_aride", "ascension.tmx"))
-map = "terre_aride" 
+tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
+map = "swamp"
+#tmx_data = load_map(os.path.join(Chemin_absolu, "Graphics", "terre_aride", "ascension.tmx"))
+#map = "terre_aride" 
 platforms, special_platforms, traps, decorations, \
     checkpoints, spawnpoints, entities_to_spawn = create_map(tmx_data)
 special_surfaces = [sp.surface for sp in special_platforms if sp.surface is not None]
@@ -311,10 +311,11 @@ while continuer:
 
                 # Au lieu de juste "if 'Z' pressed" qui appuierai 60 fois/s :
                 if pygame.key.get_pressed()[pygame.K_z]:
+                    player.is_sitting = True
                     cp.activated = True
                     player.health = player.max_health
                     spawn_point = pygame.math.Vector2(cp.rect.topleft)
-                    sauvegarder(player, checkpoints)
+                    sauvegarder(player, checkpoints, map)
                     set_spawn_sound.play()
     
         # Joueur

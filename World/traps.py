@@ -82,6 +82,11 @@ class Spike(Rectangular_Obstacle):
         elif direction == "right":
             hitbox_offset = (0, 0)
             hitbox_size_mult = (0.5, 1)
+        
+        else:
+            hitbox_offset = (0, size//2)
+            hitbox_size_mult = (1, 0.5)
+            direction = "up"
             
         super().__init__(x, y, size, 1, "Assets/Traps/spike.png", hitbox_size_mult, hitbox_offset, direction)
 
