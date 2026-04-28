@@ -7,14 +7,14 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 from Entities.perso import Player
-from Entities.ennemi import Araignee, Volant, Projectile, Tourelle, Fighter, Chargeur
-from World.map import Map_Manager, create_map
+from Entities.ennemi import Projectile
+from World.map import Map_Manager
 from Visual.camera import Camera
 from Visual.vfx import particles, Particle, Fade
 from World.traps import *
 from World.objets import Coeur, Monnaie
 from Core.save import sauvegarder, charger
-from Entities.boss import Gravelion,Golem
+from Entities.boss import Gravelion
 from Visual.interface import menu
 from Core.reset import reset
 
@@ -36,6 +36,7 @@ clock = pygame.time.Clock()
 Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 #Map
+defaut_map = "swamp"
 map_manager = Map_Manager()
 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
 
@@ -54,7 +55,7 @@ liste_entites = map_manager.spawn_entities(fenetre)
 
 #Joueur
 player = Player(100, 100, fenetre)
-spawn_point = charger(player, checkpoints, map)  # charge la save si elle existe, sinon spawn par défaut
+spawn_point = charger(player, checkpoints, defaut_map)  # charge la save si elle existe, sinon spawn par défaut
 player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
 player.rect.midbottom = player.position # pareil avec la hitbox
 
