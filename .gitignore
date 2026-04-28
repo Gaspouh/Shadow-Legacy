@@ -2,5 +2,4 @@ __pycache__/
 *.pyc
 .vscode/
 *.mp3.DS_Store
-save.json
 .DS_Store

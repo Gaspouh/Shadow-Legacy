@@ -34,6 +34,26 @@ def get_spawn_from_checkpoints(checkpoints, map):
         return pygame.math.Vector2(dernier_checkpoint_actif.rect.x, dernier_checkpoint_actif.rect.y)
     else:
         return pygame.math.Vector2(DEFAULT_SPAWNS[map]["x"], DEFAULT_SPAWNS[map]["y"])
+    
+def get_player_equipped_charms():
+    """Retourne les charms équipés du joueur"""
+    if not os.path.exists(SAVE_FILE):
+        return None
+
+    with open(SAVE_FILE, "r") as f:
+        data = json.load(f)
+    
+    return data.get("player", {}).get("equipped_charms", None)
+
+def get_player_found_charms():
+    """Retourne les charms équipés du joueur"""
+    if not os.path.exists(SAVE_FILE):
+        return None
+
+    with open(SAVE_FILE, "r") as f:
+        data = json.load(f)
+    
+    return data.get("player", {}).get("found_charms", None)
 
 
 def sauvegarder(player, checkpoints, map):
@@ -45,7 +65,9 @@ def sauvegarder(player, checkpoints, map):
         "player": {
             "health": player.health,      
             "max_health": player.max_health,
-            "orbs": Monnaie.orbs
+            "orbs": Monnaie.orbs,
+            "found_charms"   : get_player_found_charms(),
+            "equipped_charms": get_player_equipped_charms()
         },
 
         # spawn

@@ -75,3 +75,4 @@ class Monnaie:
 
         # Image orb à droite
         fenetre.blit(self.image, self.rect)
+

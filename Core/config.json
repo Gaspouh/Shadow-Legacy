@@ -14,13 +14,11 @@
         "attack_duration": 240,
         "attack_knockback_x": 80,
         "attack_knockback_y": -5,
-        "crit_chance": 0.02,
+        "crit_chance": 0.02,    
 
         "invincibility_duration": 2000,
 
-        "max_charms" : 2,
-        "found_charms" : [],
-        "equipped_charms" : []
+        "max_charms" : 2
     },
     "abilities": {
         "dash": {
@@ -32,11 +30,10 @@
             "strength": -10
         }
     },
-    "charms": {
-        "attack_long_range" : [],
-        "attack_speed" : [],
-        "jump_boost" : [],
-        "gaspard_t_ajoutera_ce_que_tu_veux" : null,
-        "Je pense que c'est mieux de passer les charms existant en python plutot (+ simple et direct de gérer les effets)" : null
+    "charms_collection": {
+        "attack_long_range": null,
+        "attack_speed": null,
+        "jump_boost": null,
+        "money_multiplier": null
     }
 }

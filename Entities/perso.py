@@ -1,7 +1,7 @@
 import pygame 
 import random
 from Entities.player_abilities import Dash, Double_jump, sort
-from Core.save import load_config
+from Core.save import load_config, get_player_equipped_charms
 from Entities.physics_entity import PhysicsEntity
 from Visual.sprite_sheet import VerticalAnimation
 from Visual.vfx import Fade
@@ -12,12 +12,17 @@ class Player(PhysicsEntity):
         self.window = fenetre
 
         p = load_config().get("player", {}) if load_config() else {}
+        equipped_charms = get_player_equipped_charms()
         
         # STATS DU JOUEUR
         self.health = p.get("health", 5) # Le 2eme argument est un fallback au cas ou la clé n'existe pas dans le json
         self.max_health = p.get("max_health", 5)
         self.attack = p.get("attack", 1)
-        self.jump_strength = p.get("jump_strength", -14)
+        if equipped_charms["jump_boost"] == True:
+            self.jump_strength = p.get("jump_strength", -14) * 1.2 # jump boost
+        else:
+            self.jump_strength = p.get("jump_strength", -14)
+
         self.pogo_strength = p.get("pogo_strength", -10)
         self.max_speed = p.get("max_speed", 10)
         self.speed = p.get("speed", 3)
@@ -186,6 +191,7 @@ class Player(PhysicsEntity):
 
     def update(self, platforms):
         now = pygame.time.get_ticks()
+        equipped_charms = get_player_equipped_charms()
 
         if self.on_ground and not self.in_quicksand and now - self.safe_position_timer > 500:  # enregistrement du dernier sol safe (toutes les 500ms pour éviter les surcharge de données)
             self.last_safe_position = pygame.math.Vector2(self.position.x, self.position.y)
@@ -295,22 +301,35 @@ class Player(PhysicsEntity):
 
             # ATTAQUE
             now = pygame.time.get_ticks()
-    
+
             if self.is_attacking:
-                if now - self.attack_timer >= self.attack_duration: # Si la durée de l'attaque est écoulée
+                if now - self.attack_timer >= self.attack_duration:
                     self.is_attacking = False
-                    self.attack_rect = pygame.Rect(0, 0, 0, 0) # Réinitialiser la hitbox de l'attaque lorsque l'attaque est terminée
-                
-                else :
+                    self.attack_rect = pygame.Rect(0, 0, 0, 0)                
+
+                else:
+                    long_range = equipped_charms and equipped_charms.get("attack_long_range", False)
+                    range_bonus = 50 if long_range else 0  # +50px si charm équipé
+
+
                     if self.attack_direction == "UP":
-                        self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.top - 70, 50, 70)
+                        h = 70 + range_bonus
+                        self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.top - h, 50, h)
+
+
                     elif self.attack_direction == "DOWN":
-                        self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.bottom, 50, 70)
-                    else : #direction "RIGHT" ou "LEFT"
-                        if self.attack_direction == "RIGHT": # Attaque vers la droite
-                            self.attack_rect = pygame.Rect(self.rect.right, self.rect.centery - 20, 70, 50)
-                        else: # Attaque vers la gauche
-                            self.attack_rect = pygame.Rect(self.rect.left - 70, self.rect.centery - 20, 70, 50)
+                        h = 70 + range_bonus
+                        self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.bottom, 50, h)
+
+
+                    elif self.attack_direction == "RIGHT":
+                        w = 70 + range_bonus
+                        self.attack_rect = pygame.Rect(self.rect.right, self.rect.centery - 20, w, 50)
+
+
+                    elif self.attack_direction == "LEFT":
+                        w = 70 + range_bonus
+                        self.attack_rect = pygame.Rect(self.rect.left - w, self.rect.centery - 20, w, 50)
             
             # INVINCIBILITE
             if self.invincible:
