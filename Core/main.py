@@ -107,7 +107,7 @@ while continuer:
                     player.press_jump()
                 if event.key == pygame.K_LSHIFT:
                     # faire dasher le joueur
-                    player.dash.start_dash(player) # Dash dans la direction du joueur
+                    player.press_dash()
                 if event.key == pygame.K_ESCAPE:
                     pause = menu(fenetre, player, checkpoints)
                 if event.key == pygame.K_f:

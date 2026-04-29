@@ -1,6 +1,6 @@
 {
     "player": {
-        "health": 3,
+        "health": 4,
         "max_health": 5,
         "orbs": 0,
         "found_charms": {
@@ -15,8 +15,8 @@
         }
     },
     "spawn_point": {
-        "x": 1926.0,
-        "y": 583.0
+        "x": 569.0,
+        "y": 575.0
     },
     "abilities": {},
     "checkpoints": [
@@ -26,7 +26,7 @@
             "y": 583
         },
         {
-            "activated": false,
+            "activated": true,
             "x": 569,
             "y": 575
         }

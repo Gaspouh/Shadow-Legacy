@@ -70,7 +70,7 @@ def sit_on_bench(fenetre):
         if active == True:  # Si charm trouvé c'est True, il est affiché alors
             if name in assets_path:
                 image_1 = pygame.image.load(assets_path[name]).convert_alpha()   #Compare avec la liste de path d'image, pour récuperer l'asset
-                image = pygame.transform.scale(image_1, (image_1.get_width()/1.5, image_1.get_height()/1.5))
+                image = pygame.transform.scale(image_1, (image_1.get_width()/1.8, image_1.get_height()/1.8))
                 rect = image.get_rect(topleft=(decalage_x, 200))
                 charms_afficher.append({"img": image, "rect": rect, "name": name})
                 decalage_x += 50 + image.get_width()
