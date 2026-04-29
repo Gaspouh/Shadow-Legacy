@@ -23,7 +23,8 @@ pygame.init()
 
 # Configs
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
-MAP_WIDTH, MAP_HEIGHT = 7000, 2000
+MAP_WIDTH, MAP_HEIGHT = 115*32, 30*32 # A fixer manuellement pour le premier chargement de map
+MAP_RECT = pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)
 
 fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.DOUBLEBUF, vsync=1) 
 pygame.display.set_caption("Shadow Legacy") # Définir le titre de la fenêtre
@@ -103,7 +104,7 @@ while continuer:
         if now > hitstop_until and player.health > 0: # On traite les touches que si on n'est pas en histstop et en vie
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    # faire sauter le joueur
+                    # faire sauter le joueurddd
                     player.press_jump()
                 if event.key == pygame.K_LSHIFT:
                     # faire dasher le joueur
@@ -166,15 +167,13 @@ while continuer:
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
 
             for e in liste_entites[:]:
-                if hasattr(e, "mort"):
-                    e.mort()
-                if hasattr(e, "animation_mort"):
-                    if e.animation_mort.index_image >= len(e.animation_mort.frames_droite)-1:
+
+                if not e.alive:
+                    fin = e.mort()
+                    if fin:
                         liste_entites.remove(e)
-                else :
-                    liste_entites.remove(e)
                     continue
-                
+                              
                 if hasattr(e, "patrouille"): #pour les patrouilleurs
                     e.patrouille(platforms)
                 
@@ -190,9 +189,9 @@ while continuer:
                 if hasattr(e, "charge"): #pour les chargeurs
                     e.charge(player.rect, platforms)
 
-                if hasattr(e, "update"): #pour tous les ennemis
-                    e.update(player.rect, player, platforms)
-               
+                if hasattr(e, "update"):
+                    e.update(player.rect, player, platforms) 
+
                 if e.rect.colliderect(player.rect):
                     hitstop_duration, shake_amount = player.take_damage(e.attack_data, e.rect, e) # Appliquer les effets de recul au joueur si un ennemi le touche
                     hitstop_until = now + hitstop_duration
@@ -220,6 +219,8 @@ while continuer:
 
                         if player.attack_data["critical"] : # Si coup critique
                             player.attack_data["damage"] = player.attack * 3
+                        else:
+                            player.attack_data["damage"] = player.attack
                         
                         e.receive_hit(player.attack_data, player.rect, player) # Appliquer les effets de recul à l'ennemi 
                         
@@ -265,6 +266,10 @@ while continuer:
                     if trap.special_effect == "wind":
                         player.wind_force_x = trap.force_x
                         player.wind_force_y = trap.force_y
+
+                for e in liste_entites:
+                    if trap.rect.colliderect(e.rect) and hasattr(e, "receive_hit") : #trap touche ennemi
+                        e.receive_hit(trap.attack_data, trap.rect, trap)
 
             if shake_amount > 0:
                 shake_amount -= 1 # Réduire progressivement l'intensité du screen shake
@@ -316,6 +321,8 @@ while continuer:
         if door_collided and fade.intensity >= 255 and fade.state == "out":
                 print("oui")
                 liste_entites.clear()
+                projectiles.clear()
+                tir_tourelle.clear()
 
                 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", door_collided.target_map))
 
@@ -328,8 +335,11 @@ while continuer:
                 doors = map_manager.doors
                 entities_to_spawn = map_manager.entities_to_spawn
 
-                liste_entites = map_manager.spawn_entities(fenetre)
+                MAP_WIDTH, MAP_HEIGHT = map_manager.map_width, map_manager.map_height
+                MAP_RECT = pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)
+                camera.update_map_size(MAP_WIDTH, MAP_HEIGHT)
 
+                liste_entites = map_manager.spawn_entities(fenetre)
                 spawn = map_manager.get_spawn(door_collided.target_spawn)
 
                 player.position = spawn.position
@@ -390,24 +400,23 @@ while continuer:
         game_fenetre.blit(barre_sang, (10, 40))
 
         for elem in projectiles[:]:
-            elem.update()
-            elem.draw(game_fenetre, camera)
-
-         # supprimer si trop vieux ou hors map
-            if elem.lifetime_expired() or elem.out_of_bounds(pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)):
+            delete = elem.update(platforms, MAP_RECT)
+            if delete:
                 projectiles.remove(elem)
+            else:
+                elem.draw(game_fenetre, camera)
         
-        for elem in tir_tourelle:# On parcourt la liste des projectiles tirés par les tourelles
-            elem.update()
-            elem.draw(game_fenetre, camera)
+        for elem in tir_tourelle[:]:# On parcourt la liste des projectiles tirés par les tourelles
+            delete = elem.update(platforms, MAP_RECT)
+            if delete:
+                tir_tourelle.remove(elem)
+            else :
+                elem.draw(game_fenetre, camera)
             if elem.rect.colliderect(player.rect) and not elem.hit:# Si un projectile de tourelle touche le joueur
                 elem.hit = True # Pour éviter que le même projectile touche plusieurs fois
                 hitstop_duration, shake_amount = player.take_damage(elem.attack_data, elem.rect, elem)# Appliquer les dégâts et le recul au joueur
                 hitstop_until = pygame.time.get_ticks() + hitstop_duration # Activer le hitstop
-         # supprimer si trop vieux ou hors map
-            if elem.lifetime_expired() or elem.out_of_bounds(pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)):
-                tir_tourelle.remove(elem)
-            
+
     # Gestion de mort
     else:
         death_sound.play()

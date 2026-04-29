@@ -367,10 +367,13 @@ class Boss(Ennemi):
 
     # Hitboxs et affichage
 
-    def update_hitbox(self, limite_rect):
+    def update_hitbox(self, limite_rect, platforms):
         for elem in self.hitboxs[:]:
-            elem.update()
-            if elem.out_of_bounds(limite_rect) or elem.lifetime_expired():
+            if hasattr(elem, "update"):
+                delete = elem.update(platforms, limite_rect)
+            else :
+                delete = elem.lifetime_expired()
+            if delete:
                 self.hitboxs.remove(elem)
 
     def draw(self, fenetre, camera):
@@ -534,7 +537,7 @@ class Gravelion(Boss):
         elif self.state == self.DYING:
             self.update_dying(elapsed)
 
-        self.update_hitbox(self.arene_rect)
+        self.update_hitbox(platforms, self.arene_rect)
         self.hitbox.topleft = self.rect.center
                 
         once_states = ["melee", "arm", "cocon", "laser_charge", "transition", "death"]
@@ -860,7 +863,7 @@ class Golem(Boss):
         # Collion avec les plateformes
         self.physics_update(platforms)  
 
-        self.update_hitbox(pygame.Rect(0, 0, 99999, 99999))
+        self.update_hitbox(platforms)
 
     def update_idle(self, elapsed, player_rect):
         # Idle
