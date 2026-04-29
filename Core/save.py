@@ -126,7 +126,7 @@ def charger(player, checkpoints, map):
             cp.activated = data["checkpoints"][i]["activated"]
 
     last_checkpoint_index = data.get("last_checkpoint")
-    if last_checkpoint_index is not None:
+    if last_checkpoint_index is not None and last_checkpoint_index < len(checkpoints):
         # Renvoie le dernier banc avec la pos des coordonnées
         return pygame.math.Vector2(checkpoints[last_checkpoint_index].rect.x, checkpoints[last_checkpoint_index].rect.y)
 
@@ -158,17 +158,20 @@ def save_backup():
 
 def charms_images():
     """ Image associée à chaque charme """
-    path = "Assets/Test"
+    
+    path = "Assets/charms"
     charms_assets = {
         "attack_long_range" : path + "/attack_long_range.png",
         "attack_speed" : path + "/attack_speed.png",
         "jump_boost" : path + "/jump_boost.png"
     }
+
+    """
     with open(SAVE_FILE, "r") as f:
         data = json.load(f)
     chrm = data.get("player", {}).get("found_charms", {})
-
-
+    """
+    
     return charms_assets
 
 

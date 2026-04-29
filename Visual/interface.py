@@ -57,21 +57,24 @@ def menu(fenetre, player, checkpoints):
 
 
 def sit_on_bench(fenetre):
-    """ Ouvre l'inventaire lorsque le joueur est assis sur un banc + gestion des charms equippés """
+    """ Ouvre l'inventaire lorsque le joueur est assis sur un banc + gestion des charms equippés et drag """
     open_inventory = True
     with open(SAVE_FILE, "r") as f:
         data = json.load(f)
     found_charms_data = data.get("player", {}).get("found_charms", {})
-    assets_paths = charms_images()
+    assets_path = charms_images()
     charms_afficher = []    # Initialisation des charms trouvé affichable
     decalage_x = 100 # valeur test pour apres pouvroi aligner les charms
 
     for name, active in found_charms_data.items():  # Pour récupérer valeur et clé de chaque charm
-        image = pygame.image.load(assets_paths[name]).convert_alpha()   #Compare avec la liste de path d'image, pour récuperer l'asset
-        rect = image.get_rect(topleft=(decalage_x, 200))
-        charms_afficher.append({"img": image, "rect": rect, "name": name})
-        decalage_x += 50 + image.get_width()
-    
+        if active == True:  # Si charm trouvé c'est True, il est affiché alors
+            if name in assets_path:
+                image_1 = pygame.image.load(assets_path[name]).convert_alpha()   #Compare avec la liste de path d'image, pour récuperer l'asset
+                image = pygame.transform.scale(image_1, (image_1.get_width()/1.5, image_1.get_height()/1.5))
+                rect = image.get_rect(topleft=(decalage_x, 200))
+                charms_afficher.append({"img": image, "rect": rect, "name": name})
+                decalage_x += 50 + image.get_width()
+        
     charm_selected = None   # Pouvoir selectionner un item à la fois pour le drag and drop
     offset_x, offset_y = 0, 0
 

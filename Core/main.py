@@ -273,30 +273,36 @@ while continuer:
                 game_fenetre.blit(deco.image, camera.apply(deco.rect))
 
         # Checkpoints
-        for cp in checkpoints:
-            # On calcule la position à l'écran 
+        for i, cp in enumerate(checkpoints):
+            # On calcule la position a l'écran
             cp_screen_rect = camera.apply(cp.rect)
             game_fenetre.blit(cp.image, cp_screen_rect)
 
             # Quand le joueur est proche du banc
             if cp.rect.colliderect(player.rect):
-                    
-                # UI (centrage)
-                ui_x = cp_screen_rect.centerx - (ui_reposer.get_width() // 2)
-                ui_y = cp_screen_rect.top - ui_reposer.get_height() + 135
-                game_fenetre.blit(ui_reposer, (ui_x, ui_y)) 
+                
+                # Si le joueur est debout, on affiche l'UI pour s'asseoir
+                if not player.is_sitting:
+                    # UI (centrage)
+                    ui_x = cp_screen_rect.centerx - (ui_reposer.get_width() // 2)
+                    ui_y = cp_screen_rect.top - ui_reposer.get_height() + 135
+                    game_fenetre.blit(ui_reposer, (ui_x, ui_y)) 
 
-                # Au lieu de juste "if 'Z' pressed" qui appuierai 60 fois/s :
-                if pygame.key.get_pressed()[pygame.K_z]:
-                    player.is_sitting = True
-                    cp.activated = True
-                    player.health = player.max_health
-                    spawn_point = pygame.math.Vector2(cp.rect.topleft)
-                    sauvegarder(player, checkpoints, map, index_last_checkpoint=i)
-                    set_spawn_sound.play()
-                if pygame.key.get_pressed()[pygame.K_e] and player.is_sitting == True:
-                    sit_on_bench(fenetre)
+                    # Au lieu de juste "if 'Z' pressed" qui appuierai 60 fois/s :
+                    if pygame.key.get_pressed()[pygame.K_z]:
+                        player.is_sitting = True
+                        cp.activated = True
+                        player.health = player.max_health
+                        spawn_point = pygame.math.Vector2(cp.rect.topleft)
+                        sauvegarder(player, checkpoints, map, index_last_checkpoint=i)
+                        set_spawn_sound.play()
+                
+                # Si le joueur est déjà assis, on permet d'ouvrir l'inventaire avec E
+                else:
+                    if pygame.key.get_pressed()[pygame.K_e]:
+                        sit_on_bench(fenetre)
 
+        # Portes
         for door in doors:
             if pygame.key.get_pressed()[pygame.K_a]:
                 pygame.draw.rect(game_fenetre, (255, 0, 255), camera.apply(door.rect))
