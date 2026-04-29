@@ -13,9 +13,9 @@ from Visual.camera import Camera
 from Visual.vfx import particles, Particle, Fade
 from World.traps import *
 from World.objets import Coeur, Monnaie
-from Core.save import sauvegarder, charger
+from Core.save import sauvegarder, charger, save_backup
 from Entities.boss import Gravelion
-from Visual.interface import menu
+from Visual.interface import menu, sit_on_bench
 from Core.reset import reset
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0'
@@ -34,6 +34,8 @@ camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT, zoom=zoom)
 clock = pygame.time.Clock()
 
 Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+save_backup()
 
 #Map
 defaut_map = "swamp"
@@ -277,7 +279,7 @@ while continuer:
             game_fenetre.blit(cp.image, cp_screen_rect)
 
             # Quand le joueur est proche du banc
-            if cp.rect.colliderect(player.rect) and not cp.activated:
+            if cp.rect.colliderect(player.rect):
                     
                 # UI (centrage)
                 ui_x = cp_screen_rect.centerx - (ui_reposer.get_width() // 2)
@@ -290,8 +292,10 @@ while continuer:
                     cp.activated = True
                     player.health = player.max_health
                     spawn_point = pygame.math.Vector2(cp.rect.topleft)
-                    sauvegarder(player, checkpoints, map)
+                    sauvegarder(player, checkpoints, map, index_last_checkpoint=i)
                     set_spawn_sound.play()
+                if pygame.key.get_pressed()[pygame.K_e] and player.is_sitting == True:
+                    sit_on_bench(fenetre)
 
         for door in doors:
             if pygame.key.get_pressed()[pygame.K_a]:

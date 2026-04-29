@@ -3,10 +3,11 @@ import os
 import pygame
 from World.objets import Monnaie
 
-# Path constants : use relative paths from Core directory
+# Path
 CORE_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_FILE = os.path.join(CORE_DIR, "save.json")
 CONFIG_FILE = os.path.join(CORE_DIR, "config.json")
+DEFAULT_SAVE = os.path.join(CORE_DIR, "default_save.json")
 
 # Spawn
 DEFAULT_SPAWNS = {
@@ -56,7 +57,7 @@ def get_player_found_charms():
     return data.get("player", {}).get("found_charms", None)
 
 
-def sauvegarder(player, checkpoints, map):
+def sauvegarder(player, checkpoints, map, index_last_checkpoint=None):
     # Sauvegarder l'état du jeu dans un fichier json
     spawn = get_spawn_from_checkpoints(checkpoints, map)
 
@@ -89,12 +90,13 @@ def sauvegarder(player, checkpoints, map):
                 "y": cp.rect.y
             }
             for cp in checkpoints
-        ]
+        ],
+        "last_checkpoint": index_last_checkpoint
     }
 
     with open(SAVE_FILE, "w") as f:
         json.dump(data, f, indent=4)
-    print(f"[SAVE] Sauvegarde effectuée, spawn : ({spawn.x}, {spawn.y})")
+    print("saved")
 
     
 def charger(player, checkpoints, map):
@@ -123,6 +125,11 @@ def charger(player, checkpoints, map):
         if i < len(data["checkpoints"]):
             cp.activated = data["checkpoints"][i]["activated"]
 
+    last_checkpoint_index = data.get("last_checkpoint")
+    if last_checkpoint_index is not None:
+        # Renvoie le dernier banc avec la pos des coordonnées
+        return pygame.math.Vector2(checkpoints[last_checkpoint_index].rect.x, checkpoints[last_checkpoint_index].rect.y)
+
     # On recalcule depuis les checkpoints rechargés (pour etre sur)
     spawn_point = get_spawn_from_checkpoints(checkpoints, map)
     return spawn_point
@@ -133,6 +140,36 @@ def supprimer_sauvegarde():
     if os.path.exists(SAVE_FILE):
         os.remove(SAVE_FILE)
         print("save deleted")
+
+def save_backup():
+    """ Permet de créer un save.json si le fichier n'existe pas """
+    if not os.path.exists(SAVE_FILE):
+        try:
+            with open(DEFAULT_SAVE, "r") as f_default:
+                default_data = json.load(f_default)
+            
+            with open(SAVE_FILE, "w") as f_save:
+                json.dump(default_data, f_save, indent=4)
+            
+            print("New save")
+        except Exception as e:
+            print("error")
+
+
+def charms_images():
+    """ Image associée à chaque charme """
+    path = "Assets/Test"
+    charms_assets = {
+        "attack_long_range" : path + "/attack_long_range.png",
+        "attack_speed" : path + "/attack_speed.png",
+        "jump_boost" : path + "/jump_boost.png"
+    }
+    with open(SAVE_FILE, "r") as f:
+        data = json.load(f)
+    chrm = data.get("player", {}).get("found_charms", {})
+
+
+    return charms_assets
 
 
 
@@ -153,3 +190,6 @@ class joueur_assis():
         sauvegarder(player, checkpoint, map)
 
 """
+
+
+            

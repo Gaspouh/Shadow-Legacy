@@ -33,7 +33,6 @@
     "charms_collection": {
         "attack_long_range": null,
         "attack_speed": null,
-        "jump_boost": null,
-        "money_multiplier": null
+        "jump_boost": null
     }
 }

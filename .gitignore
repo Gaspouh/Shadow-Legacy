@@ -3,3 +3,4 @@ __pycache__/
 .vscode/
 *.mp3.DS_Store
 .DS_Store
+*.json

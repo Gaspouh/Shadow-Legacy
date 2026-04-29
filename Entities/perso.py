@@ -10,10 +10,8 @@ class Player(PhysicsEntity):
     def __init__(self, x, y, fenetre):
         super().__init__(x, y, 25, 60, gravity=0.4 , friction=-0.5, use_gravity=True)
         self.window = fenetre
-
         p = load_config().get("player", {}) if load_config() else {}
         equipped_charms = get_player_equipped_charms()
-        
         # STATS DU JOUEUR
         self.health = p.get("health", 5) # Le 2eme argument est un fallback au cas ou la clé n'existe pas dans le json
         self.max_health = p.get("max_health", 5)
@@ -128,7 +126,7 @@ class Player(PhysicsEntity):
 
         v = 60  # Vitesse par défaut pour chaque anim
 
-        self.anim_idle.vitesse_animation = 57 / v / 3 # Plus lent
+        self.anim_idle.vitesse_animation = 57 / v / 3.8 # Plus lent
         self.anim_run_right.vitesse_animation = 16 / v * 1.9 # Plus rapide
         self.anim_run_left.vitesse_animation = 16 / v * 1.9
         self.anim_jump_front.vitesse_animation = 12 / v * 3

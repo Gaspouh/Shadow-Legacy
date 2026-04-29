@@ -1,5 +1,8 @@
 import pygame
-from Core.save import sauvegarder
+from Core.save import sauvegarder, charms_images, SAVE_FILE
+import os
+import json
+
 def menu(fenetre, player, checkpoints):
     pause = True
     # Afficher le menu
@@ -51,3 +54,80 @@ def menu(fenetre, player, checkpoints):
         pygame.draw.rect(fenetre, (r3, g3, b3), bouton_quitter, 2)
         pygame.display.update()
     return pause
+
+
+def sit_on_bench(fenetre):
+    """ Ouvre l'inventaire lorsque le joueur est assis sur un banc + gestion des charms equippés """
+    open_inventory = True
+    with open(SAVE_FILE, "r") as f:
+        data = json.load(f)
+    found_charms_data = data.get("player", {}).get("found_charms", {})
+    assets_paths = charms_images()
+    charms_afficher = []    # Initialisation des charms trouvé affichable
+    decalage_x = 100 # valeur test pour apres pouvroi aligner les charms
+
+    for name, active in found_charms_data.items():  # Pour récupérer valeur et clé de chaque charm
+        image = pygame.image.load(assets_paths[name]).convert_alpha()   #Compare avec la liste de path d'image, pour récuperer l'asset
+        rect = image.get_rect(topleft=(decalage_x, 200))
+        charms_afficher.append({"img": image, "rect": rect, "name": name})
+        decalage_x += 50 + image.get_width()
+    
+    charm_selected = None   # Pouvoir selectionner un item à la fois pour le drag and drop
+    offset_x, offset_y = 0, 0
+
+    # Fond (meme que menu)
+    noir_transparent = pygame.Surface((fenetre.get_width(), fenetre.get_height()))
+    noir_transparent.fill((0, 0, 0))
+    noir_transparent.set_alpha(220) 
+    
+    inventaire_pic = pygame.image.load("Assets/Images/inventaire_charms.png").convert_alpha()
+    inventaire_rec = inventaire_pic.get_rect(center=(fenetre.get_width()//2, fenetre.get_height()//2))
+
+    # centrer l'image
+    pos_x = fenetre.get_width() // 2 - inventaire_pic.get_width() // 2
+    pos_y = fenetre.get_height() // 2 - inventaire_pic.get_height() // 2
+
+    pygame.display.update()
+
+    while open_inventory:
+        mouse_pos = pygame.mouse.get_pos()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            
+            if event.type == pygame.KEYDOWN:
+                # Quitter avec Echap ou E
+                if event.key == pygame.K_ESCAPE or event.key == pygame.K_e:
+                    open_inventory = False
+                    # Return False
+
+            # Gestion du clic
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:    # le clic gauche
+                    for charm in charms_afficher:
+                        if charm["rect"].collidepoint(mouse_pos):
+                            charm_selected = charm  # le charm selectionné est le charm où la pos de la souris y est
+                            # ajout d'un delta pour calculer la différence entre la ou on clic et la ou se situe le rect :
+                            offset_x = charm["rect"].x - mouse_pos[0]
+                            offset_y = charm["rect"].y- mouse_pos[1]
+                            break
+                                    
+            # si relachement il n'y a plus de charme selectionné
+            if event.type == pygame.MOUSEBUTTONUP:
+                charm_selected = None
+            
+        # gestion deplacement quand un charm est selectionné
+        if charm_selected != None:
+            charm_selected["rect"].x = mouse_pos [0] + offset_x
+            charm_selected["rect"].y = mouse_pos [1] + offset_y
+
+        # Affichage
+        fenetre.blit(noir_transparent, (0, 0))
+        fenetre.blit(inventaire_pic, inventaire_rec)
+
+        # dessiner chaque charms possédés
+        for charm in charms_afficher:
+            fenetre.blit(charm["img"], charm["rect"])
+
+        pygame.display.update()
