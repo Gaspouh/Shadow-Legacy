@@ -75,6 +75,9 @@ class Map_Manager:
 
     def load_map(self, path):
         tmx_data = pytmx.load_pygame((path), pixelalpha=True)
+
+        self.map_width = tmx_data.width * TILE_SIZE
+        self.map_height = tmx_data.height * TILE_SIZE
         
         self.platforms, self.special_platforms, self.traps, self.decorations, \
             self.checkpoints, self.spawnpoints, self.doors, self.entities_to_spawn = create_map(tmx_data)
@@ -101,7 +104,7 @@ class Map_Manager:
                 if e["name"] == "gravelion":
                     pass
                     
-        liste_entites = araignee + volant
+        liste_entites = araignee + volant + golem + chargeur + tourelle + fighter
         return liste_entites
     
     def get_spawn(self, name):

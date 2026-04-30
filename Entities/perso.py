@@ -335,7 +335,7 @@ class Player(PhysicsEntity):
                 now = pygame.time.get_ticks()
                 if now - self.invincibility_timer >= self.invincibility_duration: # Si la durée d'invincibilité est écoulée
                     self.invincible = False
-
+            
             self.dash.update(self) # Mettre à jour l'état du dash et appliquer les effets de dash sur le joueur
             self.animate() # Joueur
             
@@ -353,6 +353,11 @@ class Player(PhysicsEntity):
             self.position.y -= 10
             self.quicksand_sink = max(0, self.quicksand_sink - 10)
 
+    def press_dash(self):
+        if self.is_sitting:
+            return # Joueur ne peut pas dash sur un banc
+        self.dash.start_dash(self)
+        
     def execute_jump(self, jump_type="simple"):
             self.on_ground = False
             self.is_jumping = True
@@ -373,7 +378,6 @@ class Player(PhysicsEntity):
     
     #GESTION DE L'ATTAQUE
     def press_attack(self):
-        self.is_sitting = False # Si joueur assis et attaque il se leve
         now = pygame.time.get_ticks()
         if not self.is_attacking and now - self.last_attack_time >= self.attack_cooldown:
             keys = pygame.key.get_pressed()

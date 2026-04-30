@@ -48,13 +48,15 @@ class Animation:
     
     def gestion_animation_once(self):
         self.vitesse_animation = 0.2
+        fin = False
         self.index_image += self.vitesse_animation
 
         if self.index_image >= len(self.frames_droite) - 1:
             self.index_image = len(self.frames_droite) - 1  # Rester sur la dernière frame
+            fin = True
 
         self.image = self.frames_droite[int(self.index_image)]
-        return self.image, True  # Retourner True pour indiquer que l'animation est terminée
+        return self.image, fin  # Retourner le bool fin pour indiquer si l'animation est terminée
     
 
 # 2eme classe pour d'autres types de spritesheet
