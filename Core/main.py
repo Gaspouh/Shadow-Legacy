@@ -14,7 +14,6 @@ from Visual.vfx import particles, Particle, Fade, HealParticle, heal_particles
 from World.traps import *
 from World.objets import Coeur, Monnaie
 from Core.save import sauvegarder, charger, save_backup
-from Entities.boss import Gravelion
 from Visual.interface import menu, sit_on_bench, home_screen
 from Core.reset import reset
 
@@ -22,8 +21,6 @@ os.environ['SDL_RENDER_SCALE_QUALITY'] = '0'
 pygame.init()
 
 # Configs
-GAME_WIDTH, GAME_HEIGHT = 1920, 1080
-MAP_WIDTH, MAP_HEIGHT = 7000, 2000
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
 MAP_WIDTH, MAP_HEIGHT = 115*32, 50*32 # A fixer manuellement pour le premier chargement de map
 MAP_RECT = pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)
@@ -65,10 +62,10 @@ spawn_point = charger(player, checkpoints, defaut_map)  # charge la save si elle
 player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
 player.rect.midbottom = player.position # pareil avec la hitbox
 
-#Boss
+"""#Boss
 gravelion = Gravelion(fenetre, 5600, 300, pygame.Rect(5000, 0, 1000, 600)) # spawn dans l'arène de Gravelion
 trigger_combat = pygame.Rect(5100, 0, 50, 600)
-#porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche
+#porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche"""
 
 # UI
 ui_reposer = pygame.image.load("Assets/Images/UI_'Pressez_Z'.png").convert_alpha()

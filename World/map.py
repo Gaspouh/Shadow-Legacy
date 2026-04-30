@@ -2,7 +2,7 @@ import pygame
 import pytmx
 from World.traps import *
 from Entities.ennemi import Araignee, Volant, Fighter, Chargeur, Tourelle
-from Entities.boss import Golem
+from Entities.boss_logic import Golem
 
 TILE_SIZE = 32
 

@@ -306,7 +306,7 @@ class Tourelle(Ennemi):
     def __init__(self, fenetre, x, y):
         
         # On applique les caractéristique de l'ennemi débutant a la tourelle
-        super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1, reward=0)
+        super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 70, 63, 0, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1, reward=0)
 
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
         self.animation_tir = Animation(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 70, 63, 0, 0, scale=1)
@@ -446,9 +446,9 @@ class Fighter(Ennemi):
 
 class Chargeur(Ennemi):
     def __init__(self, fenetre, x, y):
-        super().__init__(fenetre, x, y, 'Assets/Images/chargeur.png', 8, 80, 58, 0, 0, 3, 3, {"damage": 1, "knockback_x": 150, "knockback_y": -4}, scale=1, reward=8)
+        super().__init__(fenetre, x, y, 'Assets/Images/chargeur.png', 8, 82, 58, 3, 0, 3, 3, {"damage": 1, "knockback_x": 150, "knockback_y": -4}, scale=1, reward=8)
 
-        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/chargeur_dead.png', 8, 80, 58, 3, 0, scale=1)
+        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/chargeur_dead.png', 8, 82, 58, 3, 0, scale=1)
         self.dead = False
         self.charge_timer = 0
         self.attacking = False

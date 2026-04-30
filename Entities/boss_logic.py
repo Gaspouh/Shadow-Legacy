@@ -1,9 +1,7 @@
 import pygame
 from Entities.ennemi import Ennemi, Projectile, AttackZone
-from Visual.sprite_sheet import VerticalAnimation, Animation
-import time
+from Visual.sprite_sheet import VerticalAnimation
 import random
-import math
 from World.objets import Monnaie
 
 """class Golem(pygame.sprite.Sprite):  # pas de "self" ici
@@ -292,6 +290,8 @@ class Boss(Ennemi):
         super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data, scale=1)
         
         self.can_receive_knockback = False # Pas de recul pour les boss
+        self.combat_lance = False
+        self.dead = False #pour l'animation de mort
 
         self.phase = 1
         self.state = self.IDLE
@@ -308,6 +308,8 @@ class Boss(Ennemi):
         self.stagger_duration = 3000 # 3 secondes de pause après le seuil de dégâts
 
         self.hitboxs = []
+        self.anims = {}
+        self.current_anim = "idle"
 
     def receive_hit(self, attack_data, source_rect, source):
 
@@ -325,8 +327,8 @@ class Boss(Ennemi):
             self.enter_state(self.STAGGER)
             self.pv_last_stagger = self.pv_ennemi
 
-        # Transition de phase à 50% de PV
-        if self.pv_ennemi < self.pv_max - 6 and self.phase == 1:
+        # Changement de phase
+        if self.pv_ennemi < self.pv_max // 2 and self.phase == 1:
             self.enter_state(self.TRANSITION)
 
         #Mort
@@ -344,8 +346,11 @@ class Boss(Ennemi):
         self.state_timer = pygame.time.get_ticks()
         self.atk_spawned = False
 
-        if new_state != self.ATTACKING:
-            self.laser = None
+    def face_player(self, player_rect):
+        if player_rect.centerx > self.rect.centerx:
+            self.direction = 1
+        else:
+            self.direction = -1
 
     def teleport(self, index):
         x, y = self.tp_points[index]
@@ -359,120 +364,7 @@ class Boss(Ennemi):
         indices.remove(self.current_tp_index)  # éviter de se téléporter au même endroit
         self.teleport(random.choice(indices))
 
-    def face_player(self, player_rect):
-        if player_rect.centerx > self.rect.centerx:
-            self.direction = 1
-        else:
-            self.direction = -1
-
-    # Hitboxs et affichage
-
-    def update_hitbox(self, limite_rect, platforms):
-        for elem in self.hitboxs[:]:
-            if hasattr(elem, "update"):
-                delete = elem.update(platforms, limite_rect)
-            else :
-                delete = elem.lifetime_expired()
-            if delete:
-                self.hitboxs.remove(elem)
-
-    def draw(self, fenetre, camera):
-        if not self.alive:
-            return
-        fenetre.blit(self.image, camera.apply(self.rect))
-        for elem in self.hitboxs:
-            elem.draw(fenetre, camera)
-
-class Gravelion(Boss):
-
-    #Indices points de téléportation
-    SOL_GAUCHE = 0
-    SOL_DROIT = 1
-    AIR_GAUCHE = 2
-    AIR_DROIT = 3
-
-    #Noms des attaques :
-    ATK_MELEE       = "melee"
-    ATK_ARM         = "arm"
-    ATK_LASER       = "laser"
-    ATK_COCON       = "cocon"
-
-    def __init__(self, fenetre,x, y, arene_rect):
-        marge_x = 150
-        hauteur_air = arene_rect.top + 150
-        tp_points = [
-            (arene_rect.left + marge_x, arene_rect.bottom),
-            (arene_rect.right - marge_x, arene_rect.bottom),
-            (arene_rect.left + marge_x, hauteur_air),
-            (arene_rect.right - marge_x, hauteur_air)
-        ]
-        super().__init__(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 4, 400, 100, 0, 0, 500, 1,\
-                        {"damage": 1, "knockback_x": 80, "knockback_y": -5}, tp_points,scale=1)
-
-        self.arene_rect = arene_rect
-        self.use_gravity = False # Pas de gravité pour ce boss lévitant
-        self.orbs_value = 55
-
-        # Animations 
-        self.anims = {
-            "idle":         Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 4, 100, 100, 0, 0, 1),
-            "glowing":      Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 8, 100, 100, 0, 1, 1),
-            "arm":          Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 9, 100, 100, 0, 2, 1),
-            "cocon":        Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 8, 100, 100, 0, 3, 1),
-            "melee":        Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 7, 100, 100, 0, 4, 1),
-            "laser_charge": Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 7, 100, 100, 0, 5, 1),
-            "transition":   Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 10, 100, 100, 0, 6, 1),
-            "death":        Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 10, 1000, 100, 0, 7, 1) #Probleme avec la classe a regler pour fonctionner sur deux lignes
-        }
-
-        #Vitesse d'animation 
-        v = 60
-        self.anims["idle"].vitesse_animation = 4 / v / 2
-        self.anims["glowing"].vitesse_animation = 8 / v
-        self.anims["arm"].vitesse_animation = 9 / v * 1.5
-        self.anims["cocon"].vitesse_animation = 8 / v 
-        self.anims["melee"].vitesse_animation = 7 / v * 1.5
-        self.anims["laser_charge"].vitesse_animation = 7 / v 
-        self.anims["transition"].vitesse_animation = 10 / v / 2
-        self.anims["death"].vitesse_animation = 14 / v / 3
-
-        self.current_anim = "idle"
-        self.image = self.anims["idle"].frames_droite[0]
-        self.rect = self.image.get_rect(midbottom=(x, y))
-        self.hitbox = self.rect.inflate(-40, -40)
-
-        for anim in self.anims.values():
-            anim.frames_droite = [
-                pygame.transform.scale(frame, (160, 160)) for frame in anim.frames_droite
-            ]
-
-            anim.frames_gauche = [
-                pygame.transform.flip(frame, True, False) for frame in anim.frames_droite
-            ]
-
-        # Timers et variables d'attaque
-        self.idle_duration = 1500
-        self.cocon_punish = False
-        self.cocon_chance = 1/6
-        self.laser = None
-        self.atk_spawned = False
-
-        #Spawn 
-        self.combat_lance = False
-        self.enter_state(self.NOT_TRIGGERED)
-        self.teleport(self.SOL_DROIT)
-
-    def is_on_ground(self):
-        return self.current_tp_index in [self.SOL_GAUCHE, self.SOL_DROIT]
-    
-    def speed(self, valeur_base, is_proj=False):
-        # Augmente la vitesse de déplacement et d'animation en fonction de la phase
-        if self.phase == 1:
-            return valeur_base
-        elif self.phase == 2 and is_proj:
-            return valeur_base * 1.5
-        else :
-            return valeur_base / 1.3
+    #Animation
         
     def update_anim(self, once=False):
         anim = self.anims[self.current_anim]
@@ -493,103 +385,44 @@ class Gravelion(Boss):
         # Vrai si l'index de l'animation actuelle a bouclé (retourné à 0 après avoir atteint la fin)
         return self.anims[self.current_anim].index_image < self.anims[self.current_anim].vitesse_animation
     
-    def choose_attack(self, player_rect):
-        distance = abs(player_rect.centerx - self.rect.centerx)
-
-        cocon_chance = 1/3 if self.phase == 2 else self.cocon_chance
-        if random.random() < cocon_chance:
-            return self.ATK_COCON
-        
-        if not self.is_on_ground():
-            return random.choice([self.ATK_LASER, self.ATK_ARM])
-        if distance < 200:
-            return self.ATK_MELEE
-        return random.choice([self.ATK_MELEE, self.ATK_ARM])
+    def speed(self, valeur_base, is_proj=False):
+        # Augmente la vitesse de déplacement et d'animation en fonction de la phase
+        if self.phase == 1:
+            return valeur_base
+        else :
+            if is_proj:
+                return valeur_base * 1.5
+            return valeur_base / 1.3
     
-    #Contre-attaque cocon
-    def hit_while_shielded(self):
-        self.cocon_punish = True
-
-    def update(self, player_rect, player, platforms):
-        now = pygame.time.get_ticks()
-        elapsed = now - self.state_timer
-
-        if self.state == self.NOT_TRIGGERED:
-            pass
-
-        elif self.state == self.IDLE:
-            self.update_idle(elapsed, player_rect)
-
-        elif self.state == self.ATTACKING:
-            self.update_attack(elapsed, player_rect)
-
-        elif self.state == self.TELEPORTING:
-            self.update_teleport(elapsed, player_rect)
-
-        elif self.state == self.SHIELDED:
-            self.update_cocon(elapsed, player_rect, player)
-
-        elif self.state == self.STAGGER:
-            self.update_stagger(elapsed)
-
-        elif self.state == self.TRANSITION:
-            self.update_transition(elapsed)
-
-        elif self.state == self.DYING:
-            self.update_dying(elapsed)
-
-        self.update_hitbox(platforms, self.arene_rect)
-        self.hitbox.topleft = self.rect.center
-                
-        once_states = ["melee", "arm", "cocon", "laser_charge", "transition", "death"]
-        self.update_anim(self.current_anim in once_states)
-
-    # ETATS
-
-    def update_idle(self, elapsed, player_rect):
-        self.current_anim ="idle"
-        if elapsed >= self.speed(self.idle_duration):
-            self.face_player(player_rect)
-            self.current_attack = self.choose_attack(player_rect)
-            if self.current_attack == self.ATK_COCON:
-                self.enter_state(self.SHIELDED)
-            else:
-                self.enter_state(self.ATTACKING)
+    def scale_all_anims_speed(self, factor):
+        for anims in self.anims.values():
+            anims.vitesse_animation *= factor
         
-    def update_attack(self, elapsed, player_rect):
-        attack = self.current_attack
+    # Spawn et gestion des hitboxs
 
-        if attack == self.ATK_MELEE:
-            self.attack_melee(elapsed)
-        elif attack == self.ATK_ARM:
-            self.attack_arm(elapsed, player_rect)
-        elif attack == self.ATK_LASER:
-            head = self.rect.midtop + pygame.math.Vector2(0, 20)
-            self.attack_laser(elapsed, head)
+    def spawn_attack_zone(self, x, y, width, height, attack_data, image, duration):
+        zone = AttackZone(self.fenetre, x, y, width, height, attack_data, image, duration)
+        self.hitboxs.append(zone)
+        return zone
 
-    def update_cocon(self, elapsed, player_rect, player):
-        self.current_anim = "cocon"
-        self.is_shielded = True # Pour ne pas prendre de dégats pendant le cocon
+    def spawn_projectile(self, target_x, target_y, speed, width, height, damage, offset_x, offset_y, lifetime=3000, should_disappear_on_contact=True):
+        projectile = Projectile(self.rect.centerx + offset_x, self.rect.centery + offset_y,
+                                 target_x, target_y, speed, width, height, damage, lifetime, should_disappear_on_contact)
+        self.hitboxs.append(projectile)
 
-        if self.cocon_punish:
-            # Si le joueur touche le cocon, il subit une contre-attaque
-            self.cocon_punish = False 
-            self.is_shielded = False
-            self.position.x = player.position.x - 100 * player.direction # Se téléporte dans le dos du joeur
-            self.position.y = player.position.y
-            self.rect.midbottom = (self.position.x, self.position.y)
-            self.face_player(player_rect)
-            self.current_attack = self.ATK_MELEE
-            self.enter_state(self.ATTACKING)
-            return
-        
-        if elapsed >= 1500:
-            #Fin du cocon sans etre frappé
-            self.is_shielded = False
-            self.enter_state(self.TELEPORTING)
-        
+    def update_hitbox(self, platforms, limite_rect):
+        for elem in self.hitboxs[:]:
+            if hasattr(elem, "update"):
+                delete = elem.update(platforms, limite_rect)
+            else :
+                delete = elem.lifetime_expired()
+            if delete:
+                self.hitboxs.remove(elem)
+    
+    # Etats génériques
+
     def update_stagger(self, elapsed):
-        self.current_anim = "glowing"
+        self.current_anim = "idle"
         if elapsed >= self.stagger_duration:
             self.enter_state(self.IDLE)
 
@@ -597,8 +430,7 @@ class Gravelion(Boss):
         self.current_anim = "transition"
         if elapsed >= 2000:
             self.phase = 2
-            for anim in self.anims.values():
-                anim.vitesse_animation *= 1.5
+            self.scale_all_anims_speed(1.5)
             self.enter_state(self.TELEPORTING)
 
     def update_teleport(self, elapsed, player_rect):
@@ -610,109 +442,18 @@ class Gravelion(Boss):
 
     def update_dying(self, elapsed):
         self.current_anim = "death"
+        self.update_anim(once=True)
         if self.anim_over() and elapsed > 500:
             self.alive = False
-            Monnaie.add_orbs(self.orbs_value)   # Argent gagné quand le boss meurt
-
-    #ATTAQUES
-    def attack_melee(self, elapsed):
-        self.current_anim = "melee"
-        charge = self.speed(600)
-        if elapsed >= charge and not self.atk_spawned:
-
-            self.attack_rect = AttackZone(
-                x=self.rect.centerx+20*self.direction,
-                y=self.rect.bottom - 100,
-                width=70,
-                height=100,
-                attack_data={"damage": 1, "knockback_x": 40, "knockback_y": -10},
-                image=None,
-                duration=300
-            )
-            self.hitboxs.append(self.attack_rect)
-            self.atk_spawned = True
-
-            onde = Projectile(
-                x=self.rect.centerx + self.direction * 50,
-                y=self.rect.bottom -30,
-                target_x=self.arene_rect.right if self.direction == 1 else self.arene_rect.left,
-                target_y=self.rect.bottom -30,
-                speed=self.speed(10, is_proj=True),
-                width=50,
-                height=30,
-                damage=1,
-                lifetime=9999,
-                disappear_on_contact=False,
-            )
-            self.hitboxs.append(onde)
-        
-        if elapsed >= charge + 800:
-            self.enter_state(self.TELEPORTING)
-
-    def attack_arm(self, elapsed, player_rect):
-        self.current_anim = "arm"
-        charge = self.speed(500)
-        pos_x = self.rect.centerx + self.direction * 60
-        pos_y = self.rect.centery - 30
-        if elapsed >= charge and not self.atk_spawned:  
-            bras = Projectile(
-                pos_x, pos_y,
-                target_x=player_rect.centerx,
-                target_y=player_rect.centery,
-                speed=self.speed(8, is_proj=True),
-                width=30,
-                height=15,
-                damage=1,
-                lifetime=3000,
-            )
-            self.hitboxs.append(bras)
-            self.atk_spawned = True
-        
-        if elapsed >= charge + 800:
-            self.enter_state(self.TELEPORTING)
-
-    def attack_laser(self, elapsed, head):
-        self.current_anim = "laser_charge"
-        charge = self.speed(1000)
-
-        if elapsed >= charge:
-            if self.laser is None: 
-                self.laser = AttackZone(
-                    x=head.x,
-                    y=head.y,
-                    width=10,
-                    height=800,
-                    attack_data={"damage": 2, "knockback_x": 80, "knockback_y": -2},
-                    image=None,
-                    duration=9999
-                )
-                self.hitboxs.append(self.laser)
-            move_speed = self.speed(7, is_proj=True)
-
-            if self.current_tp_index == self.AIR_GAUCHE:
-                self.rect.x += move_speed
-            else:
-                self.rect.x -= move_speed
-            head = self.rect.midtop + pygame.math.Vector2(0, 20)
-            self.laser.rect.midtop = (head.x, head.y)
-
-            if elapsed >= charge + 900:
-                if self.laser in self.hitboxs:
-                    self.hitboxs.remove(self.laser)
-                self.laser = None
-                self.enter_state(self.TELEPORTING)
+    
+    #Affichage
 
     def draw(self, fenetre, camera):
         if not self.alive:
             return
-        pygame.draw.rect(fenetre, (255, 0, 0), camera.apply(self.hitbox), 2)
-        
         fenetre.blit(self.image, camera.apply(self.rect))
-        if self.laser:
-            fenetre.blit(self.laser.image, camera.apply(self.laser.rect))
         for elem in self.hitboxs:
             elem.draw(fenetre, camera)
-
 
 class Golem(Boss):
     ATK_SMASH = "smash"
@@ -867,7 +608,7 @@ class Golem(Boss):
         # Collion avec les plateformes
         self.physics_update(platforms)  
 
-        self.update_hitbox(platforms)
+        self.update_hitbox(platforms, self.arene_rect)
 
     def update_idle(self, elapsed, player_rect):
         # Idle
