@@ -22,7 +22,7 @@ os.environ['SDL_RENDER_SCALE_QUALITY'] = '0'
 pygame.init()
 
 # Configs
-GAME_WIDTH, GAME_HEIGHT = 1920, 1080
+GAME_WIDTH, GAME_HEIGHT = 1280, 720
 MAP_WIDTH, MAP_HEIGHT = 7000, 2000
 
 fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.DOUBLEBUF, vsync=1) 
@@ -109,7 +109,7 @@ while continuer:
                     # faire dasher le joueur
                     player.press_dash()
                 if event.key == pygame.K_ESCAPE:
-                    pause = menu(fenetre, player, checkpoints)
+                    pause = menu(fenetre, player, checkpoints, defaut_map)
                 if event.key == pygame.K_f:
                     # faire lancer le sort
                     if player.sort.use(player):

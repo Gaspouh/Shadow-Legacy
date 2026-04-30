@@ -3,7 +3,7 @@ from Core.save import sauvegarder, charms_images, SAVE_FILE
 import os
 import json
 
-def menu(fenetre, player, checkpoints):
+def menu(fenetre, player, checkpoints, current_map):
     pause = True
     # Afficher le menu
     noir_transparent = pygame.Surface((fenetre.get_width(), fenetre.get_height()))
@@ -29,7 +29,7 @@ def menu(fenetre, player, checkpoints):
                 #elif bouton_options.collidepoint(event.pos):
                     
                 elif bouton_quitter.collidepoint(event.pos):
-                    sauvegarder(player, checkpoints, map) # Sauvegarder avant de quitter
+                    sauvegarder(player, checkpoints, current_map) # Sauvegarder avant de quitter
                     pygame.quit()  # Quitter le jeu
                     exit()
 

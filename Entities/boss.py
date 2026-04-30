@@ -408,6 +408,7 @@ class Gravelion(Boss):
 
         self.arene_rect = arene_rect
         self.use_gravity = False # Pas de gravité pour ce boss lévitant
+        self.orbs_value = 55
 
         # Animations 
         self.anims = {
@@ -608,6 +609,7 @@ class Gravelion(Boss):
         self.current_anim = "death"
         if self.anim_over() and elapsed > 500:
             self.alive = False
+            Monnaie.add_orbs(self.orbs_value)   # Argent gagné quand le boss meurt
 
     #ATTAQUES
     def attack_melee(self, elapsed):
@@ -732,6 +734,8 @@ class Golem(Boss):
         self.recul_intensite = 0.1
         self.orbs_value = 30
         self.vitesse_deplacement = 2
+
+        self.orbs_value = 15
         
         self.scale = 0.5
 
@@ -911,7 +915,7 @@ class Golem(Boss):
     def update_dying(self, elapsed):
         # meurt
         self.alive = False # fait disparaitre le sprite
-        Monnaie.orbs += self.orbs_value
+        Monnaie.add_orbs(self.orbs_value)
         if not self.death_sound_played:
             self.death_sound.play()
             self.death_sound_played = True

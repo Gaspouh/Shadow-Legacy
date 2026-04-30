@@ -1,8 +1,8 @@
 {
     "player": {
-        "health": 4,
+        "health": 5,
         "max_health": 5,
-        "orbs": 0,
+        "orbs": 8,
         "found_charms": {
             "attack_long_range": true,
             "attack_speed": true,

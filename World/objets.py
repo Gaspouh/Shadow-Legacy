@@ -47,6 +47,7 @@ class Coeur(Animation):
            self.image = self.frames_droite[-1]  
             
 class Monnaie:
+    global orbs
     orbs = 0 # Globale
     def __init__(self, fenetre, x, y):
         self.fenetre = fenetre
@@ -56,8 +57,13 @@ class Monnaie:
         self.font = pygame.font.SysFont("Playfair Display", 60, bold=True)
         self.rect = self.image.get_rect(topright=(fenetre.get_width() - 50, 50))
 
+    @staticmethod   # permet de rendre global
+    def add_orbs(amount):
+        Monnaie.orbs += amount
+
     def draw(self, fenetre):
-        texte = str(self.orbs)
+        self.rect = self.image.get_rect(topright=(fenetre.get_width() - 50, 50))
+        texte = str(Monnaie.orbs)
 
         # effet de brillance, on décale autour du texte pour créer un halo + blit vertical pour que ça recouvre tout le texte (halo)
         for ox in range(-8, 9, 3):

@@ -2,14 +2,16 @@ import math
 import pygame
 from Visual.sprite_sheet import *
 from Entities.physics_entity import PhysicsEntity
+from World.objets import Monnaie
 
 class Ennemi(Animation, PhysicsEntity):
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data, scale):
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data, scale, reward=2):
         Animation.__init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, scale)
         PhysicsEntity.__init__(self, x, y, width, height, gravity = 0.4, friction = -0.5, use_gravity=True)
 
         #Etat
         self.alive = True
+        self.reward = reward
         self.ignore_invincibility = False
         self.respawn_on_touch = False 
         self.is_shielded = False
@@ -74,6 +76,7 @@ class Ennemi(Animation, PhysicsEntity):
         if not self.alive and not self.dead:
             self.dead = True
             self.animation_mort.gestion_animation() # Jouer l'animation de mort
+            Monnaie.add_orbs(self.reward)    # la reward
         if self.dead:
             image = self.animation_mort.gestion_animation()
         if self.direction == 1:
@@ -175,8 +178,8 @@ class AttackZone:
         fenetre.blit(self.image, camera.apply(self.rect))
 
 class Patrouilleur(Ennemi):
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data, scale):
-        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data, scale)
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data, scale, reward=2):
+        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data, scale,reward)
 
         # Capteurs pour patrouille
         self.mur = False
@@ -231,14 +234,14 @@ class Patrouilleur(Ennemi):
 
 class Araignee(Patrouilleur):
     def __init__(self, fenetre, x, y):
-        super().__init__(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 5, 3, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1)
+        super().__init__(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 5, 3, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1, reward=4)
 
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 7, 62, 50, 27, 7, scale=1)
         self.dead = False
 
 class Scorpion(Patrouilleur):
     def __init__(self, fenetre, x, y):
-        super().__init__(fenetre, x, y, 'Assets/Images/scorpion.png', 8, 64, 64, 0, 0, 4, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1)
+        super().__init__(fenetre, x, y, 'Assets/Images/scorpion.png', 8, 64, 64, 0, 0, 4, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1, reward=5)
 
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
         self.dead = False
@@ -247,7 +250,7 @@ class Volant(Ennemi):
     def __init__(self, fenetre, x, y):
         
         # On applique les caractéristique de l'ennemi débutant au volant
-        super().__init__(fenetre, x, y, 'Assets/Images/bat.png', 8, 16, 30, 0, 0, 3, 0.9, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=2)
+        super().__init__(fenetre, x, y, 'Assets/Images/bat.png', 8, 16, 30, 0, 0, 3, 0.9, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=2, reward=4)
 
         self.image = self.frames_droite[0]
         self.use_gravity = False
@@ -284,7 +287,7 @@ class Tourelle(Ennemi):
     def __init__(self, fenetre, x, y):
         
         # On applique les caractéristique de l'ennemi débutant a la tourelle
-        super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1)
+        super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1, reward=0)
 
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
         self.animation_tir = Animation(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, scale=1)
@@ -359,7 +362,7 @@ class Fighter(Ennemi):
     def __init__(self, fenetre, x, y):
         
         # On applique les caractéristique de l'ennemi débutant a la tourelle
-        super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1)
+        super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1, reward=5)
 
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
         self.animation_attaque = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 6, 64, 64, 0, 0, scale=1)
@@ -424,7 +427,7 @@ class Fighter(Ennemi):
 
 class Chargeur(Ennemi):
     def __init__(self, fenetre, x, y):
-        super().__init__(fenetre, x, y, 'Assets/Images/chargeur.png', 8, 80, 58, 0, 0, 3, 3, {"damage": 1, "knockback_x": 150, "knockback_y": -4}, scale=1)
+        super().__init__(fenetre, x, y, 'Assets/Images/chargeur.png', 8, 80, 58, 0, 0, 3, 3, {"damage": 1, "knockback_x": 150, "knockback_y": -4}, scale=1, reward=8)
 
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/chargeur_dead.png', 8, 80, 58, 0, 0, scale=1)
         self.dead = False
