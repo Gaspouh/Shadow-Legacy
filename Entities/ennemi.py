@@ -57,36 +57,52 @@ class Ennemi(Animation, PhysicsEntity):
 
         # knockback
         if self.can_receive_knockback:
-            if source_rect.centerx > self.rect.centerx:
-                knockback_direction = -1
-            else:
-                knockback_direction = 1
+            if hasattr(source, "attack_direction"): #Lorsque le joeur est la source
+                if source.attack_direction == "UP":
+                    self.velocity.y = -20
+                elif source.attack_direction == "DOWN":
+                    self.velocity.y = 50
+                else : 
+                    self.velocity.x = attack_data["knockback_x"] * source.direction
+            else :
+                if source_rect.centerx > self.rect.centerx:
+                    knockback_direction = -1
+                else:
+                    knockback_direction = 1
 
-            self.velocity.x = attack_data["knockback_x"] * knockback_direction
-            self.velocity.y = attack_data["knockback_y"]
+                self.velocity.x = attack_data["knockback_x"] * knockback_direction
+                self.velocity.y = attack_data["knockback_y"]
             self.is_knocked_back = True
 
         # meurte si les PV sont à 0 ou moins
         if self.pv_ennemi <= 0:
             self.pv_ennemi = 0
             self.alive = False
-        
     
     def mort(self):
+        fin = False
+        
         if not self.alive and not self.dead:
             self.dead = True
             self.animation_mort.gestion_animation() # Jouer l'animation de mort
             Monnaie.add_orbs(self.reward)    # la reward
         if self.dead:
             image = self.animation_mort.gestion_animation()
-        if self.direction == 1:
-            self.image = self.animation_mort.frames_droite[int(self.animation_mort.index_image)]
-        else:
-            self.image = self.animation_mort.frames_gauche[int(self.animation_mort.index_image)]
+            if self.direction == 1:
+                self.image = self.animation_mort.frames_droite[int(self.animation_mort.index_image)]
+            else:
+                self.image = self.animation_mort.frames_gauche[int(self.animation_mort.index_image)]
+                
+            if self.animation_mort.index_image >= len(self.animation_mort.frames_droite) - 1:
+                    fin = True
+
+            return fin  # True quand l'animation est terminée
+
+        return False  # encore en vie
 
 class Projectile:
     def __init__(self, x, y, target_x, target_y, speed, width, height, damage, gravity=0.4, \
-                  lifetime=3000, disappear_on_contact=True, image=None, use_gravity=False):
+                  lifetime=3000, should_disappear_on_contact=True, image=None, use_gravity=False):
         
         dist_x = target_x - x
         dist_y = target_y - y
@@ -114,7 +130,7 @@ class Projectile:
         # Durée de vie du projectile
         self.birth_time = pygame.time.get_ticks()
         self.lifetime = lifetime
-        self.disappear_on_contact = disappear_on_contact
+        self.should_disappear_on_contact = should_disappear_on_contact
 
         if image:
             self.image = pygame.transform.scale(image, (width, height))
@@ -122,10 +138,9 @@ class Projectile:
             self.image = pygame.Surface((width, height), pygame.SRCALPHA)
             self.image.fill((255, 0, 0))  # Couleur rouge pour les projectiles sans image
 
-
         self.angle = math.degrees(math.atan2(-self.velocity.y, self.velocity.x))
         
-    def update(self):
+    def update(self, platforms, limite_rect):
         if self.use_gravity:
             self.velocity.y += self.gravity
 
@@ -134,11 +149,21 @@ class Projectile:
 
         self.angle = math.degrees(math.atan2(-self.velocity.y, self.velocity.x))
 
+        if self.lifetime_expired() or self.out_of_bounds(limite_rect) or self.disappear_on_contact(platforms):
+            return True  # Indiquer que le projectile doit être supprimé
+
     def lifetime_expired(self):
         return pygame.time.get_ticks() - self.birth_time > self.lifetime
 
     def out_of_bounds(self, limite_rect):
         return not limite_rect.colliderect(self.rect)
+    
+    def disappear_on_contact(self, platforms):
+        if self.should_disappear_on_contact:
+            for platform in platforms:
+                if self.rect.colliderect(platform.rect):
+                    return True
+        return False
         
     def draw(self, fenetre, camera):
         rotated_image = pygame.transform.rotate(self.image, self.angle)
@@ -164,15 +189,9 @@ class AttackZone:
             self.image = pygame.Surface((width, height), pygame.SRCALPHA)
             self.image.fill((255, 0, 0))  # Couleur rouge pour les projectiles sans image
 
-    def update(self):
-        pass
-
     def lifetime_expired(self):
         return pygame.time.get_ticks() - self.birth_time > self.duration
-
-    def out_of_bounds(self, limite_rect):
-        pass
-
+    
     def draw(self, fenetre, camera):
         pygame.draw.rect(fenetre, (255,0,0), camera.apply(self.rect), 2)
         fenetre.blit(self.image, camera.apply(self.rect))
@@ -290,7 +309,7 @@ class Tourelle(Ennemi):
         super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1, reward=0)
 
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
-        self.animation_tir = Animation(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, scale=1)
+        self.animation_tir = Animation(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 70, 63, 0, 0, scale=1)
         self.dead = False
         self.use_gravity = False
         self.can_receive_knockback = False
@@ -354,7 +373,7 @@ class Tourelle(Ennemi):
             self.shooting = True
             self.animation_tir.index_image = 0 
             # Créer un projectile qui se dirige vers le joueur
-            projectile = Projectile(self.rect.centerx, self.rect.centery, player_rect.centerx, player_rect.centery, speed=5, width=20, height=20, damage= 1, gravity=False) 
+            projectile = Projectile(self.rect.centerx, self.rect.centery, player_rect.centerx, player_rect.centery, speed=5, width=20, height=20, damage= 1) 
             tir_tourelle.append(projectile)
             self.coldown = 150  # Mettre un cooldown entre les tirs
     
@@ -429,7 +448,7 @@ class Chargeur(Ennemi):
     def __init__(self, fenetre, x, y):
         super().__init__(fenetre, x, y, 'Assets/Images/chargeur.png', 8, 80, 58, 0, 0, 3, 3, {"damage": 1, "knockback_x": 150, "knockback_y": -4}, scale=1, reward=8)
 
-        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/chargeur_dead.png', 8, 80, 58, 0, 0, scale=1)
+        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/chargeur_dead.png', 8, 80, 58, 3, 0, scale=1)
         self.dead = False
         self.charge_timer = 0
         self.attacking = False

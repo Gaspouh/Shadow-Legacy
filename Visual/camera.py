@@ -17,6 +17,10 @@ class Camera:
 
     def apply(self, entity_rect):
         return entity_rect.move(self.camera.topleft)
+    
+    def update_map_size(self, map_width, map_height):
+        self.map_width = map_width
+        self.map_height = map_height
 
     def update(self, target, shake_amount=0):
         target_x = -target.rect.centerx + self.zoom_w // 2
@@ -34,3 +38,26 @@ class Camera:
         if shake_amount > 0:
             self.camera.x += random.randint(-shake_amount, shake_amount)
             self.camera.y += random.randint(-shake_amount, shake_amount)
+
+class Background_effect:    # On utilise le "parallax layer", c'est un Effet populaire en 2D et utlisé dans hollow knight pour créer de la profondeur
+    def __init__(self, fenetre, path_image, profondeur):
+        self.fenetre = fenetre
+        self.image = pygame.image.load(path_image).convert_alpha()
+        self.profondeur = profondeur
+    
+    def effect(self, camera):
+        # On multiplie par la profondeur et elle est entre 0 et 1, 1 c'est la meme vitesse et 0 c'est immobile (quand la distance tend vers l'infini)
+        offset_x = -camera.camera.x * self.profondeur  # "-" car la camera est deja negative, ça fait une valeur absolue en gros
+        offset_y = -camera.camera.y * self.profondeur
+        
+        # Application de la "formule du tiling" classique pour faire du parallax. repete l'image au max pour couvrir tout l'écran en gros
+        img_w = self.image.get_width()
+        # là le modulo permet repeter l'image à l'infini
+        start_x = offset_x % img_w
+        
+        # On dessine deux fois pour couvrir les transitions (tiling) cas classique du parallax)
+        self.fenetre.blit(self.image, (start_x - img_w, offset_y))
+        self.fenetre.blit(self.image, (start_x, offset_y))
+        if start_x + img_w < self.fenetre.get_width():
+            self.fenetre.blit(self.image, (start_x + img_w, offset_y))
+

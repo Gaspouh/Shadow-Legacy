@@ -25,9 +25,10 @@ class PhysicsEntity:
 
         if self.use_gravity : # Gravité
             self.acceleration.y = self.gravity
+        else:
+            self.acceleration.y += self.velocity.y * self.friction
 
         self.acceleration.x += self.velocity.x * self.friction
-        self.acceleration.y += self.velocity.y * self.friction
         self.velocity += self.acceleration
 
         # Seuil d'arrêt horizontal

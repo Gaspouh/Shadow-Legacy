@@ -2,7 +2,7 @@
     "player": {
         "health": 5,
         "max_health": 5,
-        "orbs": 8,
+        "orbs": 100,
         "found_charms": {
             "attack_long_range": true,
             "attack_speed": true,
@@ -15,18 +15,18 @@
         }
     },
     "spawn_point": {
-        "x": 569.0,
-        "y": 575.0
+        "x": 100.0,
+        "y": 100.0
     },
     "abilities": {},
     "checkpoints": [
         {
-            "activated": true,
+            "activated": false,
             "x": 1926,
             "y": 583
         },
         {
-            "activated": true,
+            "activated": false,
             "x": 569,
             "y": 575
         }

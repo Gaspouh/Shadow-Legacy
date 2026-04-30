@@ -10,20 +10,23 @@ from Entities.perso import Player
 from Entities.ennemi import Projectile
 from World.map import Map_Manager
 from Visual.camera import Camera
-from Visual.vfx import particles, Particle, Fade
+from Visual.vfx import particles, Particle, Fade, HealParticle, heal_particles
 from World.traps import *
 from World.objets import Coeur, Monnaie
 from Core.save import sauvegarder, charger, save_backup
 from Entities.boss import Gravelion
-from Visual.interface import menu, sit_on_bench
+from Visual.interface import menu, sit_on_bench, home_screen
 from Core.reset import reset
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0'
 pygame.init()
 
 # Configs
-GAME_WIDTH, GAME_HEIGHT = 1280, 720
+GAME_WIDTH, GAME_HEIGHT = 1920, 1080
 MAP_WIDTH, MAP_HEIGHT = 7000, 2000
+GAME_WIDTH, GAME_HEIGHT = 1920, 1080
+MAP_WIDTH, MAP_HEIGHT = 115*32, 50*32 # A fixer manuellement pour le premier chargement de map
+MAP_RECT = pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)
 
 fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.DOUBLEBUF, vsync=1) 
 pygame.display.set_caption("Shadow Legacy") # Définir le titre de la fenêtre
@@ -35,12 +38,13 @@ clock = pygame.time.Clock()
 
 Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-save_backup()
+home_screen(fenetre)
 
 #Map
 defaut_map = "swamp"
 map_manager = Map_Manager()
 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
+
 
 platforms = map_manager.platforms
 special_platforms = map_manager.special_platforms
@@ -93,6 +97,8 @@ shake_amount = 0 # Intensité du screen shake
 continuer = True
 pause = False
 
+save_backup()
+
 while continuer:
     now = pygame.time.get_ticks()
 
@@ -103,13 +109,19 @@ while continuer:
         if now > hitstop_until and player.health > 0: # On traite les touches que si on n'est pas en histstop et en vie
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    # faire sauter le joueur
+                    # faire sauter le joueurddd
                     player.press_jump()
                 if event.key == pygame.K_LSHIFT:
                     # faire dasher le joueur
                     player.press_dash()
                 if event.key == pygame.K_ESCAPE:
-                    pause = menu(fenetre, player, checkpoints, defaut_map)
+                    etat_menu = menu(fenetre, player, checkpoints, defaut_map)
+                    if etat_menu == "QUIT":
+                        continuer = False # quitte le jeu pour aller au menu home
+                        pause = False
+                    else:
+                        pause = etat_menu # Si c'est False, le jeu reprend
+
                 if event.key == pygame.K_f:
                     # faire lancer le sort
                     if player.sort.use(player):
@@ -120,6 +132,8 @@ while continuer:
                         target_y = y
                         projectile = Projectile(x, y, target_x, target_y, 15, 80, 80, 3)
                         projectiles.append(projectile)
+                if event.key == pygame.K_o:
+                    player.soin.use(player)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Clic gauche
@@ -136,6 +150,9 @@ while continuer:
         # Mise à jour des cœurs
         for i, heart in enumerate(hearts):
             heart.update(player.health, i)
+        
+        # Mise à jour du soin
+        player.soin.update(player)
 
         if now > hitstop_until :
             #Reset effets
@@ -166,15 +183,13 @@ while continuer:
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
 
             for e in liste_entites[:]:
-                if hasattr(e, "mort"):
-                    e.mort()
-                if hasattr(e, "animation_mort"):
-                    if e.animation_mort.index_image >= len(e.animation_mort.frames_droite)-1:
+
+                if not e.alive:
+                    fin = e.mort()
+                    if fin:
                         liste_entites.remove(e)
-                else :
-                    liste_entites.remove(e)
                     continue
-                
+                              
                 if hasattr(e, "patrouille"): #pour les patrouilleurs
                     e.patrouille(platforms)
                 
@@ -190,9 +205,9 @@ while continuer:
                 if hasattr(e, "charge"): #pour les chargeurs
                     e.charge(player.rect, platforms)
 
-                if hasattr(e, "update"): #pour tous les ennemis
-                    e.update(player.rect, player, platforms)
-               
+                if hasattr(e, "update"):
+                    e.update(player.rect, player, platforms) 
+
                 if e.rect.colliderect(player.rect):
                     hitstop_duration, shake_amount = player.take_damage(e.attack_data, e.rect, e) # Appliquer les effets de recul au joueur si un ennemi le touche
                     hitstop_until = now + hitstop_duration
@@ -220,6 +235,8 @@ while continuer:
 
                         if player.attack_data["critical"] : # Si coup critique
                             player.attack_data["damage"] = player.attack * 3
+                        else:
+                            player.attack_data["damage"] = player.attack
                         
                         e.receive_hit(player.attack_data, player.rect, player) # Appliquer les effets de recul à l'ennemi 
                         
@@ -234,6 +251,9 @@ while continuer:
 
             # Dessiner les éléments du jeu sur la fenêtre
             game_fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
+
+            # Backgroud avec parallax
+
                 
             # Plateformes
             for platform in platforms:
@@ -265,6 +285,10 @@ while continuer:
                     if trap.special_effect == "wind":
                         player.wind_force_x = trap.force_x
                         player.wind_force_y = trap.force_y
+
+                for e in liste_entites:
+                    if trap.rect.colliderect(e.rect) and hasattr(e, "receive_hit") : #trap touche ennemi
+                        e.receive_hit(trap.attack_data, trap.rect, trap)
 
             if shake_amount > 0:
                 shake_amount -= 1 # Réduire progressivement l'intensité du screen shake
@@ -316,6 +340,8 @@ while continuer:
         if door_collided and fade.intensity >= 255 and fade.state == "out":
                 print("oui")
                 liste_entites.clear()
+                projectiles.clear()
+                tir_tourelle.clear()
 
                 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", door_collided.target_map))
 
@@ -328,8 +354,11 @@ while continuer:
                 doors = map_manager.doors
                 entities_to_spawn = map_manager.entities_to_spawn
 
-                liste_entites = map_manager.spawn_entities(fenetre)
+                MAP_WIDTH, MAP_HEIGHT = map_manager.map_width, map_manager.map_height
+                MAP_RECT = pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)
+                camera.update_map_size(MAP_WIDTH, MAP_HEIGHT)
 
+                liste_entites = map_manager.spawn_entities(fenetre)
                 spawn = map_manager.get_spawn(door_collided.target_spawn)
 
                 player.position = spawn.position
@@ -354,6 +383,17 @@ while continuer:
             pygame.draw.rect(game_fenetre, (255, 0, 0), camera.apply(player.attack_rect)) # Afficher la hitbox de l'attaque pour les tests
         if pygame.key.get_pressed()[pygame.K_a]:
             pygame.draw.rect(game_fenetre, (0, 0, 255), camera.apply(player.rect), 2) # Afficher la hitbox de l'attaque pour les tests
+        
+        if player.soin.is_healing:
+            if (now // 150) % 2 == 0: # Clignotement de l'effet de soin
+                heal_effect = pygame.Surface((player.rect.width, player.rect.height), pygame.SRCALPHA)
+                heal_effect.fill((255, 255, 255, 100)) # Blanc transparent
+                game_fenetre.blit(heal_effect, camera.apply(player.rect))
+            if (now // 80) % 2 == 0:
+                heal_particles.append(HealParticle(
+                    player.rect.centerx + randint(-20, 20),
+                    player.rect.bottom - randint(0, 30)
+                ))
 
         """
         #Lancement Gravelion
@@ -363,12 +403,16 @@ while continuer:
             gravelion.enter_state(gravelion.IDLE)
             shake_amount = 10 # Gros screen shake pour annoncer le début du combat
         """
+        total_particles = particles + heal_particles  # Liste combinée pour faciliter la mise à jour et le dessin
 
         # Particules
-        for p in particles[:]: # On utilise [:] pour copier la liste et éviter les erreurs de suppression
+        for p in total_particles[:]: # On utilise [:] pour copier la liste et éviter les erreurs de suppression
             p.update()
             if p.life <= 0:
-                particles.remove(p)
+                if p in particles:
+                    particles.remove(p)
+                elif p in heal_particles:
+                    heal_particles.remove(p)
             else:
                 p.draw(game_fenetre, camera)
         
@@ -390,24 +434,23 @@ while continuer:
         game_fenetre.blit(barre_sang, (10, 40))
 
         for elem in projectiles[:]:
-            elem.update()
-            elem.draw(game_fenetre, camera)
-
-         # supprimer si trop vieux ou hors map
-            if elem.lifetime_expired() or elem.out_of_bounds(pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)):
+            delete = elem.update(platforms, MAP_RECT)
+            if delete:
                 projectiles.remove(elem)
+            else:
+                elem.draw(game_fenetre, camera)
         
-        for elem in tir_tourelle:# On parcourt la liste des projectiles tirés par les tourelles
-            elem.update()
-            elem.draw(game_fenetre, camera)
+        for elem in tir_tourelle[:]:# On parcourt la liste des projectiles tirés par les tourelles
+            delete = elem.update(platforms, MAP_RECT)
+            if delete:
+                tir_tourelle.remove(elem)
+            else :
+                elem.draw(game_fenetre, camera)
             if elem.rect.colliderect(player.rect) and not elem.hit:# Si un projectile de tourelle touche le joueur
                 elem.hit = True # Pour éviter que le même projectile touche plusieurs fois
                 hitstop_duration, shake_amount = player.take_damage(elem.attack_data, elem.rect, elem)# Appliquer les dégâts et le recul au joueur
                 hitstop_until = pygame.time.get_ticks() + hitstop_duration # Activer le hitstop
-         # supprimer si trop vieux ou hors map
-            if elem.lifetime_expired() or elem.out_of_bounds(pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)):
-                tir_tourelle.remove(elem)
-            
+
     # Gestion de mort
     else:
         death_sound.play()

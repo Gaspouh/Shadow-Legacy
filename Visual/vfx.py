@@ -30,7 +30,9 @@ class Particle:
             pygame.draw.circle(temp_surface, color_with_alpha, (size, size), size)
             surface.blit(temp_surface, camera.apply(pygame.Rect(self.x - size, self.y - size, size*2, size*2)))
 
+
 particles = []
+heal_particles = []
 
 class Fade:
     def __init__(self):
@@ -68,3 +70,25 @@ class Fade:
                     self.state = None
             self.overlay.set_alpha(self.intensity) #Définir l'opacité du fond
             fenetre.blit(self.overlay, (0, 0)) #Affiche le fondu sur la fenetre depuis le point 0,0
+
+class HealParticle:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.life = random.randint(20, 40)
+        self.max_life = self.life
+        self.size = random.randint(2, 5)
+        self.vy = -random.randint(1, 3)  # Monte vers le haut
+        self.vx = random.randint(-1, 1)  
+
+    def update(self):
+        self.x += self.vx
+        self.y += self.vy
+        self.life -= 1
+
+    def draw(self, surface, camera):
+        alpha = int(255 * (self.life / self.max_life))
+        s = pygame.Surface((self.size * 2, self.size * 2), pygame.SRCALPHA)
+        pygame.draw.circle(s, (255, 255, 255, alpha), (self.size, self.size), self.size)
+        pos = camera.apply(pygame.Rect(self.x - self.size, self.y - self.size, self.size * 2, self.size * 2))
+        surface.blit(s, pos)

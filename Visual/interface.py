@@ -1,7 +1,75 @@
 import pygame
-from Core.save import sauvegarder, charms_images, SAVE_FILE
+from Core.save import sauvegarder, charms_images, SAVE_FILE, supprimer_sauvegarde
 import os
 import json
+
+
+def effet_bouton(image, rect):
+    """ Effet d'animation quand la souris passe sur un bouton (colidepoint), plus pratique en fonction pour utiliser dans home_screen """
+    mouse_pos = pygame.mouse.get_pos()
+    # il faut créer une nouvelle image pour pas écraser celle de base
+    if rect.collidepoint(mouse_pos):
+        # Agrandir l'image
+        new_width = int(image.get_width() * 1.1)
+        new_height = int(image.get_height() * 1.1)
+        new_image = pygame.transform.scale(image, (new_width, new_height))
+        new_rect = new_image.get_rect(center=rect.center)   # nouveau rect aussi
+        return new_image, new_rect
+    else:
+        return image, rect
+    
+def home_screen(fenetre):
+    """ Affiche l'écran d'accueil du jeu avec les options de démarrage, de chargement et de sortie. """
+    running = True
+    # Charger les images
+    background = pygame.image.load("Assets/Home/background_home_screen.png").convert()
+    background = pygame.transform.scale(background, (fenetre.get_width(), fenetre.get_height()))
+
+    # deplacer les bouttons à gauche de l'écran
+    boutton_reprendre = pygame.image.load("Assets/Home/boutton_reprendre.png").convert_alpha()
+    boutton_reprendre = pygame.transform.scale(boutton_reprendre, (boutton_reprendre.get_width()//1.4, boutton_reprendre.get_height()//1.4))
+    rect_reprendre = boutton_reprendre.get_rect(topleft=(50, 190))
+
+    boutton_quitter = pygame.image.load("Assets/Home/boutton_quitter.png").convert_alpha()
+    boutton_quitter = pygame.transform.scale(boutton_quitter, (boutton_quitter.get_width()//3.1, boutton_quitter.get_height()//3.1))
+    rect_quitter = boutton_quitter.get_rect(topleft=(50, 500))
+
+    boutton_nouvelle_game = pygame.image.load("Assets/Home/boutton_nouvelle_game.png").convert_alpha()
+    boutton_nouvelle_game = pygame.transform.scale(boutton_nouvelle_game, (boutton_nouvelle_game.get_width()//1.45, boutton_nouvelle_game.get_height()//1.45))
+    rect_nouvelle_game = boutton_nouvelle_game.get_rect(topleft=(50, 350))
+    
+    while running:
+        mouse_pos =pygame.mouse.get_pos()   # position de la souris pour chaque frame
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    if rect_reprendre.collidepoint(event.pos):
+                        running = False # Passe au boucle du main pour lancer une game
+                    elif rect_quitter.collidepoint(event.pos):
+                        pygame.quit()  # Quitter le jeu
+                        exit()
+                    elif rect_nouvelle_game.collidepoint(event.pos):
+                        # Supprimer les données de sauvegarde existantes pour une nouvelle partie
+                        supprimer_sauvegarde()
+                        running = False  # Supprime la save + Passe au boucle du main pour lancer une game
+
+        # Affichage des éléements
+        fenetre.blit(background, (0, 0))    
+
+        # Utiliser l'effet de bulle pour les boutons
+        img, rect = effet_bouton(boutton_reprendre, rect_reprendre) # on utilise "img" et "rect" pour chaque bouton car dans tout les cas 1 seul bouton à la fois est selectionné
+        fenetre.blit(img, rect)
+
+        img, rect = effet_bouton(boutton_quitter, rect_quitter)
+        fenetre.blit(img, rect)
+
+        img, rect = effet_bouton(boutton_nouvelle_game, rect_nouvelle_game)
+        fenetre.blit(img, rect)
+            
+        pygame.display.update()
 
 def menu(fenetre, player, checkpoints, current_map):
     pause = True
@@ -30,8 +98,8 @@ def menu(fenetre, player, checkpoints, current_map):
                     
                 elif bouton_quitter.collidepoint(event.pos):
                     sauvegarder(player, checkpoints, current_map) # Sauvegarder avant de quitter
-                    pygame.quit()  # Quitter le jeu
-                    exit()
+                    home_screen(fenetre)
+                    return "QUIT"   # au lieu de mainloop.continuer = False
 
         if bouton_reprendre.collidepoint(souris_pos):
             r1, g1, b1 = 255, 255 , 255
