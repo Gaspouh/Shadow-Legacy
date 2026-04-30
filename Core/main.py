@@ -10,7 +10,7 @@ from Entities.perso import Player
 from Entities.ennemi import Projectile
 from World.map import Map_Manager
 from Visual.camera import Camera
-from Visual.vfx import particles, Particle, Fade
+from Visual.vfx import particles, Particle, Fade, HealParticle, heal_particles
 from World.traps import *
 from World.objets import Coeur, Monnaie
 from Core.save import sauvegarder, charger, save_backup
@@ -120,6 +120,8 @@ while continuer:
                         target_y = y
                         projectile = Projectile(x, y, target_x, target_y, 15, 80, 80, 3)
                         projectiles.append(projectile)
+                if event.key == pygame.K_o:
+                    player.soin.use(player)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Clic gauche
@@ -136,6 +138,9 @@ while continuer:
         # Mise à jour des cœurs
         for i, heart in enumerate(hearts):
             heart.update(player.health, i)
+        
+        # Mise à jour du soin
+        player.soin.update(player)
 
         if now > hitstop_until :
             #Reset effets
@@ -354,6 +359,17 @@ while continuer:
             pygame.draw.rect(game_fenetre, (255, 0, 0), camera.apply(player.attack_rect)) # Afficher la hitbox de l'attaque pour les tests
         if pygame.key.get_pressed()[pygame.K_a]:
             pygame.draw.rect(game_fenetre, (0, 0, 255), camera.apply(player.rect), 2) # Afficher la hitbox de l'attaque pour les tests
+        
+        if player.soin.is_healing:
+            if (now // 150) % 2 == 0: # Clignotement de l'effet de soin
+                heal_effect = pygame.Surface((player.rect.width, player.rect.height), pygame.SRCALPHA)
+                heal_effect.fill((255, 255, 255, 100)) # Blanc transparent
+                game_fenetre.blit(heal_effect, camera.apply(player.rect))
+            if (now // 80) % 2 == 0:
+                heal_particles.append(HealParticle(
+                    player.rect.centerx + randint(-20, 20),
+                    player.rect.bottom - randint(0, 30)
+                ))
 
         """
         #Lancement Gravelion
@@ -363,12 +379,16 @@ while continuer:
             gravelion.enter_state(gravelion.IDLE)
             shake_amount = 10 # Gros screen shake pour annoncer le début du combat
         """
+        total_particles = particles + heal_particles  # Liste combinée pour faciliter la mise à jour et le dessin
 
         # Particules
-        for p in particles[:]: # On utilise [:] pour copier la liste et éviter les erreurs de suppression
+        for p in total_particles[:]: # On utilise [:] pour copier la liste et éviter les erreurs de suppression
             p.update()
             if p.life <= 0:
-                particles.remove(p)
+                if p in particles:
+                    particles.remove(p)
+                elif p in heal_particles:
+                    heal_particles.remove(p)
             else:
                 p.draw(game_fenetre, camera)
         

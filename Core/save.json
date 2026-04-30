@@ -1,12 +1,12 @@
 {
     "player": {
-        "health": 3,
+        "health": 5,
         "max_health": 5,
         "orbs": 0,
         "found_charms": {
-            "attack_long_range": true,
-            "attack_speed": true,
-            "jump_boost": true
+            "attack_long_range": false,
+            "attack_speed": false,
+            "jump_boost": false
         },
         "equipped_charms": {
             "attack_long_range": false,
@@ -31,5 +31,5 @@
             "y": 575
         }
     ],
-    "last_checkpoint": null
+    "last_checkpoint": 0
 }
