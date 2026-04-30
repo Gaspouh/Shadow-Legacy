@@ -13,6 +13,7 @@ from Visual.camera import Camera
 from Visual.vfx import particles, Particle, Fade, HealParticle, heal_particles
 from World.traps import *
 from World.objets import Coeur, Monnaie
+from Entities.boss_gravelion import Gravelion
 from Core.save import sauvegarder, charger, save_backup
 from Visual.interface import menu, sit_on_bench, home_screen
 from Core.reset import reset
@@ -62,10 +63,10 @@ spawn_point = charger(player, checkpoints, defaut_map)  # charge la save si elle
 player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
 player.rect.midbottom = player.position # pareil avec la hitbox
 
-"""#Boss
+#Boss
 gravelion = Gravelion(fenetre, 5600, 300, pygame.Rect(5000, 0, 1000, 600)) # spawn dans l'arène de Gravelion
 trigger_combat = pygame.Rect(5100, 0, 50, 600)
-#porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche"""
+#porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche
 
 # UI
 ui_reposer = pygame.image.load("Assets/Images/UI_'Pressez_Z'.png").convert_alpha()
