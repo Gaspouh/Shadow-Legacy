@@ -361,7 +361,8 @@ class Boss(Ennemi):
 
     def teleport_random(self):
         indices = list(range(len(self.tp_points)))
-        indices.remove(self.current_tp_index)  # éviter de se téléporter au même endroit
+        if self.current_tp_index in indices:
+            indices.remove(self.current_tp_index)  # éviter de se téléporter au même endroit
         self.teleport(random.choice(indices))
 
     #Animation
