@@ -3,11 +3,18 @@ import os
 import pygame
 from World.objets import Monnaie
 
+
 # Path
 CORE_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_FILE = os.path.join(CORE_DIR, "save.json")
 CONFIG_FILE = os.path.join(CORE_DIR, "config.json")
 DEFAULT_SAVE = os.path.join(CORE_DIR, "default_save.json")
+
+# Dico des maps à mettre à jour
+DEFAULT_SPAWNS = {
+    "terre_aride": {"x": 10, "y": 1200},
+    "Swamp/map_swamp.tmx": {"x": 100, "y": 100} 
+}
 
 # Spawn
 DEFAULT_SPAWNS = {
@@ -22,19 +29,27 @@ def load_config():
     with open(CONFIG_FILE, "r") as f:
         return json.load(f)
     
-def get_spawn_from_checkpoints(checkpoints, map):
-    """
-    Retourne la position du dernier checkpoint activé dans checkpoints[]
-    """
+def get_saved_map():
+    """prend juste la map sauvegardée pour apres charger la bonne map """
+    if not os.path.exists(SAVE_FILE):
+        return "Swamp/map_swamp.tmx" # fallback si pas de save (map du début)
+    
+    with open(SAVE_FILE, "r") as f:
+        data = json.load(f)
+
+    return data.get("current_map", "Swamp/map_swamp.tmx")
+    
+def get_spawn_from_checkpoints(checkpoints, map_path):
     dernier_checkpoint_actif = None
     for cp in checkpoints:
         if cp.activated:
-            dernier_checkpoint_actif = cp  # on prend le dernier de la liste activé
+            dernier_checkpoint_actif = cp   # dernier checkpoint acivé trouvé
 
     if dernier_checkpoint_actif:
         return pygame.math.Vector2(dernier_checkpoint_actif.rect.x, dernier_checkpoint_actif.rect.y)
     else:
-        return pygame.math.Vector2(DEFAULT_SPAWNS[map]["x"], DEFAULT_SPAWNS[map]["y"])
+        spawn = DEFAULT_SPAWNS.get(map_path, {"x": 100, "y": 100})
+        return pygame.math.Vector2(spawn["x"], spawn["y"])
     
 def get_player_equipped_charms():
     """Retourne les charms équipés du joueur"""
@@ -63,6 +78,7 @@ def sauvegarder(player, checkpoints, map, index_last_checkpoint=None):
 
     data = {    # on modifiera perso.py, abilities.py, et autres fichiers pour qu'ils dependent du json et pas l'inverse
         # player
+        "current_map": map, # map actuelle
         "player": {
             "health": player.health,      
             "max_health": player.max_health,
@@ -92,6 +108,7 @@ def sauvegarder(player, checkpoints, map, index_last_checkpoint=None):
             for cp in checkpoints
         ],
         "last_checkpoint": index_last_checkpoint
+        
     }
 
     with open(SAVE_FILE, "w") as f:

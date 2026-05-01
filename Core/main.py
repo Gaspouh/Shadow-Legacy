@@ -14,10 +14,12 @@ from Visual.vfx import particles, Particle, Fade, HealParticle, heal_particles
 from World.traps import *
 from World.objets import Coeur, Monnaie
 from Entities.boss_gravelion import Gravelion
-from Core.save import sauvegarder, charger, save_backup
+from Core.save import *
 from Visual.interface import menu, sit_on_bench, home_screen
 from Core.reset import reset
 from Entities.boss_wolf_black import Black_Wolf
+
+save_backup()
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0'
 pygame.init()
@@ -40,7 +42,7 @@ Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 #home_screen(fenetre)
 
 #Map
-defaut_map = "swamp"
+current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
 map_manager = Map_Manager()
 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
 
@@ -60,7 +62,7 @@ liste_entites = map_manager.spawn_entities(fenetre)
 
 #Joueur
 player = Player(100, 100, fenetre)
-spawn_point = charger(player, checkpoints, defaut_map)  # charge la save si elle existe, sinon spawn par défaut
+spawn_point = charger(player, checkpoints, current_map_path)  # charge la save si elle existe, sinon spawn par défaut
 player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
 player.rect.midbottom = player.position # pareil avec la hitbox
 
@@ -98,8 +100,6 @@ shake_amount = 0 # Intensité du screen shake
 continuer = True
 pause = False
 
-save_backup()
-
 while continuer:
     now = pygame.time.get_ticks()
 
@@ -116,7 +116,7 @@ while continuer:
                     # faire dasher le joueur
                     player.press_dash()
                 if event.key == pygame.K_ESCAPE:
-                    etat_menu = menu(fenetre, player, checkpoints, defaut_map)
+                    etat_menu = menu(fenetre, player, checkpoints, current_map_path)
                     if etat_menu == "QUIT":
                         continuer = False # quitte le jeu pour aller au menu home
                         pause = False
@@ -322,7 +322,7 @@ while continuer:
                         cp.activated = True
                         player.health = player.max_health
                         spawn_point = pygame.math.Vector2(cp.rect.topleft)
-                        sauvegarder(player, checkpoints, map, index_last_checkpoint=i)
+                        sauvegarder(player, checkpoints, current_map_path, index_last_checkpoint=i)
                         set_spawn_sound.play()
                 
                 # Si le joueur est déjà assis, on permet d'ouvrir l'inventaire avec E
@@ -347,6 +347,7 @@ while continuer:
                 projectiles.clear()
                 tir_tourelle.clear()
 
+                current_map_path = door_collided.target_map
                 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", door_collided.target_map))
 
                 platforms = map_manager.platforms
@@ -459,7 +460,7 @@ while continuer:
     else:
         death_sound.play()
         debut_mort = pygame.time.get_ticks()
-        duree_mort = 6000
+        duree_mort = 4500
 
         you_died = pygame.image.load("Assets/Images/YOU_DIED_text.png").convert_alpha()
         w_base, h_base = you_died.get_width(), you_died.get_height()
