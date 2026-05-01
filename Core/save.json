@@ -1,8 +1,8 @@
 {
     "player": {
-        "health": 5,
+        "health": 2,
         "max_health": 5,
-        "orbs": 100,
+        "orbs": 140,
         "found_charms": {
             "attack_long_range": true,
             "attack_speed": true,
@@ -22,13 +22,8 @@
     "checkpoints": [
         {
             "activated": false,
-            "x": 1926,
-            "y": 583
-        },
-        {
-            "activated": false,
-            "x": 569,
-            "y": 575
+            "x": 216,
+            "y": 677
         }
     ],
     "last_checkpoint": null

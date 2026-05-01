@@ -17,6 +17,7 @@ from Entities.boss_gravelion import Gravelion
 from Core.save import sauvegarder, charger, save_backup
 from Visual.interface import menu, sit_on_bench, home_screen
 from Core.reset import reset
+from Entities.boss_wolf_black import Black_Wolf
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0'
 pygame.init()
@@ -36,7 +37,7 @@ clock = pygame.time.Clock()
 
 Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-home_screen(fenetre)
+#home_screen(fenetre)
 
 #Map
 defaut_map = "swamp"
@@ -67,6 +68,8 @@ player.rect.midbottom = player.position # pareil avec la hitbox
 gravelion = Gravelion(fenetre, 5600, 300, pygame.Rect(5000, 0, 1000, 600)) # spawn dans l'arène de Gravelion
 trigger_combat = pygame.Rect(5100, 0, 50, 600)
 #porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche
+blackwold_arena = pygame.Rect(0, 0, 1600, 800)
+blackwolf = Black_Wolf(fenetre, 800, 400, arene_rect=blackwold_arena) # spawn dans l'arène du loup noir
 
 # UI
 ui_reposer = pygame.image.load("Assets/Images/UI_'Pressez_Z'.png").convert_alpha()
@@ -179,6 +182,9 @@ while continuer:
             #update joueur
             player.update(platforms + special_surfaces)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
+            blackwolf.update(player.rect, player, platforms=platforms)
+            fenetre.fill((30, 30, 30))
+            blackwolf.draw(fenetre, camera)
 
             for e in liste_entites[:]:
 

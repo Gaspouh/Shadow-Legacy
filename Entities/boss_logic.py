@@ -401,7 +401,7 @@ class Boss(Ennemi):
     # Spawn et gestion des hitboxs
 
     def spawn_attack_zone(self, x, y, width, height, attack_data, image, duration):
-        zone = AttackZone(self.fenetre, x, y, width, height, attack_data, image, duration)
+        zone = AttackZone(x, y, width, height, attack_data, image, duration)
         self.hitboxs.append(zone)
         return zone
 
