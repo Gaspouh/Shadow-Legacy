@@ -48,10 +48,10 @@ class Checkpoint(pygame.sprite.Sprite):
 
         #pygame.draw.rect(self.image, (0, 255, 0), self.image.get_rect(), 2) # hitbox pour test du gameplay
 
-class SpawnPoint: #L'endoit ou le joeur spawn apres un changement de salle
+class SpawnPoint: #L'endroit ou le joeur spawn apres un changement de salle
     def __init__(self, x, y, name):
         self.position = pygame.math.Vector2(x, y)
-        self.name = name #Pour différencier les spawn ponit d'une meme salle
+        self.name = name #Pour différencier les spawn point d'une meme salle
     
 class Door:
     def __init__(self, x, y, width, height, target_map, target_spawn):
