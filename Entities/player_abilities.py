@@ -78,13 +78,20 @@ class Double_jump:
             return True
         return False
 
-class sort(Projectile):
+class sort:
     def __init__(self):
         self.cost = 33 # Coût en sang pour utiliser le sort
         
-    def use(self, player):
+    def use(self, player, projectiles):
         if player.sang >= self.cost: # Vérifie que le joueur a assez de sang pour utiliser le sort
             player.sang -= self.cost # Consomme du sang
+            direction = player.direction
+            x = player.rect.centerx + (direction * 30)
+            y = player.rect.centery
+            target_x = x + (direction * 1000)  # tire loin devant
+            target_y = y
+            projectile = Projectile(x, y, target_x, target_y, 15, 80, 80, 3, image=pygame.image.load('Assets/Images/sort.png').convert_alpha())
+            projectiles.append(projectile)
             return True
         return False
 

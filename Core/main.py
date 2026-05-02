@@ -12,7 +12,7 @@ from World.map import Map_Manager
 from Visual.camera import Camera
 from Visual.vfx import particles, Particle, Fade, HealParticle, heal_particles
 from World.traps import *
-from World.objets import Coeur, Monnaie
+from World.objets import Coeur, Monnaie, Receptacle
 from Entities.boss_gravelion import Gravelion
 from Core.save import *
 from Visual.interface import menu, sit_on_bench, home_screen
@@ -51,6 +51,7 @@ platforms = map_manager.platforms
 special_platforms = map_manager.special_platforms
 traps = map_manager.traps
 decorations = map_manager.decorations
+objects = map_manager.objets
 checkpoints = map_manager.checkpoints
 spawnpoints = map_manager.spawnpoints
 doors = map_manager.doors
@@ -125,14 +126,8 @@ while continuer:
 
                 if event.key == pygame.K_f:
                     # faire lancer le sort
-                    if player.sort.use(player):
-                        direction = player.direction
-                        x = player.rect.centerx + (direction * 30)
-                        y = player.rect.centery
-                        target_x = x + (direction * 1000)  # tire loin devant
-                        target_y = y
-                        projectile = Projectile(x, y, target_x, target_y, 15, 80, 80, 3)
-                        projectiles.append(projectile)
+                    player.sort.use(player, projectiles)
+            
                 if event.key == pygame.K_o:
                     player.soin.use(player)
 
@@ -300,6 +295,12 @@ while continuer:
             for deco in decorations:
                 game_fenetre.blit(deco.image, camera.apply(deco.rect))
 
+            for obj in objects[:]:
+                obj.update(player, objects)# Mettre à jour les réceptacles
+                if not obj.taken:# Afficher les objets qui n'ont pas été pris
+                    game_fenetre.blit(obj.image, camera.apply(obj.rect))
+                obj.draw_big(game_fenetre, player)# Afficher les objets pris en grand pour indiquer qu'ils ont été ramassés
+
         # Checkpoints
         for i, cp in enumerate(checkpoints):
             # On calcule la position a l'écran
@@ -424,6 +425,10 @@ while continuer:
         # Afficher les cœurs
         for heart in hearts:
             game_fenetre.blit(heart.image, heart.rect) # Les cœurs sont fixes à l'écran, pas besoin d'appliquer le décalage de la caméra
+        
+        if len(hearts) < player.max_health:
+            i = len(hearts)
+            hearts.append(Coeur(fenetre, 100 + i*110, 35))
 
         for e in liste_entites:
             if pygame.key.get_pressed()[pygame.K_a]:

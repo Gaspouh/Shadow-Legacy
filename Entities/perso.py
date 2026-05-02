@@ -27,6 +27,7 @@ class Player(PhysicsEntity):
         self.sang = 0
         self.sang_max = 99
         self.is_sitting = False
+        self.receptacles = 0
 
         # PHYSIQUE DU JOUEUR
         self.direction = 1 # 1 pour droite, -1 pour gauche

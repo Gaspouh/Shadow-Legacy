@@ -82,3 +82,57 @@ class Monnaie:
         # Image orb à droite
         fenetre.blit(self.image, self.rect)
 
+class Receptacle(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.taken = False
+        self.image = pygame.image.load("Assets/Images/fragment1.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (20, 40))
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.show_big = False
+        self.show_timer = 0
+    
+    def update(self, player, objets):
+        # Logique pour vérifier si le joueur est proche du réceptacle et peut le prendre
+        if self.rect.colliderect(player.rect) and not self.taken:
+            player.receptacles += 1  # Augmente le nombre de réceptacles du joueur
+            self.taken = True  # Marque le réceptacle comme pris
+            self.show_big = True  # Affiche le réceptacle en grand pour indiquer qu'il a été pris
+            self.show_timer = pygame.time.get_ticks()  # Démarre le timer pour l'affichage en grand
+        
+        if player.receptacles == 1:
+            self.image = pygame.image.load("Assets/Images/fragment1.png").convert_alpha()
+            self.image = pygame.transform.scale(self.image, (20, 40))
+
+        elif player.receptacles == 2:
+            self.image = pygame.image.load("Assets/Images/fragment2.png").convert_alpha()
+            self.image = pygame.transform.scale(self.image, (20, 40))
+
+        elif player.receptacles == 3: # Si le joueur a 3 réceptacles, il gagne un cœur supplémentaire
+            
+            player.max_health += 1
+            player.health = player.max_health
+            self.image = pygame.image.load("Assets/Images/fragment3.png").convert_alpha()
+            self.image = pygame.transform.scale(self.image, (20, 40))
+            player.receptacles = 0 # Reset les réceptacles après avoir obtenu le cœur
+
+    def draw_big(self, game_fenetre, player):
+        if self.show_big:# Affiche le réceptacle en grand pendant 2 secondes après l'avoir pris
+                
+            now = pygame.time.get_ticks()
+
+            # durée affichage (2 secondes)
+            if now - self.show_timer < 2000:
+                big_img = pygame.transform.scale(self.image, (200, 400))
+
+                rect = big_img.get_rect(center=(game_fenetre.get_width()//2, game_fenetre.get_height()//2))
+
+                # Glow simple
+                glow = pygame.Surface((rect.width+40, rect.height+40), pygame.SRCALPHA)
+                pygame.draw.ellipse(glow, (255, 255, 150, 120), glow.get_rect())
+                game_fenetre.blit(glow, (rect.x-20, rect.y-20))
+
+                game_fenetre.blit(big_img, rect)
+
+            else:
+                self.show_big = False

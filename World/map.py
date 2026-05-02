@@ -3,6 +3,7 @@ import pytmx
 from World.traps import *
 from Entities.ennemi import Araignee, Volant, Fighter, Chargeur, Tourelle
 from Entities.boss_logic import Golem
+from World.objets import Receptacle
 
 TILE_SIZE = 32
 
@@ -80,7 +81,7 @@ class Map_Manager:
         self.map_height = tmx_data.height * TILE_SIZE
         
         self.platforms, self.special_platforms, self.traps, self.decorations, \
-            self.checkpoints, self.spawnpoints, self.doors, self.entities_to_spawn = create_map(tmx_data)
+            self.checkpoints, self.spawnpoints, self.doors, self.entities_to_spawn, self.objets = create_map(tmx_data)
 
     def spawn_entities(self, fenetre):
         araignee, volant, golem, chargeur, tourelle, fighter = [], [], [], [], [], []
@@ -116,6 +117,7 @@ def create_map(tmx_data):
     special_platforms = []
     traps = []
 
+    objets = []
     decorations = []
     checkpoints = []
     doors = []
@@ -191,10 +193,13 @@ def create_map(tmx_data):
         if obj_type == "decor":
             decorations.append(Map_Object(x, y, image))
         
-  
         elif obj_type == "banc":
             y = int (y - obj.height)
             checkpoints.append(Checkpoint(x, y))
+        
+        elif obj_type == "receptacle":
+            y = int(y - obj.height)
+            objets.append(Receptacle(x, y))
 
         elif obj_type == "spawnpoint":
             name = obj.name
@@ -224,5 +229,5 @@ def create_map(tmx_data):
             })
 
 
-    return platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, doors, entities_to_spawn
+    return platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, doors, entities_to_spawn, objets
 

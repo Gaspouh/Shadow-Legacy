@@ -373,7 +373,7 @@ class Tourelle(Ennemi):
             self.shooting = True
             self.animation_tir.index_image = 0 
             # Créer un projectile qui se dirige vers le joueur
-            projectile = Projectile(self.rect.centerx, self.rect.centery, player_rect.centerx, player_rect.centery, speed=5, width=20, height=20, damage= 1) 
+            projectile = Projectile(self.rect.centerx, self.rect.centery, player_rect.centerx, player_rect.centery, speed=5, width=20, height=20, damage= 1, image=pygame.image.load('Assets/Images/tir_tourelle.png').convert_alpha()) 
             tir_tourelle.append(projectile)
             self.coldown = 150  # Mettre un cooldown entre les tirs
     
@@ -381,15 +381,16 @@ class Fighter(Ennemi):
     def __init__(self, fenetre, x, y):
         
         # On applique les caractéristique de l'ennemi débutant a la tourelle
-        super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 63, 63, 8, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1, reward=5)
+        super().__init__(fenetre, x, y, 'Assets/Images/fighter.png', 8, 50, 66, 17, 0, 10, 1.7, {"damage": 2, "knockback_x": 40, "knockback_y": -4}, scale=1, reward=5)
 
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
-        self.animation_attaque = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 6, 64, 64, 0, 0, scale=1)
+        self.animation_attaque = Animation(fenetre, x, y, 'Assets/Images/attaque_fighter.png', 4, 72, 66, 14, 0, scale=1)
         self.dead = False
         self.use_gravity = True
         self.cooldown = 0
         self.attacking = False
         self.hitbox = None
+        self.can_receive_knockback = False
      
     def mouvement(self, player_rect, player, platforms):
         Animation.gestion_animation(self)
@@ -399,9 +400,9 @@ class Fighter(Ennemi):
         if self.cooldown > 0: # Gérer le cooldown pour limiter la fréquence des attaques
             self.cooldown -= 1
         # Calculer la direction vers le joueur
-        if player_rect.x > self.rect.x and abs(player_rect.centerx - self.rect.centerx) > 120:
+        if player_rect.x > self.rect.x and abs(player_rect.centerx - self.rect.centerx) > 80:
             self.direction = 1 # Aller vers la droite
-        elif player_rect.x < self.rect.x and abs(player_rect.centerx - self.rect.centerx) > 120:
+        elif player_rect.x < self.rect.x and abs(player_rect.centerx - self.rect.centerx) > 80:
             self.direction = -1 # Aller vers la gauche
         else:
             self.attaque() # Attaquer si proche du joueur
@@ -436,12 +437,11 @@ class Fighter(Ennemi):
             return
         # Attaquer si le cooldown est écoulé
         if self.cooldown == 0:
-            print("Attaque du fighter !")
             self.attacking = True
             self.animation_attaque.index_image = 0 
-            self.cooldown = 60  # Mettre un cooldown entre les attaques
-            self.hitbox = AttackZone(self.rect.centerx , self.rect.centery , 120, 50, self.attack_data, None, duration=500)
-            self.hitbox.rect.center = (self.rect.centerx + (120 * self.direction), self.rect.centery)  # Positionner la hitbox devant le fighter en fonction de sa direction
+            self.cooldown = 210  # Mettre un cooldown entre les attaques
+            self.hitbox = AttackZone(self.rect.centerx , self.rect.centery , 80, 40, self.attack_data, None, duration=500)
+            self.hitbox.rect.center = (self.rect.centerx + (80 * self.direction), self.rect.centery)  # Positionner la hitbox devant le fighter en fonction de sa direction
             return self.hitbox
 
 class Chargeur(Ennemi):

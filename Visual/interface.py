@@ -2,6 +2,7 @@ import pygame
 from Core.save import sauvegarder, charms_images, SAVE_FILE, supprimer_sauvegarde
 import os
 import json
+from World.objets import Receptacle
 
 
 def effet_bouton(image, rect):
@@ -124,7 +125,7 @@ def menu(fenetre, player, checkpoints, current_map):
     return pause
 
 
-def sit_on_bench(fenetre):
+def sit_on_bench(fenetre, receptacle, liste_receptacles):
     """ Ouvre l'inventaire lorsque le joueur est assis sur un banc + gestion des charms equippés et drag """
     open_inventory = True
     with open(SAVE_FILE, "r") as f:
@@ -142,6 +143,19 @@ def sit_on_bench(fenetre):
                 rect = image.get_rect(topleft=(decalage_x, 200))
                 charms_afficher.append({"img": image, "rect": rect, "name": name})
                 decalage_x += 50 + image.get_width()
+
+    for ojbets in liste_receptacles:
+        if len(ojbets.liste_receptacles) > 0: # Si il y a des receptacles dans la liste, on affiche les charms qu'ils contiennent
+            if len(ojbets.liste_receptacles) == 1:
+                image = pygame.image.load("Assets/Images/fragment1.png").convert_alpha()
+            elif len(ojbets.liste_receptacles) == 2:
+                image = pygame.image.load("Assets/Images/fragment2.png").convert_alpha()
+            elif len(ojbets.liste_receptacles) == 3:
+                image = pygame.image.load("Assets/Images/fragment3.png").convert_alpha()
+            rect = ojbets.image.get_rect(topleft=(decalage_x, 200))
+            image2 = pygame.transform.scale(image, (ojbets.image.get_width()/1.8, ojbets.image.get_height()/1.8))
+            charms_afficher.append({"img": image2, "rect": rect, "name": ojbets.name})
+            decalage_x += 50 + ojbets.image.get_width()
         
     charm_selected = None   # Pouvoir selectionner un item à la fois pour le drag and drop
     offset_x, offset_y = 0, 0
