@@ -1,5 +1,6 @@
 import pygame
 import pytmx
+from Entities.boss_wolf_black import Black_Wolf
 from World.traps import *
 from Entities.ennemi import Araignee, Volant, Fighter, Chargeur, Tourelle
 from Entities.boss_logic import Golem
@@ -84,7 +85,7 @@ class Map_Manager:
             self.checkpoints, self.spawnpoints, self.doors, self.entities_to_spawn, self.objets = create_map(tmx_data)
 
     def spawn_entities(self, fenetre):
-        araignee, volant, golem, chargeur, tourelle, fighter = [], [], [], [], [], []
+        araignee, volant, golem, chargeur, tourelle, fighter, blackwolf = [], [], [], [], [], [], []
 
         for e in self.entities_to_spawn:
             if e["type"] == "mob":
@@ -100,12 +101,14 @@ class Map_Manager:
                     tourelle.append(Tourelle(fenetre, e["x"], e["y"]))
                 elif e["name"] == "fighter":
                     fighter.append(Fighter(fenetre, e["x"], e["y"]))
-            
+                elif e["name"] == "blackwolf":
+                    blackwolf.append(Black_Wolf(fenetre, e["x"], e["y"]))
+
             if e["type"] == "boss":
                 if e["name"] == "gravelion":
                     pass
                     
-        liste_entites = araignee + volant + golem + chargeur + tourelle + fighter
+        liste_entites = araignee + volant + golem + chargeur + tourelle + fighter + blackwolf
         return liste_entites
     
     def get_spawn(self, name):

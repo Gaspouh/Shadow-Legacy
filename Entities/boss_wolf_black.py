@@ -1,38 +1,56 @@
 import pygame
+import random
 from Entities.boss_logic import Boss
 from Visual.sprite_sheet import Animation
-import random
+from World.objets import Monnaie
+
 
 class Black_Wolf(Boss):
-    def __init__(self, fenetre, x, y, arene_rect=None):
-        tp_points = [(x, y)] # Points de téléportation par défaut
+
+    def __init__(self, fenetre, x, y):
         path = "Assets/Boss/Loups/Black_Wolf"
         self.fenetre = fenetre
-        vitesse_initiale = 3
-        
+        vitesse_initiale = 4
+
         super().__init__(
             fenetre, x, y,
-            f"{path}/Idle.png", 
-            6, 128, 128, 0, 0, 
-            pv_max=200,
+            path+"/Idle.png", 8, 128, 128, 0, 0,
+            pv_max=300,
             vitesse=vitesse_initiale,
-            attack_data={"damage": 10, "knockback_x": 120, "knockback_y": -5},
-            tp_points=tp_points,
-            stagger_threshold=20,
+            attack_data={"damage": 1, "knockback_x": 100, "knockback_y": -5},
+            tp_points=[(x, y)],
+            stagger_threshold=50,
             scale=1
         )
-        self.vitesse = vitesse_initiale # sans ça ça bug
+        self.vitesse = vitesse_initiale  # sans ça ça bug
+        self.can_receive_knockback = True
+        self.arene_rect = pygame.Rect(-99999, -99999, 999999, 999999)  # pas d'arene (arene infinieà
 
-        # arene du boss
-        self.arene_rect = arene_rect if arene_rect is not None else pygame.Rect(x - 1000, y - 1000, 2000, 2000)
-        
-        self.attack_cooldown = 1000
+        # reward à la mort
+        self.orbs_value = 25
+        self.orbs_added = False
+
+        # cooldowns
+        self.attack_cooldown = 500
         self.last_attack_time = 0
+        self.jump_cooldown = 7000   # il saute toutes les 7s
+        self.last_jump_time = 0
+        self.pursuit_start_time = None  # qd la poursuite a commencé
+
+        # trigger "dynamique", pour un comportement plus réalisste, le loup peut perdre de vu le joueur
+        self.trigger_small = 260
+        self.trigger_large = 400
+        self.trigger_actif = self.trigger_small
+        self.last_seen_time = None  # derniere fois que le joueur etait dans le grand trigger
+
+        # il patrouille quand pas déclenché
+        self.patrol_dir = 1
+        self.patrol_timer = pygame.time.get_ticks()
+        self.patrol_duration = 2800  # change de direction toutes les 2.8s
 
         # Animations
-        w, h = 120, 120 # Dimensions
+        w, h = 128, 128
         scale = self.scale
-        
         self.anims = {
             "idle": Animation(fenetre, x, y, path+"/Idle.png", 8, w, h, 0, 0, scale),
             "walk": Animation(fenetre, x, y, path+"/walk.png", 11, w, h, 0, 0, scale),
@@ -45,100 +63,204 @@ class Black_Wolf(Boss):
             "attack3": Animation(fenetre, x, y, path+"/Attack_3.png", 5, w, h, 0, 0, scale),
             "run_attack": Animation(fenetre, x, y, path+"/Run+Attack.png", 7, w, h, 0, 0, scale)
         }
-
-        # Vitesse d'animation globale à ajuster
         for anim in self.anims.values():
-            anim.vitesse_animation = 1
+            anim.vitesse_animation = 0.14
 
-        self.current_anim = "idle"
+        self.current_anim = "idle"  # anim de base
         self.image = self.anims["idle"].frames_droite[0]
-        
-        # Hitbox de l'ia
-        self.trigger_range = 400
-        self.attack_range_x = 80
-        self.attack_range_y = 100
-        
+
+        # gestion hitbox
+        self.hitbox_offset_x = w // 3   # valeur ajustée visuellement
+        hitbox_w = w -self.hitbox_offset_x * 2
+        self.rect = pygame.Rect(x + self.hitbox_offset_x, y, hitbox_w, h - 10)
+        self.position = pygame.math.Vector2(self.rect.centerx, self.rect.bottom)
+
+        # attack range
+        self.attack_range_x = 65
+        self.attack_range_y = 90
+
         self.enter_state(self.NOT_TRIGGERED)
+
+ 
+    """ partie de gestion de la detection """
+    def joueur_detecte(self, player_rect):
+        # zone moins large sur x
+        dx = abs(player_rect.centerx - self.rect.centerx) * 1.35
+        dy = abs(player_rect.centery - self.rect.centery)
+        r = self.trigger_actif
+        return (dx * dx + dy * dy) <= r * r
+
+    def update_trigger(self, player_rect, now):
+        # savoir si le joueur est dans le trigger
+        if self.trigger_actif == self.trigger_large:
+            if self.joueur_detecte(player_rect):
+                self.last_seen_time = now
+            else:
+                # 5s de reset pour que le trigger soit petit
+                if self.last_seen_time and now - self.last_seen_time >= 5000:
+                    self.trigger_actif = self.trigger_small
+                    self.pursuit_start_time = None
+                    self.last_seen_time = None
+                    self.enter_state(self.NOT_TRIGGERED)
+
 
     def zone_attaque(self):
         if self.direction == 1:
-            return pygame.Rect(self.rect.right, self.rect.centery - self.attack_range_y // 2,   # droite
+            return pygame.Rect(self.rect.right, self.rect.centery - self.attack_range_y // 2,
                                self.attack_range_x, self.attack_range_y)
-        return pygame.Rect(self.rect.left - self.attack_range_x, self.rect.centery - self.attack_range_y // 2,  # gauche
+        
+        return pygame.Rect(self.rect.left - self.attack_range_x, self.rect.centery - self.attack_range_y // 2,
                            self.attack_range_x, self.attack_range_y)
 
     def joueur_dans_attack(self, player_rect):
         return self.zone_attaque().colliderect(player_rect)
 
+
     def update(self, player_rect, player, platforms=[]):
+        """ fonction update main du blackwolf """
         now = pygame.time.get_ticks()
         elapsed = now - self.state_timer
 
         if not self.alive:
             return
-        # Gestion des états (animations/transitions)
+
+        self.update_trigger(player_rect, now)
+
         if self.state == self.NOT_TRIGGERED:
-            if self.dans_trigger(player_rect, self.trigger_range):
-                self.combat_lance = True
+            self.update_patrol(now)
+            if self.joueur_detecte(player_rect):
+                # 1ere détection
+                self.trigger_actif = self.trigger_large
+                self.last_seen_time = now
+                self.pursuit_start_time = now
+                self.last_jump_time = now  # jump poissible au bout de 7s
                 self.enter_state(self.IDLE)
+
         elif self.state == self.IDLE:
-            self.update_idle(elapsed, player_rect)
+            self.update_idle(elapsed, player_rect, now)
+
         elif self.state == self.ATTACKING:
             self.update_attack(elapsed, player_rect, player)
+
+        elif self.state == self.STAGGER:
+            self.update_stagger(elapsed)
+
         elif self.state == self.DYING:
             self.update_dying(elapsed)
-        
-        # Physique du boss
-        if self.state == self.IDLE and abs(self.velocity.x)<self.vitesse: # physique de transition
-            self.velocity.x = self.vitesse *self.direction
-        elif self.state == self.ATTACKING:
-            self.velocity.x*= 0.8 # le fait ralentir vite
-
         self.physics_update(platforms)
         self.update_hitbox(platforms, self.arene_rect)
 
-    def update_idle(self, elapsed, player_rect):
-        self.face_player(player_rect)
+    def update_patrol(self, now):
+        # simuler des "rondes"
+        self.current_anim = "walk"
+        self.velocity.x = 1.5 * self.patrol_dir
+        self.direction = self.patrol_dir
 
-        # Sélection d'une attaque
+        if now - self.patrol_timer >= self.patrol_duration:
+            self.patrol_dir *= -1
+            self.patrol_timer = now
+
+        self.update_anim()
+
+    def update_idle(self, elapsed, player_rect, now):
+        self.face_player(player_rect)
+        d_x = abs(player_rect.centerx - self.rect.centerx)
+
+        # jump attack
+        jump_dispo = (
+            self.pursuit_start_time is not None and
+            now - self.last_jump_time >= self.jump_cooldown
+        )
+
+        # gestion attaque
         if self.joueur_dans_attack(player_rect):
-            now = pygame.time.get_ticks()
-            if now - self.state_timer >= self.attack_cooldown:
-                # choisi une attaque random
+            if now - self.last_attack_time >= self.attack_cooldown:
                 self.current_attack = random.choice(["attack1", "attack2", "attack3"])
+                self.last_attack_time = now
                 self.enter_state(self.ATTACKING)
                 return
 
-        # poursuite
-        d_x = player_rect.centerx - self.rect.centerx
-        if abs(d_x) > 5: 
-            # si le boss est loin il run, sinon il marche
-            if abs(d_x) > 100:
+        # bond si cooldown est reset et le joueur est a portée
+        if jump_dispo and d_x < 380:
+            self.current_attack = "run_attack"
+            self.last_jump_time = now
+            self.enter_state(self.ATTACKING)
+            return
+
+        # poursuite normale
+        if d_x > 5:
+            if d_x > 300: # il run si il est loin
                 self.current_anim = "run"
-            else:
+                self.velocity.x = self.vitesse * 3.5 * self.direction
+            else: # sinon marche
                 self.current_anim = "walk"
+                self.velocity.x = self.vitesse * self.direction
         else:
             self.current_anim = "idle"
+            self.velocity.x = 0
 
-        self.update_anim() # logique d'anim
+        self.update_anim()
 
     def update_attack(self, elapsed, player_rect, player):
         self.current_anim = self.current_attack
-        self.update_anim()
-        
-        # créer la hitbox de l'attaque a un moment dans l'animation
-        if elapsed >= 200 and not self.atk_spawned:
-            atk = self.spawn_attack_zone(
-                x = self.zone_attaque().x,
-                y = self.zone_attaque().y,
-                width=self.attack_range_x,
-                height=self.attack_range_y,
-                attack_data=self.attack_data,
-                image=None,
-                duration=200
-            )
-            self.atk_spawned = True
 
-        # fin attaque
-        if elapsed >= 1000:
-            self.enter_state(self.IDLE)
+        if self.current_attack == "run_attack":
+            # gestion de l'attaque en sautant
+            if elapsed < 150:
+                self.velocity.y = -5  # saut
+                self.velocity.x = self.vitesse * 1.5 * self.direction
+
+            if elapsed >= 250 and not self.atk_spawned:
+                self.spawn_attack_zone(
+                    x=self.zone_attaque().x,
+                    y=self.zone_attaque().y,
+                    width=self.attack_range_x + 20,  # un peu plus grande pendant le bond
+                    height=self.attack_range_y + 20,
+                    attack_data=self.attack_data,
+                    image=None,
+                    duration=250
+                )
+                self.atk_spawned = True
+
+            if elapsed >= 900:
+                self.enter_state(self.IDLE)
+
+        else:
+            # attaques de base
+            self.velocity.x *= 0.8  # ralentit qd il attaque
+
+            if elapsed >= 200 and not self.atk_spawned:
+                self.spawn_attack_zone(
+                    x=self.zone_attaque().x,
+                    y=self.zone_attaque().y,
+                    width=self.attack_range_x,
+                    height=self.attack_range_y,
+                    attack_data=self.attack_data,
+                    image=None,
+                    duration=200
+                )
+                self.atk_spawned = True
+
+            if elapsed >= 800:
+                self.enter_state(self.IDLE)
+
+        self.update_anim()
+
+   # gesiton de mort (et la reward)
+    def mort(self):
+        if not self.alive:
+            if not self.orbs_added:
+                Monnaie.add_orbs(self.orbs_value)
+                self.orbs_added = True
+            return True
+        return False
+
+    # affichage
+    def draw(self, fenetre, camera):
+        if not self.alive:
+            return
+        cam_rect = camera.apply(self.rect)
+        # le sprite est plus large que la hitbox, on le recentre
+        fenetre.blit(self.image, (cam_rect.x - self.hitbox_offset_x, cam_rect.y))
+        for elem in self.hitboxs:
+            elem.draw(fenetre, camera)

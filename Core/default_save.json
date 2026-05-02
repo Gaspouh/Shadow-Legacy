@@ -1,4 +1,6 @@
-{
+{   
+    "current_map_name": "swamp",
+    "current_map": "map_swamp.tmx",
     "player": {
         "health": 5,
         "max_health": 5,

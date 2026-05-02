@@ -11,16 +11,21 @@ CONFIG_FILE = os.path.join(CORE_DIR, "config.json")
 DEFAULT_SAVE = os.path.join(CORE_DIR, "default_save.json")
 
 # Dico des maps à mettre à jour
-DEFAULT_SPAWNS = {
-    "terre_aride": {"x": 10, "y": 1200},
-    "Swamp/map_swamp.tmx": {"x": 100, "y": 100} 
+
+MAP_NAME = ["swamp", "terre_aride"]
+
+MAP_PATHS = {
+    MAP_NAME[0]: "map_swamp.tmx",
+    MAP_NAME[1]: "ascension.tmx"
 }
 
-# Spawn
+# spawns
 DEFAULT_SPAWNS = {
-    "terre_aride": {"x": 10, "y": 1200},
-    "swamp": {"x": 100, "y": 100}
-} # Position de spawn par défaut selon la map (si aucun checkpoint activé)
+    MAP_NAME[0]: {"x": 100, "y": 100},
+    MAP_NAME[1]: {"x": 10, "y": 1200}
+}   # Position de spawn par défaut selon la map (si aucun checkpoint activé)
+
+
 
 def load_config():
     """Charge les stats de base depuis config.json"""
@@ -30,15 +35,16 @@ def load_config():
         return json.load(f)
     
 def get_saved_map():
-    """prend juste la map sauvegardée pour apres charger la bonne map """
+    """prend juste la map sauvegardée et son nom pour apres charger la bonne map """
     if not os.path.exists(SAVE_FILE):
-        return "Swamp/map_swamp.tmx" # fallback si pas de save (map du début)
+        return MAP_NAME[0] # fallback si pas de save (map du début)
     
     with open(SAVE_FILE, "r") as f:
         data = json.load(f)
 
-    return data.get("current_map", "Swamp/map_swamp.tmx")
-    
+    return data.get("current_map_name"), data.get("current_map")
+
+
 def get_spawn_from_checkpoints(checkpoints, map_path):
     dernier_checkpoint_actif = None
     for cp in checkpoints:
@@ -72,18 +78,19 @@ def get_player_found_charms():
     return data.get("player", {}).get("found_charms", None)
 
 
-def sauvegarder(player, checkpoints, map, index_last_checkpoint=None):
+def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None):
     # Sauvegarder l'état du jeu dans un fichier json
-    spawn = get_spawn_from_checkpoints(checkpoints, map)
+    spawn = get_spawn_from_checkpoints(checkpoints, map_name)
 
     data = {    # on modifiera perso.py, abilities.py, et autres fichiers pour qu'ils dependent du json et pas l'inverse
         # player
-        "current_map": map, # map actuelle
+        "current_map_name": map_name,
+        "current_map": MAP_PATHS.get(map_name, "map_swamp.tmx"), # fallback avec la map swamp au cas ou
         "player": {
             "health": player.health,      
             "max_health": player.max_health,
             "orbs": Monnaie.orbs,
-            "found_charms"   : get_player_found_charms(),
+            "found_charms" : get_player_found_charms(),
             "equipped_charms": get_player_equipped_charms()
         },
 
@@ -210,6 +217,3 @@ class joueur_assis():
         sauvegarder(player, checkpoint, map)
 
 """
-
-
-            

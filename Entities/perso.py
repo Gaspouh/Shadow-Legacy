@@ -446,7 +446,10 @@ class Player(PhysicsEntity):
         self.invincibility_timer = now
         self.stun_timer = now
 
-        if damage_amount == 2:
+        hitstop_duration = 0
+        shake_amount = 0
+
+        if damage_amount >= 2:
             hitstop_duration = 200
             shake_amount = 10
         elif damage_amount == 1:

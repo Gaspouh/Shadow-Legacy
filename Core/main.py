@@ -17,15 +17,19 @@ from Entities.boss_gravelion import Gravelion
 from Core.save import *
 from Visual.interface import menu, sit_on_bench, home_screen
 from Core.reset import reset
-from Entities.boss_wolf_black import Black_Wolf
 
 save_backup()
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0'
 pygame.init()
 
+info_ecran = pygame.display.Info()
+
+largeur = info_ecran.current_w
+hauteur = info_ecran.current_h
+
 # Configs
-GAME_WIDTH, GAME_HEIGHT = 1920, 1080
+GAME_WIDTH, GAME_HEIGHT = largeur, hauteur
 MAP_WIDTH, MAP_HEIGHT = 115*32, 50*32 # A fixer manuellement pour le premier chargement de map
 MAP_RECT = pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)
 
@@ -42,9 +46,10 @@ Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 #home_screen(fenetre)
 
 #Map
-current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
+MAP_PATH_TO_NAME = {v: k for k, v in MAP_PATHS.items()} # ça permet d'inverser le dico en gardant clé:valeur
+current_map_name, current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
 map_manager = Map_Manager()
-map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", "Swamp", "map_swamp.tmx"))
+map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", current_map_name, current_map_path)) # charge la map actuelle
 
 
 platforms = map_manager.platforms
@@ -63,7 +68,7 @@ liste_entites = map_manager.spawn_entities(fenetre)
 
 #Joueur
 player = Player(100, 100, fenetre)
-spawn_point = charger(player, checkpoints, current_map_path)  # charge la save si elle existe, sinon spawn par défaut
+spawn_point = charger(player, checkpoints, current_map_name)  # charge la save si elle existe, sinon spawn par défaut
 player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
 player.rect.midbottom = player.position # pareil avec la hitbox
 
@@ -71,8 +76,6 @@ player.rect.midbottom = player.position # pareil avec la hitbox
 gravelion = Gravelion(fenetre, 5600, 300, pygame.Rect(5000, 0, 1000, 600)) # spawn dans l'arène de Gravelion
 trigger_combat = pygame.Rect(5100, 0, 50, 600)
 #porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche
-blackwold_arena = pygame.Rect(0, 0, 1600, 800)
-blackwolf = Black_Wolf(fenetre, 800, 400, arene_rect=blackwold_arena) # spawn dans l'arène du loup noir
 
 # UI
 ui_reposer = pygame.image.load("Assets/Images/UI_'Pressez_Z'.png").convert_alpha()
@@ -117,7 +120,7 @@ while continuer:
                     # faire dasher le joueur
                     player.press_dash()
                 if event.key == pygame.K_ESCAPE:
-                    etat_menu = menu(fenetre, player, checkpoints, current_map_path)
+                    etat_menu = menu(fenetre, player, checkpoints, current_map_name)
                     if etat_menu == "QUIT":
                         continuer = False # quitte le jeu pour aller au menu home
                         pause = False
@@ -177,9 +180,7 @@ while continuer:
             #update joueur
             player.update(platforms + special_surfaces)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
-            blackwolf.update(player.rect, player, platforms=platforms)
             fenetre.fill((30, 30, 30))
-            blackwolf.draw(fenetre, camera)
 
             for e in liste_entites[:]:
 
@@ -260,7 +261,7 @@ while continuer:
 
             # Plateformes spéciales (boue, sable mouvant, eau)
             for sp in special_platforms:
-                game_fenetre.blit(sp.image, camera.apply(sp.rect)) 
+                game_fenetre.blit(sp.image, camera.apply(sp.rect))
 
             # Pieges
             for trap in traps:
@@ -323,7 +324,7 @@ while continuer:
                         cp.activated = True
                         player.health = player.max_health
                         spawn_point = pygame.math.Vector2(cp.rect.topleft)
-                        sauvegarder(player, checkpoints, current_map_path, index_last_checkpoint=i)
+                        sauvegarder(player, checkpoints, current_map_name, index_last_checkpoint=i)
                         set_spawn_sound.play()
                 
                 # Si le joueur est déjà assis, on permet d'ouvrir l'inventaire avec E
@@ -348,8 +349,11 @@ while continuer:
                 projectiles.clear()
                 tir_tourelle.clear()
 
-                current_map_path = door_collided.target_map
                 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", door_collided.target_map))
+                current_map_path = door_collided.target_map
+                current_map_name = MAP_PATH_TO_NAME.get(os.path.basename(current_map_path))
+                map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", door_collided.target_map))
+                spawn = map_manager.get_spawn(door_collided.target_spawn)
 
                 platforms = map_manager.platforms
                 special_platforms = map_manager.special_platforms
@@ -433,8 +437,11 @@ while continuer:
         for e in liste_entites:
             if pygame.key.get_pressed()[pygame.K_a]:
                 pygame.draw.rect(game_fenetre, (255, 255, 0), camera.apply(e.rect), 2)
-            game_fenetre.blit(e.image, camera.apply(e.rect))
 
+            if hasattr(e, "draw"):
+                e.draw(game_fenetre, camera)
+            else:
+                game_fenetre.blit(e.image, camera.apply(e.rect))
         # Afficher les orbs
         monnaie.draw(game_fenetre)
 

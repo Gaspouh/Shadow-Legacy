@@ -72,7 +72,7 @@ def home_screen(fenetre):
             
         pygame.display.update()
 
-def menu(fenetre, player, checkpoints, current_map):
+def menu(fenetre, player, checkpoints, current_map_name):
     pause = True
     # Afficher le menu
     noir_transparent = pygame.Surface((fenetre.get_width(), fenetre.get_height()))
@@ -98,7 +98,7 @@ def menu(fenetre, player, checkpoints, current_map):
                 #elif bouton_options.collidepoint(event.pos):
                     
                 elif bouton_quitter.collidepoint(event.pos):
-                    sauvegarder(player, checkpoints, current_map) # Sauvegarder avant de quitter
+                    sauvegarder(player, checkpoints, current_map_name) # Sauvegarder avant de quitter
                     home_screen(fenetre)
                     return "QUIT"   # au lieu de mainloop.continuer = False
 

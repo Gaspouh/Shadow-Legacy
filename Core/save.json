@@ -1,9 +1,10 @@
 {
-    "current_map": "terre_aride/ascension.tmx",
+    "current_map_name": "swamp",
+    "current_map": "map_swamp.tmx",
     "player": {
-        "health": 5,
-        "max_health": 5,
-        "orbs": 65,
+        "health": 14,
+        "max_health": 17,
+        "orbs": 693,
         "found_charms": {
             "attack_long_range": false,
             "attack_speed": false,
@@ -32,5 +33,5 @@
             "y": 555
         }
     ],
-    "last_checkpoint": 1
+    "last_checkpoint": null
 }
