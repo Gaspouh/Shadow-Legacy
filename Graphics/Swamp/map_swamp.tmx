@@ -351,10 +351,10 @@
   <object id="44" gid="98" x="1248" y="676" width="141" height="168"/>
   <object id="45" gid="69" x="1245" y="676" width="61" height="25"/>
   <object id="46" gid="68" x="1218" y="676" width="63" height="27"/>
-  <object id="59" x="3120" y="796" width="50" height="100">
+  <object id="59" x="3185.33" y="389.333" width="155.333" height="537.333">
    <properties>
     <property name="obj_type" value="door"/>
-    <property name="target_map" value="terre_aride/ascension.tmx"/>
+    <property name="target_map" value="Forest/forest.tmx"/>
     <property name="target_spawn" value="left"/>
    </properties>
    <capsule/>
@@ -365,7 +365,7 @@
    </properties>
    <ellipse/>
   </object>
-  <object id="63" name="right" x="2978" y="802" width="52" height="52">
+  <object id="63" name="right" x="3108.67" y="854" width="30.6667" height="29.3333">
    <properties>
     <property name="obj_type" value="spawnpoint"/>
    </properties>
@@ -378,12 +378,7 @@
   </object>
   <object id="68" gid="62" x="844.394" y="672.282" width="30" height="10"/>
   <object id="70" gid="62" x="918.882" y="674.144" width="30" height="10"/>
-  <object id="71" name="Receptacle" x="352.504" y="853.011" width="37.2439" height="24.2086">
-   <properties>
-    <property name="obj_type" value="receptacle"/>
-   </properties>
-  </object>
-  <object id="73" name="blackwolf" x="2862.24" y="834.727">
+  <object id="73" name="blackwolf" x="2778.24" y="841.394">
    <properties>
     <property name="obj_type" value="mob"/>
    </properties>

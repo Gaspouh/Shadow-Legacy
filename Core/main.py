@@ -35,7 +35,7 @@ game_fenetre = pygame.Surface((GAME_WIDTH//zoom, GAME_HEIGHT//zoom))
 
 Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-#home_screen(fenetre)
+home_screen(fenetre)
 
 #Map
 MAP_PATH_TO_NAME = {v: k for k, v in MAP_PATHS.items()} # ça permet d'inverser le dico en gardant clé:valeur
@@ -124,7 +124,7 @@ while continuer:
                 if event.key == pygame.K_ESCAPE:
                     etat_menu = menu(fenetre, player, checkpoints, current_map_name)
                     if etat_menu == "QUIT":
-                        continuer = False # quitte le jeu pour aller au menu home
+                        home_screen(fenetre) # quitte le jeu pour aller au menu home
                         pause = False
                     else:
                         pause = etat_menu # Si c'est False, le jeu reprend

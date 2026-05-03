@@ -4,24 +4,35 @@ import os
 import json
 from World.objets import Receptacle
 
+pygame.mixer.init()
+over_sound = pygame.mixer.Sound("Assets/Sounds/over_button.mp3")
 
-def effet_bouton(image, rect):
+def effet_bouton(image, rect, over_state):
     """ Effet d'animation quand la souris passe sur un bouton (colidepoint), plus pratique en fonction pour utiliser dans home_screen """
     mouse_pos = pygame.mouse.get_pos()
+    mouse_hover = rect.collidepoint(mouse_pos)
     # il faut créer une nouvelle image pour pas écraser celle de base
     if rect.collidepoint(mouse_pos):
+        if not over_state:
+            over_sound.play()
         # Agrandir l'image
         new_width = int(image.get_width() * 1.1)
         new_height = int(image.get_height() * 1.1)
         new_image = pygame.transform.scale(image, (new_width, new_height))
         new_rect = new_image.get_rect(center=rect.center)   # nouveau rect aussi
-        return new_image, new_rect
+        return new_image, new_rect, True
     else:
-        return image, rect
+        return image, rect, False
     
 def home_screen(fenetre):
     """ Affiche l'écran d'accueil du jeu avec les options de démarrage, de chargement et de sortie. """
     running = True
+    over_reprendre = False
+    over_quitter = False
+    over_nouvelle_game = False
+
+    click_sound = pygame.mixer.Sound("Assets/Sounds/click_button.mp3")
+
     # Charger les images
     background = pygame.image.load("Assets/Home/background_home_screen.png").convert()
     background = pygame.transform.scale(background, (fenetre.get_width(), fenetre.get_height()))
@@ -48,11 +59,17 @@ def home_screen(fenetre):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     if rect_reprendre.collidepoint(event.pos):
+                        click_sound.play()
+                        pygame.time.delay(320)  # sinon le son a pas le temps de se jouer (running=false)
                         running = False # Passe au boucle du main pour lancer une game
                     elif rect_quitter.collidepoint(event.pos):
+                        click_sound.play()
+                        pygame.time.delay(320)
                         pygame.quit()  # Quitter le jeu
                         exit()
                     elif rect_nouvelle_game.collidepoint(event.pos):
+                        click_sound.play()
+                        pygame.time.delay(320)
                         # Supprimer les données de sauvegarde existantes pour une nouvelle partie
                         supprimer_sauvegarde()
                         running = False  # Supprime la save + Passe au boucle du main pour lancer une game
@@ -61,13 +78,13 @@ def home_screen(fenetre):
         fenetre.blit(background, (0, 0))    
 
         # Utiliser l'effet de bulle pour les boutons
-        img, rect = effet_bouton(boutton_reprendre, rect_reprendre) # on utilise "img" et "rect" pour chaque bouton car dans tout les cas 1 seul bouton à la fois est selectionné
+        img, rect, over_reprendre = effet_bouton(boutton_reprendre, rect_reprendre, over_reprendre) # on utilise "img" et "rect" pour chaque bouton car dans tout les cas 1 seul bouton à la fois est selectionné
         fenetre.blit(img, rect)
 
-        img, rect = effet_bouton(boutton_quitter, rect_quitter)
+        img, rect, over_quitter = effet_bouton(boutton_quitter, rect_quitter, over_quitter)
         fenetre.blit(img, rect)
 
-        img, rect = effet_bouton(boutton_nouvelle_game, rect_nouvelle_game)
+        img, rect, over_nouvelle_game = effet_bouton(boutton_nouvelle_game, rect_nouvelle_game, over_nouvelle_game)
         fenetre.blit(img, rect)
             
         pygame.display.update()
@@ -99,7 +116,6 @@ def menu(fenetre, player, checkpoints, current_map_name):
                     
                 elif bouton_quitter.collidepoint(event.pos):
                     sauvegarder(player, checkpoints, current_map_name) # Sauvegarder avant de quitter
-                    home_screen(fenetre)
                     return "QUIT"   # au lieu de mainloop.continuer = False
 
         if bouton_reprendre.collidepoint(souris_pos):
