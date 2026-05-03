@@ -25,8 +25,6 @@ DEFAULT_SPAWNS = {
     MAP_NAME[1]: {"x": 10, "y": 1200}
 }   # Position de spawn par défaut selon la map (si aucun checkpoint activé)
 
-
-
 def load_config():
     """Charge les stats de base depuis config.json"""
     if not os.path.exists(CONFIG_FILE):
@@ -176,8 +174,10 @@ def save_backup():
                 json.dump(default_data, f_save, indent=4)
             
             print("New save")
+            return True
         except Exception as e:
             print("error")
+            return False
 
 
 def charms_images():
