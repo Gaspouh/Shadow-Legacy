@@ -619,19 +619,14 @@
    </properties>
    <ellipse/>
   </object>
-  <object id="66" name="Receptacle" x="810.056" y="644.32" width="37.2439" height="24.2086">
+  <object id="66" name="Receptacle" x="2013.83" y="825.452" width="37.2439" height="24.2086">
    <properties>
     <property name="obj_type" value="receptacle"/>
    </properties>
   </object>
   <object id="68" gid="62" x="844.394" y="672.282" width="30" height="10"/>
-  <object id="69" name="Receptacle" x="887.45" y="643.602" width="37.2439" height="24.2086">
-   <properties>
-    <property name="obj_type" value="receptacle"/>
-   </properties>
-  </object>
   <object id="70" gid="62" x="918.882" y="674.144" width="30" height="10"/>
-  <object id="71" name="Receptacle" x="961.938" y="645.464" width="37.2439" height="24.2086">
+  <object id="71" name="Receptacle" x="352.504" y="853.011" width="37.2439" height="24.2086">
    <properties>
     <property name="obj_type" value="receptacle"/>
    </properties>
