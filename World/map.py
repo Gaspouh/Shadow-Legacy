@@ -1,3 +1,5 @@
+import os
+
 import pygame
 import pytmx
 from Entities.boss_wolf_black import Black_Wolf
@@ -83,7 +85,10 @@ class Map_Manager:
         
         self.platforms, self.special_platforms, self.traps, self.decorations, \
             self.checkpoints, self.spawnpoints, self.doors, self.entities_to_spawn, self.objets = create_map(tmx_data)
-
+        
+        background_folder = os.path.join(os.path.dirname(path), "Background") 
+        
+        self.nb_parallax_layers = len([fichier for fichier in os.listdir(background_folder) if fichier != "0.png"])
     def spawn_entities(self, fenetre):
         araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf = [], [], [], [], [], [], [], []
 

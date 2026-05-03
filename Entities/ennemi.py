@@ -381,10 +381,9 @@ class Fighter(Ennemi):
     def __init__(self, fenetre, x, y):
         
         # On applique les caractéristique de l'ennemi débutant a la tourelle
-        super().__init__(fenetre, x, y, 'Assets/Images/fighter.png', 8, 50, 66, 17, 0, 10, 1.7, {"damage": 2, "knockback_x": 40, "knockback_y": -4}, scale=1, reward=5)
-
+        super().__init__(fenetre, x, y, 'Assets/Images/fighter.png', 8, 62, 70, 3, 0, 10, 0.001, {"damage": 2, "knockback_x": 40, "knockback_y": -4}, scale=1, reward=5)
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
-        self.animation_attaque = Animation(fenetre, x, y, 'Assets/Images/attaque_fighter.png', 4, 72, 66, 14, 0, scale=1)
+        self.animation_attaque = Animation(fenetre, x, y, 'Assets/Images/attaque_fighter.png', 4, 83, 76, 0, 0, scale=1)
         self.dead = False
         self.use_gravity = True
         self.cooldown = 0
