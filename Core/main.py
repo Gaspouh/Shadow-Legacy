@@ -80,7 +80,9 @@ ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /7, ui_r
 
 # Sons
 set_spawn_sound = pygame.mixer.Sound("Assets/Sounds/set_spawn_sound.mp3")
+set_spawn_sound.set_volume(0.5)
 death_sound = pygame.mixer.Sound("Assets/Sounds/elden-ring-death.mp3")
+death_sound.set_volume(0.7)
 
 #Attributs
 hearts = [Coeur(fenetre, 100 + i*110, 35) for i in range(player.max_health)]

@@ -257,6 +257,15 @@ class Araignee(Patrouilleur):
 
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 7, 62, 50, 27, 7, scale=1)
         self.dead = False
+        self.death_sound = pygame.mixer.Sound("Assets/Sounds/ennemi_death.mp3")
+        self.death_sound.set_volume(0.2)
+        self.death_sound_played = False
+
+    def mort(self):
+        if not self.death_sound_played:
+            self.death_sound.play()
+            self.death_sound_played = True
+        return super().mort()
 
 class Scorpion(Patrouilleur):
     def __init__(self, fenetre, x, y):
@@ -276,6 +285,9 @@ class Volant(Ennemi):
         self.friction = -0.3
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
         self.dead = False
+        self.death_sound = pygame.mixer.Sound("Assets/Sounds/ennemi_death.mp3")
+        self.death_sound.set_volume(0.2)
+        self.death_sound_played = False
 
     def poursuite(self, player_rect, platforms):
         Animation.gestion_animation(self)
@@ -300,7 +312,14 @@ class Volant(Ennemi):
                 self.velocity.y += (dy / vecteur_deplacement) * self.vitesse_deplacement
                 
             # Appliquer la physique (déplacements et collisions)
-            self.physics_update(platforms)  
+            self.physics_update(platforms)
+
+    def mort(self):
+        if not self.death_sound_played:
+            self.death_sound.play()
+            self.death_sound_played = True
+        return super().mort()
+    
 
 class Tourelle(Ennemi):
     def __init__(self, fenetre, x, y):
@@ -320,6 +339,10 @@ class Tourelle(Ennemi):
         self.angle = 0              # Angle actuel du canon
         self.vitesse_rotation = 3  # orientation des frames de tir
         self.oriente = False        # alignement du canon avec le joueur pour tirer
+
+        self.shoot_sound = pygame.mixer.Sound("Assets/Sounds/tourelle_shoot.mp3")
+        self.shoot_sound.set_volume(0.7)
+        self.shoot_sound_played = False
 
     def get_angle_vers_joueur(self, player_rect):
         dx = player_rect.centerx - self.rect.centerx #composante x du vecteur entre la tourelle et le joueur
@@ -371,6 +394,10 @@ class Tourelle(Ennemi):
     def tir(self, player_rect, tir_tourelle):
         if self.dans_trigger(player_rect, trigger_range=300) and self.coldown == 0 and self.oriente:
             self.shooting = True
+            if self.shoot_sound_played == False:
+                self.shoot_sound.play()
+                self.shoot_sound_played = False
+
             self.animation_tir.index_image = 0 
             # Créer un projectile qui se dirige vers le joueur
             projectile = Projectile(self.rect.centerx, self.rect.centery, player_rect.centerx, player_rect.centery, speed=5, width=20, height=20, damage= 1, image=pygame.image.load('Assets/Images/tir_tourelle.png').convert_alpha()) 
@@ -454,6 +481,10 @@ class Chargeur(Ennemi):
         self.attacking = False
         self.duree_charge = 0
 
+        self.death_sound = pygame.mixer.Sound("Assets/Sounds/ennemi_death.mp3")
+        self.death_sound.set_volume(0.2)
+        self.death_sound_played = False
+
     def charge(self, player_rect, platforms):
         Animation.gestion_animation(self)
         # Afficher la bonne frame en fonction de la direction (orientation perso)
@@ -488,6 +519,12 @@ class Chargeur(Ennemi):
 
         # Appliquer la physique (déplacements et collisions)
         self.physics_update(platforms)
+    
+    def mort(self):
+        if not self.death_sound_played:
+            self.death_sound.play()
+            self.death_sound_played = True
+        return super().mort()
     
 if __name__ == "__main__":
     # Créer une fenêtre de jeu de test
