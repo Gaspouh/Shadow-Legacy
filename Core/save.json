@@ -2,9 +2,9 @@
     "current_map_name": "swamp",
     "current_map": "map_swamp.tmx",
     "player": {
-        "health": 14,
-        "max_health": 17,
-        "orbs": 693,
+        "health": 9,
+        "max_health": 9,
+        "orbs": 61,
         "found_charms": {
             "attack_long_range": false,
             "attack_speed": false,
@@ -23,7 +23,7 @@
     "abilities": {},
     "checkpoints": [
         {
-            "activated": true,
+            "activated": false,
             "x": 1939,
             "y": 557
         },

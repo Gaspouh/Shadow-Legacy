@@ -86,9 +86,20 @@ class Receptacle(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.taken = False
-        self.image = pygame.image.load("Assets/Images/fragment1.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (20, 40))
+
+        self.img1 = pygame.transform.scale(
+            pygame.image.load("Assets/Images/fragment1.png").convert_alpha(), (20,40)
+        )
+        self.img2 = pygame.transform.scale(
+            pygame.image.load("Assets/Images/fragment2.png").convert_alpha(), (20,40)
+        )
+        self.img3 = pygame.transform.scale(
+            pygame.image.load("Assets/Images/fragment3.png").convert_alpha(), (20,40)
+        )
+
+        self.image = self.img1
         self.rect = self.image.get_rect(topleft=(x, y))
+        
         self.show_big = False
         self.show_timer = 0
     
@@ -101,19 +112,16 @@ class Receptacle(pygame.sprite.Sprite):
             self.show_timer = pygame.time.get_ticks()  # Démarre le timer pour l'affichage en grand
         
         if player.receptacles == 1:
-            self.image = pygame.image.load("Assets/Images/fragment1.png").convert_alpha()
-            self.image = pygame.transform.scale(self.image, (20, 40))
+            self.image = self.img1
 
         elif player.receptacles == 2:
-            self.image = pygame.image.load("Assets/Images/fragment2.png").convert_alpha()
-            self.image = pygame.transform.scale(self.image, (20, 40))
+            self.image = self.img2
 
         elif player.receptacles == 3: # Si le joueur a 3 réceptacles, il gagne un cœur supplémentaire
             
             player.max_health += 1
             player.health = player.max_health
-            self.image = pygame.image.load("Assets/Images/fragment3.png").convert_alpha()
-            self.image = pygame.transform.scale(self.image, (20, 40))
+            self.image = self.img3
             player.receptacles = 0 # Reset les réceptacles après avoir obtenu le cœur
 
     def draw_big(self, game_fenetre, player):

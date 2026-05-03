@@ -35,10 +35,10 @@ particles = []
 heal_particles = []
 
 class Fade:
-    def __init__(self):
+    def __init__(self, width, height):
         self.intensity = 0
         self.state = None #"in", "out", "wait" ou None
-        self.overlay = pygame.Surface ((1920, 1080)) #Taille de la fenetre
+        self.overlay = pygame.Surface ((width, height)) #Taille de la fenetre
         self.overlay.fill((0, 0, 0)) #Fond noir
         self.wait_start = None
 

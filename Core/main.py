@@ -25,11 +25,8 @@ pygame.init()
 
 info_ecran = pygame.display.Info()
 
-largeur = info_ecran.current_w
-hauteur = info_ecran.current_h
-
 # Configs
-GAME_WIDTH, GAME_HEIGHT = largeur, hauteur
+GAME_WIDTH, GAME_HEIGHT = 1920, 1080
 MAP_WIDTH, MAP_HEIGHT = 115*32, 50*32 # A fixer manuellement pour le premier chargement de map
 MAP_RECT = pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)
 
@@ -88,7 +85,7 @@ death_sound = pygame.mixer.Sound("Assets/Sounds/elden-ring-death.mp3")
 #Attributs
 hearts = [Coeur(fenetre, 100 + i*110, 35) for i in range(player.max_health)]
 monnaie = Monnaie(fenetre, 200, 200)
-fade = Fade()
+fade = Fade(GAME_WIDTH, GAME_HEIGHT)
 door_collided = None
 wait = False
 
