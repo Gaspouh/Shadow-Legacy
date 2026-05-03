@@ -12,14 +12,14 @@ DEFAULT_SAVE = os.path.join(CORE_DIR, "default_save.json")
 
 # Dico des maps à mettre à jour
 
-MAP_NAME = ["swamp", "terre_aride", "Forest", "cave", "cave"]
+MAP_NAME = ["swamp", "terre_aride", "cave", "cave", "forest"]
 
 MAP_PATHS = {
     MAP_NAME[0]: "map_swamp.tmx",
     MAP_NAME[1]: "ascension.tmx",
-    MAP_NAME[2]: "forest.tmx",
-    MAP_NAME[3]: "cave.tmx",
-    MAP_NAME[4]: "boss_arene.tmx"
+    MAP_NAME[2]: "cave.tmx",
+    MAP_NAME[3]: "boss_arene.tmx",
+    MAP_NAME[4]: "Parcours.tmx"
 }
 
 # spawns
@@ -27,8 +27,8 @@ DEFAULT_SPAWNS = {
     MAP_NAME[0]: {"x": 100, "y": 100},
     MAP_NAME[1]: {"x": 10, "y": 1200},
     MAP_NAME[2]: {"x": 100, "y": 100},
-    MAP_NAME[3]: {"x": 100, "y": 100},
-    MAP_NAME[4]: {"x": 550, "y": 1000}
+    MAP_NAME[3]: {"x": 1000, "y": 1000},
+    MAP_NAME[4]: {"x": 200, "y": 700}
 }   # Position de spawn par défaut selon la map (si aucun checkpoint activé)
 
 def load_config():

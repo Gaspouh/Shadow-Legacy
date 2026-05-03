@@ -15,7 +15,6 @@ class Camera:
         self.map_height = map_height
         self.camera = pygame.Rect(0, 0, self.zoom_w, self.zoom_h)
 
-
     def apply(self, entity_rect):
         return entity_rect.move(self.camera.topleft)
     

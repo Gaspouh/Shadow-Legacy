@@ -16,14 +16,13 @@ class Platform(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
 
 class Special_Platform(Platform):
-    def __init__(self, x, y, image, effect=None, slow_factor = 1, jump_factor = 1):
+    def __init__(self, x, y, image, effect=None, slow_factor=1, jump_factor=1):
         super().__init__(x, y, image)
         self.effect = effect
         self.slow_factor = slow_factor
         self.jump_factor = jump_factor    
         
         width = image.get_width()
-        height = image.get_height()
 
         if effect == "mud":
             self.surface = Platform(x, y + 5, pygame.Surface((width, 5)))

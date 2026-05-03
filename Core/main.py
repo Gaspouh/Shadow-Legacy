@@ -27,16 +27,11 @@ info_ecran = pygame.display.Info()
 
 # Configs
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
-MAP_WIDTH, MAP_HEIGHT = 115*32, 50*32 # A fixer manuellement pour le premier chargement de map
-MAP_RECT = pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)
-
 fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.DOUBLEBUF, vsync=1) 
 pygame.display.set_caption("Shadow Legacy") # Définir le titre de la fenêtre
 
 zoom = 1.5 # zoom
 game_fenetre = pygame.Surface((GAME_WIDTH//zoom, GAME_HEIGHT//zoom))
-camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT, zoom=zoom)
-clock = pygame.time.Clock()
 
 Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -48,6 +43,11 @@ current_map_name, current_map_path = get_saved_map()  # recupère la map actuell
 map_manager = Map_Manager()
 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", current_map_name, current_map_path)) # charge la map actuelle
 
+MAP_WIDTH, MAP_HEIGHT = map_manager.map_width, map_manager.map_height
+MAP_RECT = pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)
+
+camera = Camera(GAME_WIDTH, GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT, zoom=zoom)
+clock = pygame.time.Clock()
 
 platforms = map_manager.platforms
 special_platforms = map_manager.special_platforms
@@ -363,6 +363,7 @@ while continuer:
 
                 platforms = map_manager.platforms
                 special_platforms = map_manager.special_platforms
+                special_surfaces = [sp.surface for sp in special_platforms if sp.surface is not None]
                 traps = map_manager.traps
                 decorations = map_manager.decorations
                 checkpoints = map_manager.checkpoints

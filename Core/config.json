@@ -4,7 +4,7 @@
         "max_health": 5,
 
         "jump_strength": -13,
-        "pogo_strength": -10,
+        "pogo_strength": -8,
 
         "max_speed": 10,
         "speed": 2.5,

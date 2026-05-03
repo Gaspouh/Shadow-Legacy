@@ -26,6 +26,11 @@
    <property name="type" value="quicksand"/>
   </properties>
  </tile>
+ <tile id="12">
+  <properties>
+   <property name="type" value="ground"/>
+  </properties>
+ </tile>
  <tile id="18">
   <properties>
    <property name="type" value="ice"/>

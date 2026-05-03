@@ -147,6 +147,7 @@ class Saw(Rectangular_Obstacle):
     def __init__(self, x, y, radius):
         super().__init__(x, y, radius * 2, 1, "Assets/Images/scie.png")
         self.respawn_on_touch = True
+        self.apply_knockback = True
 
 class Retractable_spike :
     pass
