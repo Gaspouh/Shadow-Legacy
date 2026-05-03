@@ -42,7 +42,7 @@ MAP_PATH_TO_NAME = {v: k for k, v in MAP_PATHS.items()} # ça permet d'inverser 
 current_map_name, current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
 map_manager = Map_Manager()
 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", current_map_name, current_map_path)) # charge la map actuelle
-layers = create_parallax_layers(os.path.join(Chemin_absolu, "Graphics", current_map_name), nb_layers=5, fenetre=game_fenetre) # créer les layers de parallax pour la map actuelle
+layers = create_parallax_layers(os.path.join(Chemin_absolu, "Graphics", current_map_name), nb_layers=map_manager.nb_parallax_layers, fenetre=game_fenetre) # créer les layers de parallax pour la map actuelle
 
 MAP_WIDTH, MAP_HEIGHT = map_manager.map_width, map_manager.map_height
 MAP_RECT = pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)
