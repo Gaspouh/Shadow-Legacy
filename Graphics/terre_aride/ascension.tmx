@@ -351,7 +351,7 @@
  </layer>
  <objectgroup id="3" name="Calque d'Objets 1">
   <object id="2" gid="187" x="586.566" y="1213.19" width="63" height="59"/>
-  <object id="59" name="banc" gid="200" x="216.611" y="699.698" width="11" height="21"/>
+  <object id="59" name="banc" gid="200" x="216.611" y="690.442" width="11" height="21"/>
   <object id="60" gid="183" x="1679.5" y="1154.88" width="109" height="41"/>
   <object id="61" gid="186" x="1257.96" y="736.988" width="47" height="55"/>
   <object id="62" gid="181" x="59.2353" y="738.372" width="89" height="26"/>

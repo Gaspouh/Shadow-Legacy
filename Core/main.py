@@ -9,7 +9,7 @@ if project_root not in sys.path:
 from Entities.perso import Player
 from Entities.ennemi import Projectile
 from World.map import Map_Manager
-from Visual.camera import Camera
+from Visual.camera import Camera, background
 from Visual.vfx import particles, Particle, Fade, HealParticle, heal_particles
 from World.traps import *
 from World.objets import Coeur, Monnaie, Receptacle
@@ -177,7 +177,6 @@ while continuer:
             #update joueur
             player.update(platforms + special_surfaces)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
-            fenetre.fill((30, 30, 30))
 
             for e in liste_entites[:]:
 
@@ -247,7 +246,9 @@ while continuer:
                             particles.append(Particle(e.rect.centerx, e.rect.centery))
 
             # Dessiner les éléments du jeu sur la fenêtre
-            game_fenetre.fill((135, 206, 235)) # Remplir le fond avec une couleur de ciel
+            offset_x = -camera.camera.x
+            offset_y = -camera.camera.y
+            background(game_fenetre, offset_x, offset_y, now) # Remplir le fond 
 
             # Backgroud avec parallax
 

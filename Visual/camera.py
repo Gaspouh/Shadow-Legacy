@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 
 class Camera:
     def __init__(self, width, height, map_width, map_height, zoom=2):
@@ -59,5 +60,88 @@ class Background_effect:    # On utilise le "parallax layer", c'est un Effet pop
         self.fenetre.blit(self.image, (start_x - img_w, offset_y))
         self.fenetre.blit(self.image, (start_x, offset_y))
         if start_x + img_w < self.fenetre.get_width():
-            self.fenetre.blit(self.image, (start_x + img_w, offset_y))
+            self.fenetre.blit(self.image, (start_x + img_w, offset_y)) 
 
+lucioles =[] # création de luciole
+for i in range(16):
+    lucioles.append(
+    {
+        "x": random.uniform(0, 3500),   # coordonné aléatoire
+        "y": random.uniform(0, 1000),   # coordonné aléatoire
+        "vx": random.uniform(-0.2, 0.2), # vitesse aléatoire
+        "vy": random.uniform(-0.15, 0.15),# vitesse aléatoire
+        "color": random.choice([ #couleurs aléatoires
+            (60, 180, 80),
+            (80, 200, 60),
+            (40, 160, 120),
+            (100, 255, 180),
+            (120, 255, 150),
+            (255, 100, 255),
+            (255, 150, 255),
+            (255, 200, 255),
+            (200, 100, 255),            
+            (255, 100, 200),
+            (255, 150, 200),
+            (255, 200, 200),
+
+        ]),
+        # variables d'animation des lucioles
+        "radius": random.randint(15, 35),
+        "phase": random.uniform(0, 6.28),
+        "vitesse_scintillement": random.uniform(0.0003, 0.001),
+        "amplitude": random.uniform(0.4, 0.8),
+        "timer_direction": 0,
+        "delai_direction": random.randint(200, 500),
+    })
+
+def background(game_fenetre, offset_x, offset_y, now):
+    game_fenetre.fill((8, 8, 18)) # rempli l'écran en sombre
+    longeur = game_fenetre.get_width() # longueur map
+    hauteur = game_fenetre.get_height() # hauteur map
+
+    for luciole in lucioles:
+        luciole["timer_direction"] += 1 # temps avant mouvement
+        if luciole["timer_direction"] >= luciole["delai_direction"]: # délai de mouvement atteint
+            luciole["vx"] += random.uniform(-0.3, 0.3) # déplacment x
+            luciole["vy"] += random.uniform(-0.3, 0.3) # déplacemnt y
+            luciole["timer_direction"] = 0 # reset chrono
+            luciole["delai_direction"] = random.randint(200, 500) # délai de mouvement aléatoire
+
+        luciole["x"] += luciole["vx"] # mise à jour de la position x
+        luciole["y"] += luciole["vy"] # mise à jour de la position y
+
+        # Rester dans la map
+        luciole["x"] = luciole["x"] % 3500 # retour dans le bord opposé si hors map
+        luciole["y"] = luciole["y"] % 1000 #retour dans le bord opposé si hors map
+
+        # convertir coordonné par raaport à la caméra
+        screen_x = luciole["x"] - offset_x
+        screen_y = luciole["y"] - offset_y
+
+        # ne dessiner que si proche
+        radius = luciole["radius"]
+        if -radius < screen_x < longeur + radius and -radius < screen_y < hauteur + radius: # proche de la caméra
+            draw_luciole(game_fenetre, screen_x, screen_y, luciole, now) #dessiner les lucioles
+
+def draw_luciole(surface, x, y, luciole, now):
+    # Calculer le niveau de brillance 
+    brillance = 0.5 + 0.5 * math.sin(luciole["phase"] + now * luciole["vitesse_scintillement"]) # variation régulière avec la fonction sinus
+
+    # Taille et transparence du halo dépendent de la brillance
+    taille_halo = int(luciole["radius"] * (0.6 + 0.4 * brillance))
+    transparence_halo = int(60 + 120 * brillance)
+
+    if taille_halo < 1: # fin du cycle
+        return
+
+    # Dessiner le halo lumineux
+    halo = pygame.Surface((taille_halo * 2, taille_halo * 2), pygame.SRCALPHA)
+    pygame.draw.circle(halo, (*luciole["color"], transparence_halo), (taille_halo, taille_halo), taille_halo)
+    surface.blit(halo, (x - taille_halo, y - taille_halo), special_flags=pygame.BLEND_RGBA_ADD)
+
+    # Dessiner le noyau de la luciole
+    taille_noyau = max(2, taille_halo // 4)
+    transparence_noyau = int(200 * brillance)
+    noyau = pygame.Surface((taille_noyau * 2, taille_noyau * 2), pygame.SRCALPHA)
+    pygame.draw.circle(noyau, (200, 255, 200, transparence_noyau), (taille_noyau, taille_noyau), taille_noyau)
+    surface.blit(noyau, (x - taille_noyau, y - taille_noyau), special_flags=pygame.BLEND_RGBA_ADD)

@@ -87,7 +87,7 @@ class sort:
             player.sang -= self.cost # Consomme du sang
             direction = player.direction
             x = player.rect.centerx + (direction * 30)
-            y = player.rect.centery
+            y = player.rect.centery - 20 # pour éviter la collision avec le sol
             target_x = x + (direction * 1000)  # tire loin devant
             target_y = y
             projectile = Projectile(x, y, target_x, target_y, 15, 80, 80, 3, image=pygame.image.load('Assets/Images/sort.png').convert_alpha())
