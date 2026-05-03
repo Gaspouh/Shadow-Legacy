@@ -73,7 +73,7 @@
   <object id="4" x="1787.33" y="579.333" width="34" height="93.3333">
    <properties>
     <property name="obj_type" value="door"/>
-    <property name="target_map" value="terre_aride/cave.tmx"/>
+    <property name="target_map" value="cave/cave.tmx"/>
     <property name="target_spawn" value="boss_defeated"/>
    </properties>
    <capsule/>
