@@ -9,7 +9,7 @@ if project_root not in sys.path:
 from Entities.perso import Player
 from Entities.ennemi import Projectile
 from World.map import Map_Manager
-from Visual.camera import Camera, background
+from Visual.camera import Camera, background, intro
 from Visual.vfx import particles, Particle, Fade, HealParticle, heal_particles
 from World.traps import *
 from World.objets import Coeur, Monnaie, Receptacle
@@ -18,7 +18,7 @@ from Core.save import *
 from Visual.interface import menu, sit_on_bench, home_screen
 from Core.reset import reset
 
-save_backup()
+new_game = save_backup()
 
 os.environ['SDL_RENDER_SCALE_QUALITY'] = '0'
 pygame.init()
@@ -104,6 +104,10 @@ pause = False
 while continuer:
     now = pygame.time.get_ticks()
 
+    if new_game:
+        intro(game_fenetre, fenetre)
+        new_game = False
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             continuer = False
@@ -180,11 +184,15 @@ while continuer:
 
             for e in liste_entites[:]:
 
+                if hasattr(e, "update"):
+                    e.update(player.rect, player, platforms)
+
                 if not e.alive:
                     fin = e.mort()
                     if fin:
                         liste_entites.remove(e)
                     continue
+
                               
                 if hasattr(e, "patrouille"): #pour les patrouilleurs
                     e.patrouille(platforms)
@@ -506,7 +514,7 @@ while continuer:
         reset(player, liste_entites, hearts, spawn_point)
 
 # Mettre à jour l'affichage
-    if not pause:
+    if not pause or not new_game:
         fenetre.blit(pygame.transform.scale(game_fenetre, (GAME_WIDTH, GAME_HEIGHT)), (0, 0))
         fade.update(fenetre)
         pygame.display.update()

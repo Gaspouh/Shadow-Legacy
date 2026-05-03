@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="96" height="23" tilewidth="32" tileheight="32" infinite="1" nextlayerid="3" nextobjectid="14">
+ <tileset firstgid="1" name="objects" tilewidth="199" tileheight="183" tilecount="41" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Bushes/1.png" width="31" height="15"/>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Bushes/2.png" width="30" height="10"/>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Bushes/3.png" width="29" height="15"/>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Bushes/4.png" width="31" height="21"/>
+  </tile>
+  <tile id="4">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Bushes/5.png" width="63" height="28"/>
+  </tile>
+  <tile id="5">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Bushes/6.png" width="31" height="26"/>
+  </tile>
+  <tile id="6">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Bushes/7.png" width="61" height="24"/>
+  </tile>
+  <tile id="7">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Bushes/8.png" width="63" height="27"/>
+  </tile>
+  <tile id="8">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Bushes/9.png" width="61" height="25"/>
+  </tile>
+  <tile id="9">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Fence/1.png" width="23" height="18"/>
+  </tile>
+  <tile id="10">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Fence/2.png" width="25" height="20"/>
+  </tile>
+  <tile id="11">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Fence/3.png" width="16" height="13"/>
+  </tile>
+  <tile id="12">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Grass/8.png" width="8" height="14"/>
+  </tile>
+  <tile id="13">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Grass/9.png" width="6" height="8"/>
+  </tile>
+  <tile id="14">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Grass/10.png" width="9" height="11"/>
+  </tile>
+  <tile id="15">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Grass/1.png" width="17" height="18"/>
+  </tile>
+  <tile id="16">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Grass/2.png" width="17" height="16"/>
+  </tile>
+  <tile id="17">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Grass/3.png" width="14" height="16"/>
+  </tile>
+  <tile id="18">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Grass/4.png" width="12" height="12"/>
+  </tile>
+  <tile id="19">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Grass/5.png" width="11" height="13"/>
+  </tile>
+  <tile id="20">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Grass/6.png" width="11" height="9"/>
+  </tile>
+  <tile id="21">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Grass/7.png" width="7" height="14"/>
+  </tile>
+  <tile id="22">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Ridges/1.png" width="89" height="26"/>
+  </tile>
+  <tile id="23">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Ridges/2.png" width="40" height="28"/>
+  </tile>
+  <tile id="24">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Ridges/3.png" width="109" height="41"/>
+  </tile>
+  <tile id="25">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Ridges/4.png" width="65" height="61"/>
+  </tile>
+  <tile id="26">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Ridges/5.png" width="81" height="29"/>
+  </tile>
+  <tile id="27">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Ridges/6.png" width="47" height="55"/>
+  </tile>
+  <tile id="28">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Stones/1.png" width="63" height="59"/>
+  </tile>
+  <tile id="29">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Stones/2.png" width="47" height="57"/>
+  </tile>
+  <tile id="30">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Stones/3.png" width="52" height="63"/>
+  </tile>
+  <tile id="31">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Stones/4.png" width="57" height="30"/>
+  </tile>
+  <tile id="32">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Stones/5.png" width="31" height="31"/>
+  </tile>
+  <tile id="33">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Trees/1.png" width="101" height="103"/>
+  </tile>
+  <tile id="34">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Trees/2.png" width="104" height="132"/>
+  </tile>
+  <tile id="35">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Trees/3.png" width="123" height="150"/>
+  </tile>
+  <tile id="36">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Willows/1.png" width="104" height="135"/>
+  </tile>
+  <tile id="37">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Willows/2.png" width="141" height="168"/>
+  </tile>
+  <tile id="38">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Willows/3.png" width="199" height="183"/>
+  </tile>
+  <tile id="40">
+   <properties>
+    <property name="obj_type" value="decor"/>
+   </properties>
+   <image source="../Swamp/Objects/Pointers/7.png" width="13" height="21"/>
+  </tile>
+  <tile id="41">
+   <properties>
+    <property name="obj_type" value="banc"/>
+   </properties>
+   <image source="../Swamp/Objects/Pointers/8.png" width="11" height="21"/>
+  </tile>
+ </tileset>
+ <tileset firstgid="43" source="forest_platform.tsx"/>
+ <tileset firstgid="139" source="forest_objects.tsx"/>
+ <tileset firstgid="204" source="../traps.tsx"/>
+ <tileset firstgid="302" source="../Swamp/Objects/objects.tsx"/>
+ <layer id="1" name="Calque de Tuiles 1" width="96" height="23">
+  <data encoding="csv">
+   <chunk x="0" y="0" width="16" height="16">
+109,109,109,109,109,109,109,109,109,109,109,109,109,109,109,109,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
+   <chunk x="16" y="0" width="16" height="16">
+109,109,109,109,109,109,109,109,109,109,109,109,109,109,109,109,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,198,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,85,51,
+0,0,0,0,0,0,0,0,0,0,0,0,0,85,51,107
+</chunk>
+   <chunk x="32" y="0" width="16" height="16">
+109,109,109,109,109,109,109,109,109,109,109,109,109,109,109,109,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,198,0,0,0,
+0,0,0,0,0,0,0,0,0,0,98,99,99,99,100,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,203,0,0,0,198,0,0,0,0,0,0,0,0,0,
+51,51,51,51,51,51,51,84,0,0,0,0,0,0,0,0,
+107,107,107,107,107,107,107,51,84,0,0,0,0,0,0,0
+</chunk>
+   <chunk x="48" y="0" width="16" height="16">
+109,109,109,109,109,109,109,109,109,109,109,109,109,109,109,109,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,198,0,0,0,0,0,0,0,0,0,
+0,0,0,98,99,99,99,99,100,0,0,0,118,119,119,119,
+0,0,0,0,0,0,0,0,0,0,0,0,115,115,115,115,
+0,0,0,0,0,0,0,0,0,0,0,0,115,115,115,115,
+0,0,0,0,0,0,0,0,0,0,0,0,115,115,115,115,
+0,0,0,0,0,0,0,0,0,0,0,0,115,115,115,115,
+0,0,0,0,0,0,0,0,0,0,0,0,115,115,115,115,
+0,0,0,0,0,0,0,0,0,0,0,0,115,115,115,115,
+0,0,0,0,0,0,0,0,0,0,0,0,124,125,125,125,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
+   <chunk x="64" y="0" width="16" height="16">
+109,109,109,109,109,109,109,109,109,109,109,109,109,109,109,109,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+119,119,119,119,119,119,119,119,119,119,119,119,119,119,119,119,
+115,115,115,115,115,115,115,115,115,115,115,115,115,115,115,115,
+115,115,115,115,115,115,115,115,115,115,115,115,115,115,115,115,
+115,115,115,115,115,115,115,115,115,115,115,115,115,115,115,115,
+115,115,115,115,115,115,115,115,115,115,115,115,115,115,115,115,
+115,115,115,115,115,115,115,115,115,115,115,115,115,115,115,115,
+115,115,115,115,115,115,115,115,115,115,115,115,115,115,115,115,
+125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
+   <chunk x="80" y="0" width="16" height="16">
+109,109,109,109,109,109,109,109,115,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,115,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,115,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,115,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,115,0,0,0,0,0,0,0,
+119,119,119,119,119,119,119,119,115,0,0,0,0,0,0,0,
+115,115,115,115,115,115,115,115,115,0,0,0,0,0,0,0,
+115,115,115,115,115,115,115,115,115,0,0,0,0,0,0,0,
+115,115,115,115,115,115,115,115,115,0,0,0,0,0,0,0,
+115,115,115,115,115,115,115,115,115,0,0,0,0,0,0,0,
+115,115,115,115,115,115,115,115,115,0,0,0,0,0,0,0,
+115,115,115,115,115,115,115,115,115,0,0,0,0,0,0,0,
+125,125,125,125,125,125,125,125,125,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
+   <chunk x="0" y="16" width="16" height="16">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,94,91,91,91,0,
+0,0,0,185,196,0,0,0,0,185,0,0,0,0,0,0,
+43,43,43,43,43,43,43,43,43,43,224,224,224,224,224,224,
+58,58,58,58,58,58,58,58,58,58,58,58,55,55,55,55,
+46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
+   <chunk x="16" y="16" width="16" height="16">
+0,0,0,0,0,0,0,0,0,0,0,0,85,51,107,107,
+0,0,0,0,0,0,0,0,0,0,0,85,51,107,107,107,
+0,0,0,0,0,0,0,0,0,0,85,51,107,107,107,107,
+0,0,0,0,0,0,0,0,0,0,51,107,107,107,107,107,
+91,91,91,91,91,91,91,91,224,224,107,107,107,107,107,107,
+224,224,224,224,224,224,224,224,55,55,55,55,55,55,55,55,
+55,55,55,55,55,55,55,55,67,67,67,67,67,67,67,67,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
+   <chunk x="32" y="16" width="16" height="16">
+107,107,107,107,107,107,107,66,51,84,0,0,0,0,0,0,
+107,107,107,107,107,107,107,66,66,51,84,0,0,0,0,0,
+107,107,107,107,107,107,107,66,66,66,51,84,0,0,0,0,
+107,107,107,107,107,107,107,66,66,66,66,51,184,0,0,0,
+107,107,107,107,107,107,107,66,66,66,66,66,48,48,48,48,
+55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
+   <chunk x="48" y="16" width="16" height="16">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,139,139,139,0,0,0,185,195,0,0,0,0,
+48,48,48,48,48,48,48,48,48,48,48,48,48,48,205,205,
+55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
+   <chunk x="64" y="16" width="16" height="16">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,147,147,147,147,147,147,0,0,0,0,0,
+205,205,205,205,205,49,49,49,49,49,49,205,205,205,205,205,
+55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
+   <chunk x="80" y="16" width="16" height="16">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,199,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,45,0,0,
+0,0,185,185,194,0,185,185,0,0,0,0,45,45,45,183,
+205,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,
+55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
+   <chunk x="96" y="16" width="16" height="16">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+183,183,183,183,183,183,183,183,183,183,183,183,183,183,183,183,
+50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,
+55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
+  </data>
+ </layer>
+ <objectgroup id="2" name="Calque d'Objets 1">
+  <object id="2" name="chargeur" x="3277.52" y="605.83" width="53.3842" height="22.8789">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="3" name="araignee" x="530.116" y="606.937" width="27.2325" height="23.8284">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="4" name="araignee" x="2117.33" y="127.085" width="41.9834" height="22.6937">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="5" name="volant" x="2719.85" y="518.552">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="6" name="fighter" x="2286.74" y="586.894" width="44.6927" height="33.5196">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="7" name="chargeur" x="1148.64" y="409.704" width="53.3842" height="22.8789">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="8" name="fighter" x="2647.4" y="120.756" width="44.6927" height="33.5196">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="9" name="araignee" x="725.533" y="609.057" width="27.2325" height="23.8284">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="10" name="banc" gid="343" x="407.048" y="558.903" width="18.5204" height="21"/>
+  <object id="11" name="Receptacle" x="2751.27" y="112.627" width="37.2439" height="24.2086">
+   <properties>
+    <property name="obj_type" value="receptacle"/>
+   </properties>
+  </object>
+  <object id="12" name="left" x="64.2365" y="595.011" width="30.6667" height="29.3333">
+   <properties>
+    <property name="obj_type" value="spawnpoint"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="13" name="right" x="3472.92" y="577.226" width="52" height="52">
+   <properties>
+    <property name="obj_type" value="spawnpoint"/>
+   </properties>
+   <ellipse/>
+  </object>
+ </objectgroup>
+</map>

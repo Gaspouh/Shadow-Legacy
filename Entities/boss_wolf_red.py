@@ -5,41 +5,45 @@ from Visual.sprite_sheet import Animation
 from World.objets import Monnaie
 
 
-class Black_Wolf(Boss):
+class Red_Wolf(Boss):
 
     def __init__(self, fenetre, x, y):
-        path = "Assets/Boss/Loups/Black_Wolf"
+        path = "Assets/Boss/Loups/Red_Wolf"
         self.fenetre = fenetre
-        vitesse_initiale = 4
+        vitesse_initiale = 3
+        offset_y = 30
+        self.run_start_time = None  # quand il a commencé à courir
+        self.run_min_duration = 2000  # 2s minimum de course
+
 
         super().__init__(
             fenetre, x, y,
             path+"/Idle.png", 8, 128, 128, 0, 0,
-            pv_max=10,
+            pv_max=18,
             vitesse=vitesse_initiale,
-            attack_data={"damage": 1, "knockback_x": 150, "knockback_y": -5},
+            attack_data={"damage": 1, "knockback_x": 50, "knockback_y": -5},
             tp_points=[(x, y)],
             stagger_threshold=50,
             scale=1
         )
-        self.vitesse = vitesse_initiale  # sans ça ça bug
+        self.vitesse = vitesse_initiale
         self.can_receive_knockback = True
         self.arene_rect = pygame.Rect(-99999, -99999, 999999, 999999)  # pas d'arene (arene infinieà
 
         # reward à la mort
-        self.orbs_value = 25
+        self.orbs_value = 50
         self.orbs_added = False
 
         # cooldowns
-        self.attack_cooldown = 500
+        self.attack_cooldown = 200
         self.last_attack_time = 0
-        self.jump_cooldown = 7000   # il saute toutes les 7s
+        self.jump_cooldown = 4800
         self.last_jump_time = 0
         self.pursuit_start_time = None  # qd la poursuite a commencé
 
         # trigger "dynamique", pour un comportement plus réalisste, le loup peut perdre de vu le joueur
         self.trigger_small = 300
-        self.trigger_large = 430
+        self.trigger_large = 400
         self.trigger_actif = self.trigger_small
         self.last_seen_time = None  # derniere fois que le joueur etait dans le grand trigger
 
@@ -64,24 +68,34 @@ class Black_Wolf(Boss):
             "run_attack": Animation(fenetre, x, y, path+"/Run+Attack.png", 7, w, h, 0, 0, scale)
         }
         for anim in self.anims.values():
-            anim.vitesse_animation = 0.07
+            anim.vitesse_animation = 0.08
+            for anim in self.anims.values():
+                anim.vitesse_animation = 0.08
+                anim.frames_droite = [pygame.transform.scale(f, (int(128 * 1.4), int(128 * 1.4))) for f in anim.frames_droite]
+                anim.frames_gauche = [pygame.transform.scale(f, (int(128 * 1.4), int(128 * 1.4))) for f in anim.frames_gauche]
 
         self.current_anim = "idle"  # anim de base
         self.image = self.anims["idle"].frames_droite[0]
 
         # gestion hitbox
-        self.hitbox_offset_x = w // 3   # valeur ajustée visuellement
-        hitbox_w = w -self.hitbox_offset_x * 2
-        self.rect = pygame.Rect(x + self.hitbox_offset_x, y, hitbox_w, h - 10)
+        w_scaled = int(w * 1.4)
+        self.hitbox_offset_x =  w_scaled // 3   # valeur ajustée visuellement
+        hitbox_w = w_scaled -self.hitbox_offset_x * 2
+        self.offset_y = 70
+        self.rect = pygame.Rect(x + self.hitbox_offset_x, y + offset_y, hitbox_w, int((72) * 1.5))
         self.position = pygame.math.Vector2(self.rect.centerx, self.rect.bottom)
 
         # attack range
-        self.attack_range_x = 65
-        self.attack_range_y = 90
+        self.attack_range_x = 75
+        self.attack_range_y = 92
 
         self.enter_state(self.NOT_TRIGGERED)
 
- 
+    def enter_state(self, new_state):
+        if new_state == self.ATTACKING:
+            self.sprint_start_time = None  # attaque reset le sprint
+        super().enter_state(new_state)
+
     """ partie de gestion de la detection """
     def joueur_detecte(self, player_rect):
         # zone moins large sur x
@@ -149,7 +163,7 @@ class Black_Wolf(Boss):
                 self.trigger_actif = self.trigger_large
                 self.last_seen_time = now
                 self.pursuit_start_time = now
-                self.last_jump_time = now  # jump poissible au bout de 7s
+                self.last_jump_time = now  # jump possible au bout de 7s
                 self.enter_state(self.IDLE)
 
         elif self.state == self.IDLE:
@@ -169,11 +183,11 @@ class Black_Wolf(Boss):
     def update_patrol(self, now):
         # simuler des "rondes"
         self.current_anim = "walk"
-        self.velocity.x = 1.5 * self.patrol_dir
+        self.velocity.x = 1 * self.patrol_dir
         self.direction = self.patrol_dir
 
         if now - self.patrol_timer >= self.patrol_duration:
-            self.patrol_dir *= -1
+            self.patrol_dir *= -1  # change de dir
             self.patrol_timer = now
 
         self.update_anim()
@@ -206,12 +220,23 @@ class Black_Wolf(Boss):
         # poursuite normale
         if d_x > 5:
             if d_x > 300: # il run si il est loin
+                if self.run_start_time is None:
+                    self.run_start_time = now
                 self.current_anim = "run"
-                self.velocity.x = self.vitesse * 3.5 * self.direction
+                self.velocity.x = self.vitesse * 4.5 * self.direction
             else: # sinon marche
-                self.current_anim = "walk"
-                self.velocity.x = self.vitesse * self.direction
+                run_end = self.run_start_time is None or now - self.run_start_time >= self.run_min_duration # verifie si le run est fini
+                if run_end:
+                    self.run_start_time = None  # reset
+                    self.current_anim = "walk"
+                    self.velocity.x = self.vitesse * self.direction
+                else:
+                    #continue de sprint
+                    self.current_anim = "run"
+                    self.velocity.x = self.vitesse * 4.5 * self.direction
+
         else:
+            self.run_start_time = None
             self.current_anim = "idle"
             self.velocity.x = 0
 
@@ -288,6 +313,6 @@ class Black_Wolf(Boss):
             return
         cam_rect = camera.apply(self.rect)
         # le sprite est plus large que la hitbox, on le recentre
-        fenetre.blit(self.image, (cam_rect.x - self.hitbox_offset_x, cam_rect.y))
+        fenetre.blit(self.image, (cam_rect.x - self.hitbox_offset_x, cam_rect.y - self.offset_y))
         for elem in self.hitboxs:
             elem.draw(fenetre, camera)  
