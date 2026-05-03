@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="60" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="126">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="60" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="127">
  <tileset firstgid="1" name="platform" tilewidth="32" tileheight="32" tilecount="60" columns="10">
   <image source="../Swamp/Tiles/Tileset.png" width="320" height="192"/>
   <tile id="0">
@@ -400,6 +400,14 @@
    <properties>
     <property name="obj_type" value="mob"/>
    </properties>
+  </object>
+  <object id="126" x="1880.18" y="12.8822" width="39.5" height="86">
+   <properties>
+    <property name="obj_type" value="door"/>
+    <property name="target_map" value="cave/cave.tmx"/>
+    <property name="target_spawn" value="left"/>
+   </properties>
+   <capsule/>
   </object>
  </objectgroup>
 </map>

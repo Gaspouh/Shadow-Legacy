@@ -184,11 +184,15 @@ while continuer:
 
             for e in liste_entites[:]:
 
+                if hasattr(e, "update"):
+                    e.update(player.rect, player, platforms)
+
                 if not e.alive:
                     fin = e.mort()
                     if fin:
                         liste_entites.remove(e)
                     continue
+
                               
                 if hasattr(e, "patrouille"): #pour les patrouilleurs
                     e.patrouille(platforms)

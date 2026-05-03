@@ -5,6 +5,7 @@ from World.traps import *
 from Entities.ennemi import Araignee, Volant, Fighter, Chargeur, Tourelle
 from Entities.boss_logic import Golem
 from World.objets import Receptacle
+from Entities.boss_wolf_red import Red_Wolf
 
 TILE_SIZE = 32
 
@@ -85,7 +86,7 @@ class Map_Manager:
             self.checkpoints, self.spawnpoints, self.doors, self.entities_to_spawn, self.objets = create_map(tmx_data)
 
     def spawn_entities(self, fenetre):
-        araignee, volant, golem, chargeur, tourelle, fighter, blackwolf = [], [], [], [], [], [], []
+        araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf = [], [], [], [], [], [], [], []
 
         for e in self.entities_to_spawn:
             if e["type"] == "mob":
@@ -103,12 +104,14 @@ class Map_Manager:
                     fighter.append(Fighter(fenetre, e["x"], e["y"]))
                 elif e["name"] == "blackwolf":
                     blackwolf.append(Black_Wolf(fenetre, e["x"], e["y"]))
+                elif e["name"] == "redwolf":
+                    redwolf.append(Red_Wolf(fenetre, e["x"], e["y"]))
 
             if e["type"] == "boss":
                 if e["name"] == "gravelion":
                     pass
                     
-        liste_entites = araignee + volant + golem + chargeur + tourelle + fighter + blackwolf
+        liste_entites = araignee + volant + golem + chargeur + tourelle + fighter + blackwolf + redwolf
         return liste_entites
     
     def get_spawn(self, name):
@@ -150,6 +153,9 @@ def create_map(tmx_data):
             #Platformes classiques
             if tile_type == "ground":
                 platforms.append(Platform(pos_x, pos_y, image))
+            
+            elif tile_type == "decor":
+                decorations.append(Map_Object(pos_x, pos_y, image))
 
             #Platformes spéciales
             elif tile_type == "quicksand":

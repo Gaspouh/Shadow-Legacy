@@ -636,7 +636,7 @@
     <property name="obj_type" value="receptacle"/>
    </properties>
   </object>
-  <object id="73" name="blackwolf" x="238" y="595.333">
+  <object id="73" name="blackwolf" x="2862.24" y="834.727">
    <properties>
     <property name="obj_type" value="mob"/>
    </properties>
