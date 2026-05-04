@@ -141,7 +141,7 @@ def menu(fenetre, player, checkpoints, current_map_name):
     return pause
 
 
-def sit_on_bench(fenetre, receptacle, liste_receptacles):
+def sit_on_bench(fenetre):
     """ Ouvre l'inventaire lorsque le joueur est assis sur un banc + gestion des charms equippés et drag """
     open_inventory = True
     with open(SAVE_FILE, "r") as f:
@@ -160,7 +160,7 @@ def sit_on_bench(fenetre, receptacle, liste_receptacles):
                 charms_afficher.append({"img": image, "rect": rect, "name": name})
                 decalage_x += 50 + image.get_width()
 
-    for ojbets in liste_receptacles:
+            """ for ojbets in liste_receptacles:
         if len(ojbets.liste_receptacles) > 0: # Si il y a des receptacles dans la liste, on affiche les charms qu'ils contiennent
             if len(ojbets.liste_receptacles) == 1:
                 image = pygame.image.load("Assets/Images/fragment1.png").convert_alpha()
@@ -172,6 +172,7 @@ def sit_on_bench(fenetre, receptacle, liste_receptacles):
             image2 = pygame.transform.scale(image, (ojbets.image.get_width()/1.8, ojbets.image.get_height()/1.8))
             charms_afficher.append({"img": image2, "rect": rect, "name": ojbets.name})
             decalage_x += 50 + ojbets.image.get_width()
+                                            """
         
     charm_selected = None   # Pouvoir selectionner un item à la fois pour le drag and drop
     offset_x, offset_y = 0, 0
