@@ -21,6 +21,8 @@ class Camera:
     def update_map_size(self, map_width, map_height):
         self.map_width = map_width
         self.map_height = map_height
+        self.camera.x = 0
+        self.camera.y = 0
 
     def update(self, target, shake_amount=0):
         target_x = -target.rect.centerx + self.zoom_w // 2
@@ -40,27 +42,43 @@ class Camera:
             self.camera.y += random.randint(-shake_amount, shake_amount)
 
 class Background_effect:    # On utilise le "parallax layer", c'est un Effet populaire en 2D et utlisé dans hollow knight pour créer de la profondeur
-    def __init__(self, fenetre, path_image, profondeur):
-        self.fenetre = fenetre
-        self.image = pygame.image.load(path_image).convert_alpha()
+    def __init__(self, path_image, profondeur, fenetre):
+        image = pygame.image.load(path_image).convert_alpha()
+        ratio = fenetre.get_height() / image.get_height() * 1.2
+        new_width = int(image.get_width() * ratio)
+        self.image = pygame.transform.scale(image, (new_width, fenetre.get_height() * 1.2))
+        self.image_width = new_width
         self.profondeur = profondeur
+        
+        
+        image = pygame.transform.scale(self.image, (new_width, fenetre.get_height()))
     
-    def effect(self, camera):
+    def effect(self, fenetre, camera):
         # On multiplie par la profondeur et elle est entre 0 et 1, 1 c'est la meme vitesse et 0 c'est immobile (quand la distance tend vers l'infini)
-        offset_x = -camera.camera.x * self.profondeur  # "-" car la camera est deja negative, ça fait une valeur absolue en gros
-        offset_y = -camera.camera.y * self.profondeur
-        
-        # Application de la "formule du tiling" classique pour faire du parallax. repete l'image au max pour couvrir tout l'écran en gros
-        img_w = self.image.get_width()
-        # là le modulo permet repeter l'image à l'infini
-        start_x = offset_x % img_w
-        
-        # On dessine deux fois pour couvrir les transitions (tiling) cas classique du parallax)
-        self.fenetre.blit(self.image, (start_x - img_w, offset_y))
-        self.fenetre.blit(self.image, (start_x, offset_y))
-        if start_x + img_w < self.fenetre.get_width():
-            self.fenetre.blit(self.image, (start_x + img_w, offset_y)) 
 
+        # Application de la "formule du tiling" classique pour faire du parallax. repete l'image au max pour couvrir tout l'écran en gros
+        offset_x = (camera.camera.x * self.profondeur)  % self.image_width # là le modulo permet repeter l'image à l'infini 
+        offset_y = camera.camera.y * self.profondeur * 0.3
+        offset_y = max(-(self.image.get_height() - fenetre.get_height()), min(0, offset_y)) # limiter le déplacement vertical pour ne pas montrer les zones hors limites
+
+        # On dessine deux fois pour couvrir les transitions (tiling) cas classique du parallax)
+        fenetre.blit(self.image, (offset_x - self.image_width, offset_y)) 
+        fenetre.blit(self.image, (offset_x, offset_y))
+        if offset_x + self.image_width < fenetre.get_width(): # Ne pas dessiner si deja hors de l'écran
+            fenetre.blit(self.image, (offset_x + self.image_width, offset_y))
+
+def create_parallax_layers(map_path, nb_layers, fenetre):
+        profondeurs = [(i / nb_layers) * 0.5 for i in range(1, nb_layers + 1)]
+        layers = []
+        for i, p in enumerate(profondeurs):
+            image_path = f"{map_path}/Background/{i+1}.png"  
+            layers.append(Background_effect(image_path, p, fenetre))
+        return layers
+
+def draw_parallax(fenetre, camera, layers):
+        for layer in layers:
+            layer.effect(fenetre, camera)
+        
 lucioles =[] # création de luciole
 for i in range(16):
     lucioles.append(
@@ -93,7 +111,8 @@ for i in range(16):
         "delai_direction": random.randint(200, 500),
     })
 
-def background(game_fenetre, offset_x, offset_y, now):
+
+def background_luciole(game_fenetre, offset_x, offset_y, now):
     game_fenetre.fill((8, 8, 18)) # rempli l'écran en sombre
     longeur = game_fenetre.get_width() # longueur map
     hauteur = game_fenetre.get_height() # hauteur map

@@ -9,7 +9,7 @@ if project_root not in sys.path:
 from Entities.perso import Player
 from Entities.ennemi import Projectile
 from World.map import Map_Manager
-from Visual.camera import Camera, background, intro
+from Visual.camera import Camera, background_luciole, intro, Background_effect, create_parallax_layers, draw_parallax
 from Visual.vfx import particles, Particle, Fade, HealParticle, heal_particles
 from World.traps import *
 from World.objets import Coeur, Monnaie, Receptacle
@@ -42,6 +42,8 @@ MAP_PATH_TO_NAME = {v: k for k, v in MAP_PATHS.items()} # ça permet d'inverser 
 current_map_name, current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
 map_manager = Map_Manager()
 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", current_map_name, current_map_path)) # charge la map actuelle
+nb_layers = MAP_PARALLAX_LAYERS.get(current_map_name, 0)
+layers = create_parallax_layers(os.path.join(Chemin_absolu, "Graphics", current_map_name), nb_layers=nb_layers, fenetre=game_fenetre) # créer les layers de parallax pour la map actuelle
 
 MAP_WIDTH, MAP_HEIGHT = map_manager.map_width, map_manager.map_height
 MAP_RECT = pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)
@@ -52,7 +54,7 @@ clock = pygame.time.Clock()
 platforms = map_manager.platforms
 special_platforms = map_manager.special_platforms
 traps = map_manager.traps
-decorations = map_manager.decorations
+decorations = map_manager.decorations 
 objects = map_manager.objets
 checkpoints = map_manager.checkpoints
 spawnpoints = map_manager.spawnpoints
@@ -256,12 +258,13 @@ while continuer:
                             particles.append(Particle(e.rect.centerx, e.rect.centery))
 
             # Dessiner les éléments du jeu sur la fenêtre
-            offset_x = -camera.camera.x
+            """offset_x = -camera.camera.x
             offset_y = -camera.camera.y
-            background(game_fenetre, offset_x, offset_y, now) # Remplir le fond 
+            background_luciole(game_fenetre, offset_x, offset_y, now) # Remplir le fond """
 
             # Backgroud avec parallax
 
+            draw_parallax(game_fenetre, camera, layers)
                 
             # Plateformes
             for platform in platforms:
@@ -352,14 +355,13 @@ while continuer:
                 fade.start("out", 5)
 
         if door_collided and fade.intensity >= 255 and fade.state == "out":
-                print("oui")
+                print("doored")
                 liste_entites.clear()
                 projectiles.clear()
                 tir_tourelle.clear()
 
-                map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", door_collided.target_map))
                 current_map_path = door_collided.target_map
-                current_map_name = MAP_PATH_TO_NAME.get(os.path.basename(current_map_path))
+                current_map_name = TMX_TO_FOLDER.get(os.path.basename(current_map_path))
                 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", door_collided.target_map))
                 spawn = map_manager.get_spawn(door_collided.target_spawn)
 
@@ -376,6 +378,8 @@ while continuer:
                 MAP_WIDTH, MAP_HEIGHT = map_manager.map_width, map_manager.map_height
                 MAP_RECT = pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)
                 camera.update_map_size(MAP_WIDTH, MAP_HEIGHT)
+                nb_layers = MAP_PARALLAX_LAYERS.get(current_map_name, 0)
+                layers = create_parallax_layers(os.path.join(Chemin_absolu, "Graphics", current_map_name), nb_layers=nb_layers, fenetre=game_fenetre) # créer les layers de parallax pour la map actuelle
 
                 liste_entites = map_manager.spawn_entities(fenetre)
                 spawn = map_manager.get_spawn(door_collided.target_spawn)

@@ -343,7 +343,7 @@
   <object id="14" x="3137" y="2" width="52" height="636">
    <properties>
     <property name="obj_type" value="door"/>
-    <property name="target_map" value="Forest/parcours.tmx"/>
+    <property name="target_map" value="Forest/Parcours.tmx"/>
     <property name="target_spawn" value="left"/>
    </properties>
    <capsule/>
