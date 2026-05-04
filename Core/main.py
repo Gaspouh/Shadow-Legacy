@@ -400,7 +400,7 @@ while continuer:
         if not player.invincible or (pygame.time.get_ticks() // 100) % 2 == 0: # Pour faire clignoter le joueur quand il est invincible
             game_fenetre.blit(player.image, camera.apply(image_rect))
 
-        if player.is_attacking:
+        if player.is_attacking and pygame.key.get_pressed()[pygame.K_a]:
             pygame.draw.rect(game_fenetre, (255, 0, 0), camera.apply(player.attack_rect)) # Afficher la hitbox de l'attaque pour les tests
         if pygame.key.get_pressed()[pygame.K_a]:
             pygame.draw.rect(game_fenetre, (0, 0, 255), camera.apply(player.rect), 2) # Afficher la hitbox de l'attaque pour les tests

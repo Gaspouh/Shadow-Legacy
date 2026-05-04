@@ -193,7 +193,8 @@ class AttackZone:
         return pygame.time.get_ticks() - self.birth_time > self.duration
     
     def draw(self, fenetre, camera):
-        pygame.draw.rect(fenetre, (255,0,0), camera.apply(self.rect), 2)
+        if pygame.key.get_pressed()[pygame.K_a]:
+            pygame.draw.rect(fenetre, (255,0,0), camera.apply(self.rect), 2)
         fenetre.blit(self.image, camera.apply(self.rect))
 
 class Patrouilleur(Ennemi):
