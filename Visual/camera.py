@@ -21,6 +21,8 @@ class Camera:
     def update_map_size(self, map_width, map_height):
         self.map_width = map_width
         self.map_height = map_height
+        self.camera.x = 0
+        self.camera.y = 0
 
     def update(self, target, shake_amount=0):
         target_x = -target.rect.centerx + self.zoom_w // 2

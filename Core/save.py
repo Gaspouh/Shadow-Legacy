@@ -12,25 +12,40 @@ DEFAULT_SAVE = os.path.join(CORE_DIR, "default_save.json")
 
 # Dico des maps à mettre à jour
 
-MAP_NAME = ["swamp", "terre_aride", "cave", "cave", "forest", "forest"]
+MAP_NAME = ["swamp", "terre_aride", "cave", "forest"]
 
 MAP_PATHS = {
-    MAP_NAME[0]: "map_swamp.tmx",
-    MAP_NAME[1]: "ascension.tmx",
-    MAP_NAME[2]: "cave.tmx",
-    MAP_NAME[3]: "boss_arene.tmx",
-    MAP_NAME[4]: "Parcours.tmx",
-    MAP_NAME[5]: "forest.tmx"
+    "swamp": "map_swamp.tmx",
+    "terre_aride": "ascension.tmx",
+    "cave": "cave.tmx",
+    "forest":"forest.tmx"
+}
+
+TMX_TO_FOLDER = {
+    "map_swamp.tmx": "swamp",
+    "ascension.tmx": "terre_aride",
+    "cave.tmx": "cave",
+    "boss_arene.tmx": "cave",
+    "Parcours.tmx": "forest",
+    "forest.tmx": "forest"
+}
+
+# facilite l'utilisationn du parallax
+MAP_PARALLAX_LAYERS = {
+    "swamp": 5,
+    "terre_aride": 5,
+    "cave": 3,
+    "boss_arene":0,
+    "forest":5
 }
 
 # spawns
 DEFAULT_SPAWNS = {
-    MAP_NAME[0]: {"x": 100, "y": 100},
-    MAP_NAME[1]: {"x": 10, "y": 1200},
-    MAP_NAME[2]: {"x": 100, "y": 100},
-    MAP_NAME[3]: {"x": 1000, "y": 1000},
-    MAP_NAME[4]: {"x": 200, "y": 700},
-    MAP_NAME[5]: {"x": 100, "y": 100}
+    "swamp":{"x": 100, "y": 100},
+    "terre_aride": {"x": 10,  "y": 1200},
+    "cave": {"x": 100, "y": 100},
+    "forest": {"x": 100, "y": 100},
+    "parcours": {"x": 500, "y": 1000}
 }
 # Position de spawn par défaut selon la map (si aucun checkpoint activé)
 
@@ -44,12 +59,23 @@ def load_config():
 def get_saved_map():
     """prend juste la map sauvegardée et son nom pour apres charger la bonne map """
     if not os.path.exists(SAVE_FILE):
-        return MAP_NAME[0] # fallback si pas de save (map du début)
+        return MAP_NAME[0], MAP_PATHS[MAP_NAME[0]]  # fallback swamp
     
     with open(SAVE_FILE, "r") as f:
         data = json.load(f)
 
-    return data.get("current_map_name"), data.get("current_map")
+    name = data.get("current_map_name")
+    tmx = data.get("current_map")
+    # a cause de certains pb de save, on met en minuscule
+    if name:
+        name = name.lower()
+
+    #swamp par defaut
+    if name not in MAP_PATHS:
+        name = MAP_NAME[0]
+        tmx = MAP_PATHS[name]
+
+    return name, tmx
 
 
 def get_spawn_from_checkpoints(checkpoints, map_path):
@@ -88,11 +114,14 @@ def get_player_found_charms():
 def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None):
     # Sauvegarder l'état du jeu dans un fichier json
     spawn = get_spawn_from_checkpoints(checkpoints, map_name)
+    safe_map_name = map_name.lower() if map_name else "swamp"
+    tmx_file = MAP_PATHS.get(safe_map_name, MAP_PATHS["swamp"])
 
     data = {    # on modifiera perso.py, abilities.py, et autres fichiers pour qu'ils dependent du json et pas l'inverse
         # player
         "current_map_name": map_name,
-        "current_map": MAP_PATHS.get(map_name, "map_swamp.tmx"), # fallback avec la map swamp au cas ou
+        "current_map_name": map_name.lower() if map_name else "swamp", # fallback avec la map swamp au cas ou
+        "current_map": tmx_file,
         "player": {
             "health": player.health,      
             "max_health": player.max_health,
@@ -100,7 +129,7 @@ def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None):
             "found_charms" : get_player_found_charms(),
             "equipped_charms": get_player_equipped_charms()
         },
-
+    
         # spawn
         "spawn_point": {
             "x": spawn.x,

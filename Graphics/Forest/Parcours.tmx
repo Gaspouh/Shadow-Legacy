@@ -51,13 +51,13 @@
    </properties>
    <point/>
   </object>
-  <object id="28" name="left" x="198" y="666.667" width="52" height="52">
+  <object id="28" name="left" x="94" y="710.667" width="52" height="52">
    <properties>
     <property name="obj_type" value="spawnpoint"/>
    </properties>
    <ellipse/>
   </object>
-  <object id="30" x="3" y="642" width="63.3333" height="126.667">
+  <object id="30" x="3" y="634" width="63.3333" height="134.667">
    <properties>
     <property name="obj_type" value="door"/>
     <property name="target_map" value="Forest/forest.tmx"/>

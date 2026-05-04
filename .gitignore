@@ -1,6 +1,4 @@
 __pycache__/
 *.pyc
 .vscode/
-*.mp3.DS_Store
-.DS_Store
 *.json

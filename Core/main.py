@@ -81,7 +81,9 @@ ui_reposer = pygame.transform.scale(ui_reposer, (ui_reposer.get_width() /7, ui_r
 
 # Sons
 set_spawn_sound = pygame.mixer.Sound("Assets/Sounds/set_spawn_sound.mp3")
+set_spawn_sound.set_volume(0.5)
 death_sound = pygame.mixer.Sound("Assets/Sounds/elden-ring-death.mp3")
+death_sound.set_volume(0.7)
 
 #Attributs
 hearts = [Coeur(fenetre, 100 + i*110, 35) for i in range(player.max_health)]
@@ -352,14 +354,13 @@ while continuer:
                 fade.start("out", 5)
 
         if door_collided and fade.intensity >= 255 and fade.state == "out":
-                print("oui")
+                print("doored")
                 liste_entites.clear()
                 projectiles.clear()
                 tir_tourelle.clear()
 
-                map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", door_collided.target_map))
                 current_map_path = door_collided.target_map
-                current_map_name = MAP_PATH_TO_NAME.get(os.path.basename(current_map_path))
+                current_map_name = TMX_TO_FOLDER.get(os.path.basename(current_map_path))
                 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", door_collided.target_map))
                 spawn = map_manager.get_spawn(door_collided.target_spawn)
 

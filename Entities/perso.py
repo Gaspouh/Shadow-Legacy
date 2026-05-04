@@ -36,6 +36,9 @@ class Player(PhysicsEntity):
         self.is_jumping = False
         self.coyote_timer = -1000
         self.jump_buffer_timer = -1000
+        self.was_on_ground = False
+        self.last_land_sound_time = 0   # pour mettre un cooldown et pas spam le son
+
 
         # VARIABLES DE GESTION DE L'ATTAQUE A INITIALISER
         self.is_attacking = False
@@ -83,7 +86,18 @@ class Player(PhysicsEntity):
 
         self.respawn_on_touch = False
 
-        # Spriteheets animations :
+        # SONS
+        self.attack_sounds = [
+            pygame.mixer.Sound("Assets/Sounds/player_attack1.mp3"),
+            pygame.mixer.Sound("Assets/Sounds/player_attack2.mp3")
+        ]
+        self.land_sound = pygame.mixer.Sound("Assets/Sounds/player_land.mp3")
+        self.jump_sound =   pygame.mixer.Sound("Assets/Sounds/player_jump.mp3")
+        self.jump_sound.set_volume(0.4)
+        self.double_jump_sound = pygame.mixer.Sound("Assets/Sounds/player_double_jump.mp3")
+        self.double_jump_sound.set_volume(0.3)
+
+        # ANIMATIONS :
 
         # idle
         self.anim_idle = VerticalAnimation(fenetre, x, y, 'Assets/Player/idle.png',        57, 500, 500, 0, 0)
@@ -254,6 +268,13 @@ class Player(PhysicsEntity):
                 self.velocity.x += self.wind_force_x * 0.2
             self.velocity.y += self.wind_force_y
 
+            if not self.was_on_ground and self.on_ground:
+                if now - self.last_land_sound_time >= 2000: # cooldown de 2s
+                    self.land_sound.play()
+                    self.last_land_sound_time = now
+
+            self.was_on_ground = self.on_ground
+
             # Gestion sable mouvant
             if self.in_quicksand:
 
@@ -365,9 +386,11 @@ class Player(PhysicsEntity):
             
             if jump_type == "simple" :
                 self.velocity.y = self.jump_strength * self.current_jump_factor
+                self.jump_sound.play()
             elif jump_type == "double" :
                 self.velocity.y = self.double_jump.strength
                 self.double_jump.used =True # Flag
+                self.double_jump_sound.play()
 
             self.coyote_timer = -1000 # Réinitialisation des timers pour ne pas sauter 2 fois
             self.jump_buffer_timer = -1000
@@ -383,6 +406,7 @@ class Player(PhysicsEntity):
         if not self.is_attacking and now - self.last_attack_time >= self.attack_cooldown:
             keys = pygame.key.get_pressed()
             self.is_attacking = True
+            random.choice(self.attack_sounds).play()    # sons d'atk
             self.attack_timer = now
             self.last_attack_time = now
             self.entite_touches = [] # On vide la liste pour ne pas toucher plusieurs fois le même ennemi avec une seule attaque
