@@ -20,17 +20,26 @@ class Gravelion(Boss):
     def __init__(self, fenetre,x, y, arene_rect):
         marge_x = 150
         hauteur_air = arene_rect.top + 150
+        # ---------------------- Pour le trailer --------------------------
+        arene_w = 1200
+        arene_h = 700
+        arene_rect = pygame.Rect(x - arene_w // 2, y - arene_h, arene_w, arene_h)
+
+        # -----------------------------------------------------------------
         tp_points = [
             (arene_rect.left + marge_x, arene_rect.bottom),
             (arene_rect.right - marge_x, arene_rect.bottom),
             (arene_rect.left + marge_x, hauteur_air),
             (arene_rect.right - marge_x, hauteur_air)
         ]
+        self.arene_rect = arene_rect
         super().__init__(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 4, 400, 100, 0, 0, 500, 1,\
                         {"damage": 1, "knockback_x": 80, "knockback_y": -5}, tp_points, stagger_threshold=150, scale=1)
 
         self.arene_rect = arene_rect
         self.use_gravity = False # Pas de gravité pour ce boss lévitant
+
+        
 
         # Animations 
         self.anims = {
@@ -80,9 +89,11 @@ class Gravelion(Boss):
         self.cocon_chance = 1/6
         self.laser = None
 
-        #Spawn 
-        self.enter_state(self.NOT_TRIGGERED)
-        self.teleport(self.SOL_DROIT)
+        #Spawn (direct pour le trailer)
+        self.enter_state(self.IDLE)
+        self.rect.midbottom = (x, y)  #spawn position ds tiled
+        self.position = pygame.math.Vector2(self.rect.centerx, self.rect.bottom)
+
 
     def is_on_ground(self):
         return self.current_tp_index in [self.SOL_GAUCHE, self.SOL_DROIT]
@@ -110,10 +121,10 @@ class Gravelion(Boss):
         now = pygame.time.get_ticks()
         elapsed = now - self.state_timer
 
-        if self.state == self.NOT_TRIGGERED:
-            pass
+        #if self.state == self.NOT_TRIGGERED:
+            #pass
 
-        elif self.state == self.IDLE:
+        if self.state == self.IDLE:
             self.update_idle(elapsed, player_rect)
 
         elif self.state == self.ATTACKING:

@@ -27,7 +27,7 @@ info_ecran = pygame.display.Info()
 
 # Configs
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
-fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.DOUBLEBUF, vsync=1) 
+fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.RESIZABLE | pygame.DOUBLEBUF, vsync=1) 
 pygame.display.set_caption("Shadow Legacy") # Définir le titre de la fenêtre
 
 zoom = 1.5 # zoom
@@ -71,9 +71,7 @@ player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position 
 player.rect.midbottom = player.position # pareil avec la hitbox
 
 #Boss
-gravelion = Gravelion(fenetre, 5600, 300, pygame.Rect(5000, 0, 1000, 600)) # spawn dans l'arène de Gravelion
-trigger_combat = pygame.Rect(5100, 0, 50, 600)
-#porte_arene = Platform(5000, 0, 20, 600, (80, 80, 80))  # mur gauche
+
 
 # UI
 ui_reposer = pygame.image.load("Assets/Images/UI_'Pressez_Z'.png").convert_alpha()
@@ -416,14 +414,10 @@ while continuer:
                     player.rect.bottom - randint(0, 30)
                 ))
 
-        """
+        
         #Lancement Gravelion
-        if not gravelion.combat_lance and player.rect.colliderect(trigger_combat):
-            gravelion.combat_lance = True
-            platforms.append(porte_arene) # Fermer l'arène en ajoutant le mur gauche
-            gravelion.enter_state(gravelion.IDLE)
-            shake_amount = 10 # Gros screen shake pour annoncer le début du combat
-        """
+         # Gros screen shake pour annoncer le début du combat
+
         total_particles = particles + heal_particles  # Liste combinée pour faciliter la mise à jour et le dessin
 
         # Particules

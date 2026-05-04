@@ -480,6 +480,8 @@ class Golem(Boss):
         self.orbs_value = 30
         self.vitesse_deplacement = 2
 
+        self.arene_rect = pygame.Rect(-99999, -99999, 999999, 999999)
+        
         self.orbs_value = 15
         
         self.scale = 0.5
@@ -500,7 +502,7 @@ class Golem(Boss):
         self.attack_cooldown = 2000  
 
         # Spriteheets, animations :
-        v = 120
+        v = 200
         self.anims = {
             "idle": VerticalAnimation(fenetre, x, y, 'Assets/Boss/golem/golem_idle_sheet.png',       40, 240, 240, 0, 0),
             "walk_right": VerticalAnimation(fenetre, x, y, 'Assets/Boss/golem/golem_walk_right_sheet.png', 32, 240, 240, 0, 0),
@@ -670,9 +672,9 @@ class Golem(Boss):
             return
 
         # Technique pour aligner le spirte avec la hitbox
-        visual_rect = self.image.get_rect(midbottom=(self.rect.centerx, self.rect.bottom - 20)) # ne fonctionne pas pour l'instant
+        visual_rect = self.image.get_rect(midbottom=(self.rect.centerx, self.rect.bottom + 25))
         fenetre.blit(self.image, camera.apply(visual_rect))
-
+        """
         for elem in self.hitboxs:
             elem.draw(fenetre, camera)
 
@@ -692,3 +694,4 @@ class Golem(Boss):
         
         # zone d'attaque en jaune
         pygame.draw.rect(fenetre, (255, 255, 0), camera.apply(self._zone_smash()), 2)
+        """

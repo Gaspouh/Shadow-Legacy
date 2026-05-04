@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="200" height="70" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="33">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="200" height="70" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="37">
  <tileset firstgid="1" source="platforms_2/platforms_2.tsx"/>
  <tileset firstgid="257" source="platforms_3/platforms_3.tsx"/>
  <tileset firstgid="461" source="platforms_4/platforms_4.tsx"/>
@@ -493,6 +493,29 @@
    <properties>
     <property name="obj_type" value="door"/>
     <property name="target_map" value="hollow_earth/land"/>
+    <property name="target_spawn" value="left"/>
+   </properties>
+   <capsule/>
+  </object>
+  <object id="33" name="Receptacle" x="1661.38" y="947.896" width="37.2439" height="24.2086">
+   <properties>
+    <property name="obj_type" value="receptacle"/>
+   </properties>
+  </object>
+  <object id="34" name="Receptacle" x="2275.32" y="227.29" width="37.2439" height="24.2086">
+   <properties>
+    <property name="obj_type" value="receptacle"/>
+   </properties>
+  </object>
+  <object id="35" name="golem" x="1521.21" y="963.636">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="36" x="3320.92" y="1048.67" width="112.833" height="486.667">
+   <properties>
+    <property name="obj_type" value="door"/>
+    <property name="target_map" value="cave/gravelion_arene.tmx"/>
     <property name="target_spawn" value="left"/>
    </properties>
    <capsule/>

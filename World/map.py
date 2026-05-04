@@ -8,6 +8,7 @@ from Entities.ennemi import Araignee, Volant, Fighter, Chargeur, Tourelle
 from Entities.boss_logic import Golem
 from World.objets import Receptacle
 from Entities.boss_wolf_red import Red_Wolf
+from Entities.boss_gravelion import Gravelion
 
 TILE_SIZE = 32
 
@@ -90,7 +91,7 @@ class Map_Manager:
         
         self.nb_parallax_layers = len([fichier for fichier in os.listdir(background_folder) if fichier != "0.png"])
     def spawn_entities(self, fenetre):
-        araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf = [], [], [], [], [], [], [], []
+        araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf, gravelion = [], [], [], [], [], [], [], [], []
 
         for e in self.entities_to_spawn:
             if e["type"] == "mob":
@@ -110,12 +111,16 @@ class Map_Manager:
                     blackwolf.append(Black_Wolf(fenetre, e["x"], e["y"]))
                 elif e["name"] == "redwolf":
                     redwolf.append(Red_Wolf(fenetre, e["x"], e["y"]))
+                elif e["name"] == "gravelion":
+                    gravelion.append(Gravelion(fenetre, e["x"], e["y"], arene_rect))
 
+            """
             if e["type"] == "boss":
                 if e["name"] == "gravelion":
-                    pass
+                    gravelion.append(Gravelion(fenetre, e["x"], e["y"], arene_rect))
+            """
                     
-        liste_entites = araignee + volant + golem + chargeur + tourelle + fighter + blackwolf + redwolf
+        liste_entites = araignee + volant + golem + chargeur + tourelle + fighter + blackwolf + redwolf + gravelion
         return liste_entites
     
     def get_spawn(self, name):
