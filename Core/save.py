@@ -27,7 +27,8 @@ TMX_TO_FOLDER = {
     "cave.tmx": "cave",
     "boss_arene.tmx": "cave",
     "Parcours.tmx": "forest",
-    "forest.tmx": "forest"
+    "forest.tmx": "forest",
+    "gravelion_arene.tmx": "cave"
 }
 
 # facilite l'utilisationn du parallax

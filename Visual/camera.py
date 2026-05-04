@@ -41,12 +41,12 @@ class Camera:
             self.camera.x += random.randint(-shake_amount, shake_amount)
             self.camera.y += random.randint(-shake_amount, shake_amount)
 
-class Background_effect:    # On utilise le "parallax layer", c'est un Effet populaire en 2D et utlisé dans hollow knight pour créer de la profondeur
+class Background_effect:
     def __init__(self, path_image, profondeur, fenetre):
         image = pygame.image.load(path_image).convert_alpha()
-        ratio = fenetre.get_height() / image.get_height() * 1.2
+        ratio = fenetre.get_height() / image.get_height()
         new_width = int(image.get_width() * ratio)
-        self.image = pygame.transform.scale(image, (new_width, fenetre.get_height() * 1.2))
+        self.image = pygame.transform.scale(image, (new_width, fenetre.get_height()))  # int, pas de * 1.2
         self.image_width = new_width
         self.profondeur = profondeur
         
