@@ -1,5 +1,4 @@
 import os
-
 import pygame
 import pytmx
 from Entities.boss_wolf_black import Black_Wolf
@@ -9,8 +8,11 @@ from Entities.boss_logic import Golem
 from World.objets import Receptacle
 from Entities.boss_wolf_red import Red_Wolf
 from Entities.boss_gravelion import Gravelion
+from Core.save import get_chunks_params
 
 TILE_SIZE = 32
+RENDU_CHUNCK = get_chunks_params() # pareil, mais pour les collisions et autres, la valeur c'est la taille d'un coté du carré (en tile) qui sont calculé
+ZONE_VILLAGE = pygame.Rect(1250, 2500, 3500, 2050)
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, image):
@@ -249,3 +251,23 @@ def create_map(tmx_data):
 
     return platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, doors, entities_to_spawn, objets
 
+def chunck_zone(platforms):
+    zone = {}
+    for i in platforms:
+        x = i.rect.x // (TILE_SIZE*RENDU_CHUNCK)
+        y = i.rect.y// (TILE_SIZE*RENDU_CHUNCK)
+        if (x,y) not in zone: # si pas de platforme ds le chunck on créer une liste (pour apres ajouter les platsformes)
+            zone[(x,y)] = []
+        zone[(x,y)].append(i)
+    return zone
+
+def platforme_la_plus_proche(zone, rect):
+    x = rect.centerx // (TILE_SIZE*RENDU_CHUNCK)
+    y = rect.centery // (TILE_SIZE*RENDU_CHUNCK)
+    proche = []
+    # check les 9 chunks autour du joueur et avoir les platformes les plus proche
+    for i in (-1,0,1):
+        for j in (-1,0,1):
+            if (x+i,y+j) in zone:
+                proche.extend(zone[(x+i,y+j)])
+    return proche

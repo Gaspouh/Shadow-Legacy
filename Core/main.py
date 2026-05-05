@@ -8,8 +8,8 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 from Entities.perso import Player
 from Entities.ennemi import Projectile
-from World.map import Map_Manager
-from Visual.camera import Camera, background_luciole, intro, Background_effect, create_parallax_layers, draw_parallax
+from World.map import Map_Manager, ZONE_VILLAGE
+from Visual.camera import Camera, background_luciole, intro, Background_effect, create_parallax_layers, draw_parallax, parallax_zone
 from Visual.vfx import particles, Particle, Fade, HealParticle, heal_particles
 from World.traps import *
 from World.objets import Coeur, Monnaie, Receptacle
@@ -17,6 +17,7 @@ from Entities.boss_gravelion import Gravelion
 from Core.save import *
 from Visual.interface import menu, sit_on_bench, home_screen
 from Core.reset import reset
+from World.map import chunck_zone, platforme_la_plus_proche
 
 new_game = save_backup()
 
@@ -26,7 +27,7 @@ pygame.init()
 info_ecran = pygame.display.Info()
 
 # Configs
-GAME_WIDTH, GAME_HEIGHT = 1920, 1080
+GAME_WIDTH, GAME_HEIGHT = info_ecran.current_w, info_ecran.current_h
 fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.DOUBLEBUF, vsync=1) 
 pygame.display.set_caption("Shadow Legacy") # Définir le titre de la fenêtre
 
@@ -60,9 +61,17 @@ spawnpoints = map_manager.spawnpoints
 doors = map_manager.doors
 entities_to_spawn = map_manager.entities_to_spawn
 
+layer_village = [
+    parallax_zone(os.path.join(Chemin_absolu, "Graphics", "hollow_earth", "village", "3.png"), 0.8, game_fenetre, ZONE_VILLAGE),
+]
+
 special_surfaces = [sp.surface for sp in special_platforms if sp.surface is not None]
 
 liste_entites = map_manager.spawn_entities(fenetre)
+
+# optimisations
+repndu_visible = ... # defini dans la boucle. optimisation du rendu pour blit dans la caméra
+chunks = chunck_zone(platforms)
 
 #Joueur
 player = Player(100, 100, fenetre)
@@ -179,14 +188,15 @@ while continuer:
                     elif sp.effect == "ice":
                         player.on_ice = True
 
-            #update joueur
-            player.update(platforms + special_surfaces)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
+            #update joueur (+opti chunk)
+            proche = platforme_la_plus_proche(chunks, player.rect)
+            player.update(proche + special_surfaces)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
 
             for e in liste_entites[:]:
-
+                e_proches = platforme_la_plus_proche(chunks, e.rect)
                 if hasattr(e, "update"):
-                    e.update(player.rect, player, platforms)
+                    e.update(player.rect, player, e_proches)
 
                 if not e.alive:
                     fin = e.mort()
@@ -255,6 +265,7 @@ while continuer:
                             particles.append(Particle(e.rect.centerx, e.rect.centery))
 
             # Dessiner les éléments du jeu sur la fenêtre
+            rendu_visible = pygame.Rect(-camera.camera.x, -camera.camera.y, camera.zoom_w, camera.zoom_h)
             offset_x = -camera.camera.x
             offset_y = -camera.camera.y
             
@@ -264,19 +275,23 @@ while continuer:
             # Backgroud avec parallax
             else:
                 draw_parallax(game_fenetre, camera, layers)
+                draw_parallax(game_fenetre, camera, layer_village)
                 
             # Plateformes
             for platform in platforms:
-                game_fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
+                if platform.rect.colliderect(rendu_visible): # blit si c'est ds la partie visible
+                    game_fenetre.blit(platform.image, camera.apply(platform.rect)) # Appliquer le décalage de rendu pour le screen shake
 
             # Plateformes spéciales (boue, sable mouvant, eau)
             for sp in special_platforms:
-                game_fenetre.blit(sp.image, camera.apply(sp.rect))
+                if sp.rect.colliderect(rendu_visible):
+                    game_fenetre.blit(sp.image, camera.apply(sp.rect))
 
             # Pieges
             for trap in traps:
                 trap.update()
-                game_fenetre.blit(trap.image, camera.apply(trap.image_rect))
+                if trap.image_rect.colliderect(rendu_visible):
+                    game_fenetre.blit(trap.image, camera.apply(trap.image_rect))
                 if pygame.key.get_pressed()[pygame.K_a]:
                     pygame.draw.rect(game_fenetre, (0, 255, 0), camera.apply(trap.rect), 2)
 
@@ -304,8 +319,9 @@ while continuer:
                 shake_amount -= 1 # Réduire progressivement l'intensité du screen shake
 
             for deco in decorations:
-                game_fenetre.blit(deco.image, camera.apply(deco.rect))
-
+                if deco.rect.colliderect(rendu_visible):
+                    game_fenetre.blit(deco.image, camera.apply(deco.rect))
+    
             for obj in objects[:]:
                 obj.update(player, objects)# Mettre à jour les réceptacles
                 if not obj.taken:# Afficher les objets qui n'ont pas été pris
@@ -365,6 +381,7 @@ while continuer:
                 spawn = map_manager.get_spawn(door_collided.target_spawn)
 
                 platforms = map_manager.platforms
+                chunks = chunck_zone(platforms)
                 special_platforms = map_manager.special_platforms
                 special_surfaces = [sp.surface for sp in special_platforms if sp.surface is not None]
                 traps = map_manager.traps

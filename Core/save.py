@@ -12,13 +12,14 @@ DEFAULT_SAVE = os.path.join(CORE_DIR, "default_save.json")
 
 # Dico des maps à mettre à jour
 
-MAP_NAME = ["swamp", "terre_aride", "cave", "forest"]
+MAP_NAME = ["swamp", "terre_aride", "cave", "forest", "hollow_earth"]
 
 MAP_PATHS = {
     "swamp": "map_swamp.tmx",
     "terre_aride": "ascension.tmx",
     "cave": "cave.tmx",
-    "forest":"forest.tmx"
+    "forest":"forest.tmx",
+    "hollow_earth": "hollow_earth.tmx"
 }
 
 TMX_TO_FOLDER = {
@@ -28,7 +29,8 @@ TMX_TO_FOLDER = {
     "boss_arene.tmx": "cave",
     "Parcours.tmx": "forest",
     "forest.tmx": "forest",
-    "gravelion_arene.tmx": "cave"
+    "gravelion_arene.tmx": "cave",
+    "hollow_earth.tmx": "hollow_earth"
 }
 
 # facilite l'utilisationn du parallax
@@ -37,7 +39,8 @@ MAP_PARALLAX_LAYERS = {
     "terre_aride": 5,
     "cave": 3,
     "boss_arene":0,
-    "forest":5
+    "forest":5,
+    "hollow_earth": 2
 }
 
 # spawns
@@ -46,7 +49,8 @@ DEFAULT_SPAWNS = {
     "terre_aride": {"x": 10,  "y": 1200},
     "cave": {"x": 100, "y": 100},
     "forest": {"x": 100, "y": 100},
-    "parcours": {"x": 500, "y": 1000}
+    "parcours": {"x": 500, "y": 1000},
+    "hollow_earth": {"x": 500, "y": 2450}
 }
 # Position de spawn par défaut selon la map (si aucun checkpoint activé)
 
@@ -237,22 +241,11 @@ def charms_images():
     
     return charms_assets
 
+def get_chunks_params():
+    """ prend les parametres de chunk """
+    if not os.path.exists(CONFIG_FILE):
+        return None
+    with open(CONFIG_FILE, "r") as f:
+        data = json.load(f)
+    return data.get("chunks", 5)
 
-
-"""
-class joueur_assis():
-    is_sitting = False
-    # Pour gérer l'état du joueur quand il est sur un banc
-    def __init__(self):
-        self.current_checkpoint = None
-        # Animation :
-        self.seated_idle = 'Assets/Player/seated1.png'
-
-    def sit_on_bench(self, player, checkpoint):
-        # Déclence l'animation assise et save
-        is_sitting = True
-        self.current_checkpoint = checkpoint
-        checkpoint.activated = True
-        sauvegarder(player, checkpoint, map)
-
-"""

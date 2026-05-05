@@ -492,7 +492,7 @@
   <object id="32" x="6392.58" y="114.75" width="19.5" height="378.5">
    <properties>
     <property name="obj_type" value="door"/>
-    <property name="target_map" value="hollow_earth/land"/>
+    <property name="target_map" value="hollow_earth/hollow_earth.tmx"/>
     <property name="target_spawn" value="left"/>
    </properties>
    <capsule/>

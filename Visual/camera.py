@@ -78,6 +78,19 @@ def create_parallax_layers(map_path, nb_layers, fenetre):
 def draw_parallax(fenetre, camera, layers):
         for layer in layers:
             layer.effect(fenetre, camera)
+
+class parallax_zone(Background_effect):
+    """ definir une zone pour pplacer un layer ici """
+    def __init__(self, path_image, profondeur, fenetre, zone_monde):
+        super().__init__(path_image, profondeur, fenetre)
+        self.zone_monde = zone_monde  # coordonnées monde
+
+    def effect(self, fenetre, camera):
+
+        zone_ecran = self.zone_monde.move(camera.camera.topleft)
+        fenetre.set_clip(zone_ecran)
+        super().effect(fenetre, camera)
+        fenetre.set_clip(None)  # enlever le "clip" pour les autes layers
         
 lucioles =[] # création de luciole
 for i in range(16):
