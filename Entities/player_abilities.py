@@ -97,11 +97,11 @@ class sort:
 
 class soin:
     def __init__(self):
-        self.cost = 33 # Coût en sang pour utiliser le soin
+        self.cost = 44 # Coût en sang pour utiliser le soin
         self.heal_amount = 1 # Quantité de santé restaurée par le soin
         self.clock = 0 # Horloge pour gérer le cooldown du soin
-        self.cooldown = 5000 # Cooldown du soin en millisecondes
-        self.last_heal_time = -5000 # Temps du dernier soin, initialisé pour permettre un soin immédiat au début du jeu
+        self.cooldown = 1000 # Cooldown du soin en millisecondes
+        self.last_heal_time = -5000 # Temps du dernier soin
         self.is_healing = False # pour indiquer si le soin est en cours d'utilisation
         self.timer_soin = 0 # Timer pour gérer la durée du soin
         self.duree_soin = 2000 # Durée pendant laquelle le joueur est étourdi après avoir utilisé le soin 

@@ -27,7 +27,7 @@ info_ecran = pygame.display.Info()
 
 # Configs
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
-fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.RESIZABLE | pygame.DOUBLEBUF, vsync=1) 
+fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.DOUBLEBUF, vsync=1) 
 pygame.display.set_caption("Shadow Legacy") # Définir le titre de la fenêtre
 
 zoom = 1.5 # zoom
@@ -255,13 +255,15 @@ while continuer:
                             particles.append(Particle(e.rect.centerx, e.rect.centery))
 
             # Dessiner les éléments du jeu sur la fenêtre
-            """offset_x = -camera.camera.x
+            offset_x = -camera.camera.x
             offset_y = -camera.camera.y
-            background_luciole(game_fenetre, offset_x, offset_y, now) # Remplir le fond """
+            
+            if current_map_name == "Parcours.tmx":
+                background_luciole(game_fenetre, offset_x, offset_y, now) # Remplir le fond 
 
             # Backgroud avec parallax
-
-            draw_parallax(game_fenetre, camera, layers)
+            else:
+                draw_parallax(game_fenetre, camera, layers)
                 
             # Plateformes
             for platform in platforms:

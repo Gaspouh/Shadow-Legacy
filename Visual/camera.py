@@ -164,7 +164,7 @@ def draw_luciole(surface, x, y, luciole, now):
     pygame.draw.circle(noyau, (200, 255, 200, transparence_noyau), (taille_noyau, taille_noyau), taille_noyau)
     surface.blit(noyau, (x - taille_noyau, y - taille_noyau), special_flags=pygame.BLEND_RGBA_ADD)
 
-def intro(game_fenetre, fenetre):
+def intro(fenetre):
     clock = pygame.time.Clock()
     font = pygame.font.Font(None, 60)
     texte = ["Le monde est tombé dans l’ombre", "Les royaumes ont disparu", "et la lumière s’est éteinte", "Il ne reste que des ruines"\
@@ -175,7 +175,6 @@ def intro(game_fenetre, fenetre):
 
      # Paramètres
     scroll_speed = 2
-    line_spacing = 80
     duration = 10000  # durée totale en ms
 
     start_time = pygame.time.get_ticks()
