@@ -8,8 +8,8 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 from Entities.perso import Player
 from Entities.ennemi import Projectile
-from World.map import Map_Manager, ZONE_VILLAGE
-from Visual.camera import Camera, background_luciole, intro, Background_effect, create_parallax_layers, draw_parallax, parallax_zone
+from World.map import Map_Manager, chunck_zone, platforme_la_plus_proche
+from Visual.camera import Camera, background_luciole, intro, create_parallax_layers, draw_parallax
 from Visual.vfx import particles, Particle, Fade, HealParticle, heal_particles
 from World.traps import *
 from World.objets import Coeur, Monnaie, Receptacle
@@ -17,7 +17,6 @@ from Entities.boss_gravelion import Gravelion
 from Core.save import *
 from Visual.interface import menu, sit_on_bench, home_screen
 from Core.reset import reset
-from World.map import chunck_zone, platforme_la_plus_proche
 
 new_game = save_backup()
 
@@ -60,10 +59,6 @@ checkpoints = map_manager.checkpoints
 spawnpoints = map_manager.spawnpoints
 doors = map_manager.doors
 entities_to_spawn = map_manager.entities_to_spawn
-
-layer_village = [
-    parallax_zone(os.path.join(Chemin_absolu, "Graphics", "hollow_earth", "village", "3.png"), 0.8, game_fenetre, ZONE_VILLAGE),
-]
 
 special_surfaces = [sp.surface for sp in special_platforms if sp.surface is not None]
 
@@ -275,7 +270,6 @@ while continuer:
             # Backgroud avec parallax
             else:
                 draw_parallax(game_fenetre, camera, layers)
-                draw_parallax(game_fenetre, camera, layer_village)
                 
             # Plateformes
             for platform in platforms:

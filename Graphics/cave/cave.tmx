@@ -439,48 +439,6 @@
     <property name="obj_type" value="receptacle"/>
    </properties>
   </object>
-  <object id="23" name="volant" x="3580.67" y="640">
-   <properties>
-    <property name="obj_type" value="mob"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="24" name="volant" x="4000" y="460">
-   <properties>
-    <property name="obj_type" value="mob"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="25" name="volant" x="3768" y="688">
-   <properties>
-    <property name="obj_type" value="mob"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="26" name="volant" x="3782" y="556">
-   <properties>
-    <property name="obj_type" value="mob"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="27" name="volant" x="3938" y="582">
-   <properties>
-    <property name="obj_type" value="mob"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="28" name="volant" x="4132" y="589.333">
-   <properties>
-    <property name="obj_type" value="mob"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="29" name="volant" x="3522" y="798">
-   <properties>
-    <property name="obj_type" value="mob"/>
-   </properties>
-   <point/>
-  </object>
   <object id="30" x="-50.5" y="0.166667" width="49.5" height="250.5">
    <properties>
     <property name="obj_type" value="door"/>

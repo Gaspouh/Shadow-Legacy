@@ -9,10 +9,10 @@ from World.objets import Receptacle
 from Entities.boss_wolf_red import Red_Wolf
 from Entities.boss_gravelion import Gravelion
 from Core.save import get_chunks_params
+from Entities.npc_logic import Gordon_NPC
 
 TILE_SIZE = 32
 RENDU_CHUNCK = get_chunks_params() # pareil, mais pour les collisions et autres, la valeur c'est la taille d'un coté du carré (en tile) qui sont calculé
-ZONE_VILLAGE = pygame.Rect(1250, 2500, 3500, 2050)
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, image):
@@ -93,7 +93,7 @@ class Map_Manager:
         
         self.nb_parallax_layers = len([fichier for fichier in os.listdir(background_folder) if fichier != "0.png"])
     def spawn_entities(self, fenetre):
-        araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf, gravelion = [], [], [], [], [], [], [], [], []
+        araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf, gravelion, gordon = [], [], [], [], [], [], [], [], [], []
 
         for e in self.entities_to_spawn:
             if e["type"] == "mob":
@@ -116,11 +116,9 @@ class Map_Manager:
                 elif e["name"] == "gravelion":
                     gravelion.append(Gravelion(fenetre, e["x"], e["y"], arene_rect))
 
-            """
-            if e["type"] == "boss":
-                if e["name"] == "gravelion":
-                    gravelion.append(Gravelion(fenetre, e["x"], e["y"], arene_rect))
-            """
+            elif e["type"] == "npc":
+                if e["name"] == "gordon":
+                    gordon.append(Gordon_NPC(fenetre, e["x"], e["y"]))
                     
         liste_entites = araignee + volant + golem + chargeur + tourelle + fighter + blackwolf + redwolf + gravelion
         return liste_entites
