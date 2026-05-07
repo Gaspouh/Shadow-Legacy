@@ -8,12 +8,9 @@ from Entities.boss_logic import Golem
 from World.objets import Receptacle
 from Entities.boss_wolf_red import Red_Wolf
 from Entities.boss_gravelion import Gravelion
-<<<<<<< HEAD
 from Core.save import get_chunks_params
 from Entities.npc_logic import Gordon_NPC
-=======
 from Entities.png import Marchand
->>>>>>> 582b83e (marchand début)
 
 TILE_SIZE = 32
 RENDU_CHUNCK = get_chunks_params() # pareil, mais pour les collisions et autres, la valeur c'est la taille d'un coté du carré (en tile) qui sont calculé
