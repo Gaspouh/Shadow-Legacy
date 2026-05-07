@@ -98,11 +98,8 @@ class Map_Manager:
         
         self.nb_parallax_layers = len([fichier for fichier in os.listdir(background_folder) if fichier != "0.png"])
     def spawn_entities(self, fenetre):
-<<<<<<< HEAD
         araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf, gravelion, gordon = [], [], [], [], [], [], [], [], [], []
-=======
         araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf, gravelion, marchand = [], [], [], [], [], [], [], [], [], []
->>>>>>> 582b83e (marchand début)
 
         for e in self.entities_to_spawn:
             if e["type"] == "mob":
