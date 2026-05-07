@@ -384,7 +384,7 @@
    </properties>
    <polygon points="0,0 66.6667,21.3333 50.6667,-32 78.6667,-42.6667 -18.6667,-24 49.3333,-24"/>
   </object>
-  <object id="76" name="marchand" x="413.208" y="579.245" width="66.0377" height="26.4151">
+  <object id="76" name="marchand" x="416.982" y="483.019" width="66.0377" height="26.4151">
    <properties>
     <property name="obj_type" value="marchand"/>
    </properties>

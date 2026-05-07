@@ -40,8 +40,9 @@ home_screen(fenetre)
 
 #Map
 MAP_PATH_TO_NAME = {v: k for k, v in MAP_PATHS.items()} # ça permet d'inverser le dico en gardant clé:valeur
-current_map_name, current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
-map_manager = Map_Manager(fenetre)
+#current_map_name, current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
+current_map_name, current_map_path = "hollow_earth", MAP_PATHS["hollow_earth"] # --- IGNORE --- pour les tests, spawn direct au village
+map_manager = Map_Manager()
 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", current_map_name, current_map_path)) # charge la map actuelle
 layers = create_parallax_layers(os.path.join(Chemin_absolu, "Graphics", current_map_name), nb_layers=map_manager.nb_parallax_layers, fenetre=game_fenetre) # créer les layers de parallax pour la map actuelle
 
@@ -60,7 +61,6 @@ checkpoints = map_manager.checkpoints
 spawnpoints = map_manager.spawnpoints
 doors = map_manager.doors
 entities_to_spawn = map_manager.entities_to_spawn
-png = map_manager.png
 
 special_surfaces = [sp.surface for sp in special_platforms if sp.surface is not None]
 
@@ -326,9 +326,6 @@ while continuer:
                 if not obj.taken:# Afficher les objets qui n'ont pas été pris
                     game_fenetre.blit(obj.image, camera.apply(obj.rect))
                 obj.draw_big(game_fenetre, player)# Afficher les objets pris en grand pour indiquer qu'ils ont été ramassés
-            
-            for png_entity in png:
-                png_entity.update()
 
         # Checkpoints
         for i, cp in enumerate(checkpoints):
@@ -455,10 +452,6 @@ while continuer:
         # Afficher les cœurs
         for heart in hearts:
             game_fenetre.blit(heart.image, heart.rect) # Les cœurs sont fixes à l'écran, pas besoin d'appliquer le décalage de la caméra
-        
-        # Afficher les png
-        for png_entity in png:
-            game_fenetre.blit(png_entity.image, camera.apply(png_entity.rect))
         
         if len(hearts) < player.max_health:
             i = len(hearts)
