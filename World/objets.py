@@ -144,3 +144,43 @@ class Receptacle(pygame.sprite.Sprite):
 
             else:
                 self.show_big = False
+
+class Minerai(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.transform.scale(
+            pygame.image.load("Assets/Images/minerai.png").convert_alpha(), (30,30)
+        )
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.taken = False
+        self.show_big = False
+        self.show_timer = 0
+
+    def update(self, player, objets):
+        # Logique pour vérifier si le joueur est proche du minerai et peut le prendre
+        if self.rect.colliderect(player.rect) and not self.taken:
+            player.minerais += 1  # Augmente le nombre de minerai du joueur
+            self.taken = True  # Marque le minerai comme pris
+            self.show_big = True  # Affiche le minerai en grand pour indiquer qu'il a été pris
+            self.show_timer = pygame.time.get_ticks()  # Démarre le timer pour l'affichage en grand
+
+    def draw_big(self, game_fenetre, player):
+        if self.taken:# Affiche le minerai en grand pendant 2 secondes après l'avoir pris
+                
+            now = pygame.time.get_ticks()
+
+            # durée affichage (2 secondes)
+            if now - self.show_timer < 2000:
+                big_img = pygame.transform.scale(self.image, (150, 150))
+
+                rect = big_img.get_rect(center=(game_fenetre.get_width()//2, game_fenetre.get_height()//2))
+
+                # Glow simple
+                glow = pygame.Surface((rect.width+30, rect.height+30), pygame.SRCALPHA)
+                pygame.draw.ellipse(glow, (150, 255, 255, 120), glow.get_rect())
+                game_fenetre.blit(glow, (rect.x-15, rect.y-15))
+
+                game_fenetre.blit(big_img, rect)
+
+            else:
+                self.show_big = False

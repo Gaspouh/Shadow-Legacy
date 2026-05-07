@@ -12,7 +12,7 @@ from World.map import Map_Manager, chunck_zone, platforme_la_plus_proche
 from Visual.camera import Camera, background_luciole, intro, create_parallax_layers, draw_parallax
 from Visual.vfx import particles, Particle, Fade, HealParticle, heal_particles
 from World.traps import *
-from World.objets import Coeur, Monnaie, Receptacle
+from World.objets import Coeur, Monnaie, Receptacle, Minerai
 from Entities.boss_gravelion import Gravelion
 from Core.save import *
 from Visual.interface import menu, sit_on_bench, home_screen
@@ -42,7 +42,7 @@ home_screen(fenetre)
 MAP_PATH_TO_NAME = {v: k for k, v in MAP_PATHS.items()} # ça permet d'inverser le dico en gardant clé:valeur
 current_map_name, current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
 #current_map_name, current_map_path = "hollow_earth", MAP_PATHS["hollow_earth"] # --- IGNORE --- pour les tests, spawn direct au village
-map_manager = Map_Manager()
+map_manager = Map_Manager(fenetre)
 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", current_map_name, current_map_path)) # charge la map actuelle
 layers = create_parallax_layers(os.path.join(Chemin_absolu, "Graphics", current_map_name), nb_layers=map_manager.nb_parallax_layers, fenetre=game_fenetre) # créer les layers de parallax pour la map actuelle
 
@@ -61,6 +61,7 @@ checkpoints = map_manager.checkpoints
 spawnpoints = map_manager.spawnpoints
 doors = map_manager.doors
 entities_to_spawn = map_manager.entities_to_spawn
+pnj= map_manager.pnj
 
 special_surfaces = [sp.surface for sp in special_platforms if sp.surface is not None]
 
@@ -325,6 +326,10 @@ while continuer:
                 if not obj.taken:# Afficher les objets qui n'ont pas été pris
                     game_fenetre.blit(obj.image, camera.apply(obj.rect))
                 obj.draw_big(game_fenetre, player)# Afficher les objets pris en grand pour indiquer qu'ils ont été ramassés
+            
+            for bot in pnj:
+                bot.update(player.rect, player, e_proches=None, event=event)
+                bot.draw(game_fenetre, camera)
 
         # Checkpoints
         for i, cp in enumerate(checkpoints):

@@ -18,7 +18,6 @@ class NPC_Logic():
         self.dialogue_index = 0
         self.current_dialogue_list = []
         self.is_speaking = False
-        self.respawn_on_touch = False
     
     def player_in_dialogue(self, player_rect):
         if self.dialogue_zone.colliderect(player_rect):
@@ -154,4 +153,25 @@ class Forgeron(NPC_Logic, Animation):
         self.leave_dialogue = [
             "À bientôt, prends garde aux ténèbres qui rôdent dans ce monde."
         ]
+
+        self.upgrade_dialogue = [
+            "Je peux améliorer ton arme si tu me donnes 3 minerais et 200 pièces. Veux-tu procéder à l'amélioration ?"
+        ]
         super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1, arrival_dialogue=self.arrival_dialogue, leave_dialogue=self.leave_dialogue)
+    
+    def dialogue_equipement(self, player): 
+        # lance le dialogue d'amélioration
+        self.start_dialogue(self.upgrade_dialogue)
+
+        if player.minerais >= 3 and player.monnaie >= 200: # Vérifie si le joueur a les ressources nécessaires pour l'amélioration
+            self.upgrade(player) # Effectue l'amélioration de l'équipement du joueur
+            
+        else:
+            self.start_dialogue(["Désolé, tu n'as pas les ressources nécessaires pour l'amélioration."]) # Dialogue si le joueur n'a pas les ressources nécessaires
+
+    def upgrade(self, player):
+        # Retire les ressources du joueur
+        player.minerais -= 3
+        player.monnaie -= 200
+        player.attack += 1 # Améliore l'attaque du joueur
+        self.start_dialogue(["Ton arme a été améliorée , tu es maintenant plus fort contre les ennemis !"])
