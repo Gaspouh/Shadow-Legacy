@@ -75,7 +75,7 @@ class NPC_Logic():
             self.dialogue_triggered = False
             self.is_speaking = False
 
-        if self.is_speaking and event and event.type == pygame.MOUSEBUTTONDOWN:
+        if self.is_speaking and event and event.type == pygame.MOUSEBUTTONUP:
             if event.button in (1, 3):
 
                 # Si on est sur le dialogue d'amélioration, on vérifie les boutons d'abord
@@ -176,7 +176,7 @@ class Forgeron(NPC_Logic, Animation):
         self.upgrade_dialogue = [
             "Je peux améliorer ton arme si tu me donnes " + str(self.upgrade_cost) + " minerais et " + str(self.orb_cost) + " pièces. Veux-tu procéder à l'amélioration ?"
         ]
-        
+
         self.start_dialogue(self.upgrade_dialogue)
 
     def confirm_upgrade(self, player):

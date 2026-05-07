@@ -19,7 +19,8 @@ MAP_PATHS = {
     "terre_aride": "ascension.tmx",
     "cave": "cave.tmx",
     "forest":"forest.tmx",
-    "hollow_earth": "hollow_earth.tmx"
+    "hollow_earth": "hollow_earth.tmx",
+    "parcours": "Parcours.tmx"
 }
 
 TMX_TO_FOLDER = {

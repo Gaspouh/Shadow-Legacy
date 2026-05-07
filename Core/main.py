@@ -40,8 +40,8 @@ home_screen(fenetre)
 
 #Map
 MAP_PATH_TO_NAME = {v: k for k, v in MAP_PATHS.items()} # ça permet d'inverser le dico en gardant clé:valeur
-#current_map_name, current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
-current_map_name, current_map_path = "hollow_earth", MAP_PATHS["hollow_earth"] # --- IGNORE --- pour les tests, spawn direct au village
+current_map_name, current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
+#current_map_name, current_map_path = "hollow_earth", MAP_PATHS["hollow_earth"] # --- IGNORE --- pour les tests, spawn direct au village
 map_manager = Map_Manager(fenetre)
 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", current_map_name, current_map_path)) # charge la map actuelle
 layers = create_parallax_layers(os.path.join(Chemin_absolu, "Graphics", current_map_name), nb_layers=map_manager.nb_parallax_layers, fenetre=game_fenetre) # créer les layers de parallax pour la map actuelle
@@ -150,12 +150,6 @@ while continuer:
                         if bot.is_speaking:
                             pnj_en_train_de_parler = True
                             break
-                    if not pnj_en_train_de_parler:
-                        # On vérifie si on est proche du forgeron pour l'améliorer
-                        for e in pnj:
-                            if isinstance(e, Forgeron) and e.dialogue_zone.colliderect(player.rect):
-                                e.dialogue_equipement(player)
-                                break
                         else:
                             # faire attaquer le joueur
                             player.press_attack()
@@ -281,10 +275,10 @@ while continuer:
             offset_x = -camera.camera.x
             offset_y = -camera.camera.y
             
-            if current_map_name == "Parcours.tmx":
+            if current_map_path == "Forest/Parcours.tmx":
                 background_luciole(game_fenetre, offset_x, offset_y, now) # Remplir le fond 
 
-            # Backgroud avec parallax
+            # Background avec parallax
             else:
                 draw_parallax(game_fenetre, camera, layers)
                 
@@ -483,6 +477,8 @@ while continuer:
                 game_fenetre.blit(e.image, camera.apply(e.rect))
         # Afficher les orbs
         monnaie.draw(game_fenetre)
+
+        print(current_map_path)
 
         # Afficher la jauge de sang
         font = pygame.font.Font(None, 50)
