@@ -17,7 +17,7 @@ from Entities.boss_gravelion import Gravelion
 from Core.save import *
 from Visual.interface import menu, sit_on_bench, home_screen
 from Core.reset import reset
-from Entities.npc_logic import Gordon_NPC
+from Entities.npc_logic import Gordon_NPC , Forgeron
 
 new_game = save_backup()
 
@@ -40,8 +40,8 @@ home_screen(fenetre)
 
 #Map
 MAP_PATH_TO_NAME = {v: k for k, v in MAP_PATHS.items()} # ça permet d'inverser le dico en gardant clé:valeur
-#current_map_name, current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
-current_map_name, current_map_path = "hollow_earth", MAP_PATHS["hollow_earth"] # --- IGNORE --- pour les tests, spawn direct au village
+current_map_name, current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
+#current_map_name, current_map_path = "hollow_earth", MAP_PATHS["hollow_earth"] # --- IGNORE --- pour les tests, spawn direct au village
 map_manager = Map_Manager()
 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", current_map_name, current_map_path)) # charge la map actuelle
 layers = create_parallax_layers(os.path.join(Chemin_absolu, "Graphics", current_map_name), nb_layers=map_manager.nb_parallax_layers, fenetre=game_fenetre) # créer les layers de parallax pour la map actuelle
@@ -194,7 +194,6 @@ while continuer:
                 e_proches = platforme_la_plus_proche(chunks, e.rect)    
                 if isinstance(e, Gordon_NPC):
                     e.update(player.rect, player, event=event)
-
                 elif hasattr(e, "update"):
                     e.update(player.rect, player, e_proches)
 

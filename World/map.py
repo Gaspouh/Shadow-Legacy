@@ -9,7 +9,7 @@ from World.objets import Receptacle
 from Entities.boss_wolf_red import Red_Wolf
 from Entities.boss_gravelion import Gravelion
 from Core.save import get_chunks_params
-from Entities.npc_logic import Gordon_NPC
+from Entities.npc_logic import Gordon_NPC, Forgeron
 
 TILE_SIZE = 32
 RENDU_CHUNCK = get_chunks_params() # pareil, mais pour les collisions et autres, la valeur c'est la taille d'un coté du carré (en tile) qui sont calculé
@@ -93,7 +93,7 @@ class Map_Manager:
         
         self.nb_parallax_layers = len([fichier for fichier in os.listdir(background_folder) if fichier != "0.png"])
     def spawn_entities(self, fenetre):
-        araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf, gravelion, gordon = [], [], [], [], [], [], [], [], [], []
+        araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf, gravelion, gordon, forgeron = [], [], [], [], [], [], [], [], [], [], []
 
         for e in self.entities_to_spawn:
             if e["type"] == "mob":
@@ -119,8 +119,10 @@ class Map_Manager:
             elif e["type"] == "npc":
                 if e["name"] == "gordon":
                     gordon.append(Gordon_NPC(fenetre, e["x"], e["y"]))
+                elif e["name"] == "forgeron":
+                    forgeron.append(Forgeron(fenetre, e["x"], e["y"]))
                     
-        liste_entites = araignee + volant + golem + chargeur + tourelle + fighter + blackwolf + redwolf + gravelion + gordon
+        liste_entites = araignee + volant + golem + chargeur + tourelle + fighter + blackwolf + redwolf + gravelion + gordon + forgeron
         return liste_entites
     
     def get_spawn(self, name):
@@ -245,7 +247,7 @@ def create_map(tmx_data):
                 "x": x,
                 "y": y
             })
-            
+
         elif obj_type == "boss":
             name = obj.name
             entities_to_spawn.append({
@@ -254,17 +256,6 @@ def create_map(tmx_data):
                 "x": x,
                 "y": y
             })
-        
-        elif obj_type == "npc":
-            name = obj.name
-            entities_to_spawn.append({
-                "type": "npc",
-                "name": name,
-                "x": x,
-                "y": y
-    })
- 
-
 
     return platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, doors, entities_to_spawn, objets
 

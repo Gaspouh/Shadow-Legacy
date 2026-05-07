@@ -1,10 +1,10 @@
-from Visual.sprite_sheet import VerticalAnimation
+from Visual.sprite_sheet import VerticalAnimation , Animation
 import pygame
 
 class NPC_Logic():
     IDLE = "idle"
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, arrival_dialogue, leave_dialogue):
-        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne)
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1, arrival_dialogue=None, leave_dialogue=None):
+        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale)
         self.state = "idle"
 
         # variable necessaires pour fonctionner meme si inutiles
@@ -18,6 +18,7 @@ class NPC_Logic():
         self.dialogue_index = 0
         self.current_dialogue_list = []
         self.is_speaking = False
+        self.respawn_on_touch = False
     
     def player_in_dialogue(self, player_rect):
         if self.dialogue_zone.colliderect(player_rect):
@@ -135,5 +136,22 @@ class Gordon_NPC(NPC_Logic, VerticalAnimation):
 
         super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, self.arrival_dialogue, self.leave_dialogue)
 
-        
 
+class Forgeron(NPC_Logic, Animation):
+    def __init__(self, fenetre, x, y):
+        sprite_sheet = 'Assets/Images/forgeron.png'
+        nb_frames = 7
+        width = 62
+        height = 50
+        marge = 5
+        colonne = 0
+        self.alive = True
+
+        self.arrival_dialogue = [
+            "Bonjour étrange voyageur, que puis-je faire pour toi ?",
+            "Je peux améliorer ton équipement si tu me donnes les matériaux nécessaires."]
+        
+        self.leave_dialogue = [
+            "À bientôt, prends garde aux ténèbres qui rôdent dans ce monde."
+        ]
+        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1, arrival_dialogue=self.arrival_dialogue, leave_dialogue=self.leave_dialogue)
