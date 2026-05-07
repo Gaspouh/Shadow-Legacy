@@ -8,8 +8,12 @@ from Entities.boss_logic import Golem
 from World.objets import Receptacle
 from Entities.boss_wolf_red import Red_Wolf
 from Entities.boss_gravelion import Gravelion
+<<<<<<< HEAD
 from Core.save import get_chunks_params
 from Entities.npc_logic import Gordon_NPC
+=======
+from Entities.png import Marchand
+>>>>>>> 582b83e (marchand début)
 
 TILE_SIZE = 32
 RENDU_CHUNCK = get_chunks_params() # pareil, mais pour les collisions et autres, la valeur c'est la taille d'un coté du carré (en tile) qui sont calculé
@@ -77,8 +81,9 @@ class Door:
 arene_rect = pygame.Rect(5000, 0, 1000, 600)  # délimitation de l'arène
 
 class Map_Manager:
-    def __init__(self):
+    def __init__(self, fenetre):
         self.current_map = None
+        self.fenetre = fenetre
 
     def load_map(self, path):
         tmx_data = pytmx.load_pygame((path), pixelalpha=True)
@@ -87,13 +92,17 @@ class Map_Manager:
         self.map_height = tmx_data.height * TILE_SIZE
         
         self.platforms, self.special_platforms, self.traps, self.decorations, \
-            self.checkpoints, self.spawnpoints, self.doors, self.entities_to_spawn, self.objets = create_map(tmx_data)
+            self.checkpoints, self.spawnpoints, self.doors, self.entities_to_spawn, self.objets, self.png = create_map(tmx_data, self.fenetre)
         
         background_folder = os.path.join(os.path.dirname(path), "Background") 
         
         self.nb_parallax_layers = len([fichier for fichier in os.listdir(background_folder) if fichier != "0.png"])
     def spawn_entities(self, fenetre):
+<<<<<<< HEAD
         araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf, gravelion, gordon = [], [], [], [], [], [], [], [], [], []
+=======
+        araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf, gravelion, marchand = [], [], [], [], [], [], [], [], [], []
+>>>>>>> 582b83e (marchand début)
 
         for e in self.entities_to_spawn:
             if e["type"] == "mob":
@@ -115,6 +124,8 @@ class Map_Manager:
                     redwolf.append(Red_Wolf(fenetre, e["x"], e["y"]))
                 elif e["name"] == "gravelion":
                     gravelion.append(Gravelion(fenetre, e["x"], e["y"], arene_rect))
+                elif e["name"] == "marchand":
+                    marchand.append(Marchand(fenetre, e["x"], e["y"]))
 
             elif e["type"] == "npc":
                 if e["name"] == "gordon":
@@ -127,7 +138,7 @@ class Map_Manager:
         return self.spawnpoints.get(name)
     
 
-def create_map(tmx_data):
+def create_map(tmx_data, fenetre):
     platforms = []
     special_platforms = []
     traps = []
@@ -137,6 +148,7 @@ def create_map(tmx_data):
     checkpoints = []
     doors = []
     entities_to_spawn = []
+    png = []
 
     spawnpoints = {}
 
@@ -218,6 +230,11 @@ def create_map(tmx_data):
         elif obj_type == "receptacle":
             y = int(y - obj.height)
             objets.append(Receptacle(x, y))
+        
+        elif obj_type == "marchand":
+            y = int(y - obj.height)
+            png.append(Marchand(fenetre, x, y))
+            
 
         elif obj_type == "spawnpoint":
             name = obj.name
@@ -247,7 +264,7 @@ def create_map(tmx_data):
             })
 
 
-    return platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, doors, entities_to_spawn, objets
+    return platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, doors, entities_to_spawn, objets, png
 
 def chunck_zone(platforms):
     zone = {}
