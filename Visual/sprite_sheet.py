@@ -73,14 +73,13 @@ class VerticalAnimation:
             frame = pygame.Surface((width, height), pygame.SRCALPHA)
             # multiplie le height
             frame.blit(sheet, (0, 0),(colonne * width, marge + (i * height), width, height))
-            
-            frame.set_colorkey((0, 0, 0)) 
             frames_droite.append(frame)
             frames_gauche.append(pygame.transform.flip(frame, True, False))
         
         self.frames_droite = frames_droite
         self.frames_gauche = frames_gauche
         self.rect = frames_droite[0].get_rect(center=(x, y))
+        self.image = frames_droite[0]
         self.index_image = 0.0
         self.vitesse_animation = 0.1
 
@@ -88,6 +87,7 @@ class VerticalAnimation:
         self.index_image += self.vitesse_animation
         if self.index_image >= len(self.frames_droite):
             self.index_image = 0.0
+        self.image = self.frames_droite[int(self.index_image)]  
         return self.index_image
     
     def start_animation(self):

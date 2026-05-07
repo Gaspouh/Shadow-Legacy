@@ -17,6 +17,7 @@ from Entities.boss_gravelion import Gravelion
 from Core.save import *
 from Visual.interface import menu, sit_on_bench, home_screen
 from Core.reset import reset
+from Entities.npc_logic import Gordon_NPC
 
 new_game = save_backup()
 
@@ -27,7 +28,7 @@ info_ecran = pygame.display.Info()
 
 # Configs
 GAME_WIDTH, GAME_HEIGHT = info_ecran.current_w, info_ecran.current_h
-fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.DOUBLEBUF, vsync=1) 
+fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.RESIZABLE | pygame.DOUBLEBUF, vsync=1) 
 pygame.display.set_caption("Shadow Legacy") # Définir le titre de la fenêtre
 
 zoom = 1.5 # zoom
@@ -190,8 +191,11 @@ while continuer:
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
 
             for e in liste_entites[:]:
-                e_proches = platforme_la_plus_proche(chunks, e.rect)
-                if hasattr(e, "update"):
+                e_proches = platforme_la_plus_proche(chunks, e.rect)    
+                if isinstance(e, Gordon_NPC):
+                    e.update(player.rect, player, event=event)
+
+                elif hasattr(e, "update"):
                     e.update(player.rect, player, e_proches)
 
                 if not e.alive:
@@ -200,9 +204,9 @@ while continuer:
                         liste_entites.remove(e)
                     continue
 
-                              
-                if hasattr(e, "patrouille"): #pour les patrouilleurs
+                if hasattr(e, "patrouille"):
                     e.patrouille(platforms)
+
                 
                 if hasattr(e, "poursuite"): #pour les volants
                     e.poursuite(player.rect, platforms)

@@ -125,7 +125,7 @@ class Map_Manager:
                 if e["name"] == "gordon":
                     gordon.append(Gordon_NPC(fenetre, e["x"], e["y"]))
                     
-        liste_entites = araignee + volant + golem + chargeur + tourelle + fighter + blackwolf + redwolf + gravelion
+        liste_entites = araignee + volant + golem + chargeur + tourelle + fighter + blackwolf + redwolf + gravelion + gordon
         return liste_entites
     
     def get_spawn(self, name):
@@ -256,6 +256,16 @@ def create_map(tmx_data, fenetre):
                 "x": x,
                 "y": y
             })
+        
+        elif obj_type == "npc":
+            name = obj.name
+            entities_to_spawn.append({
+                "type": "npc",
+                "name": name,
+                "x": x,
+                "y": y
+    })
+ 
 
 
     return platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, doors, entities_to_spawn, objets, png

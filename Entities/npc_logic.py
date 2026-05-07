@@ -3,9 +3,14 @@ import pygame
 
 class NPC_Logic():
     IDLE = "idle"
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, arrival_dialogue, leave_dialogue):
-        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, arrival_dialogue, leave_dialogue)
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, arrival_dialogue, leave_dialogue):
+        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne)
         self.state = "idle"
+
+        # variable necessaires pour fonctionner meme si inutiles
+        self.alive = True
+        self.attack_data = {"damage": 0}
+
         self.dialogue_triggered = False   # déclenchement dialogue
         self.dialogue_zone = pygame.Rect(self.rect.x - 50, self.rect.y - 50, self.rect.width + 100, self.rect.height + 100) # zone de déclenchement du dialogue
         self.arrival_dialogue = arrival_dialogue
@@ -13,7 +18,7 @@ class NPC_Logic():
         self.dialogue_index = 0
         self.current_dialogue_list = []
         self.is_speaking = False
-
+    
     def player_in_dialogue(self, player_rect):
         if self.dialogue_zone.colliderect(player_rect):
             if not self.dialogue_triggered:
@@ -66,40 +71,57 @@ class NPC_Logic():
         text_rect.center = bubble_rect.center
         screen.blit(text_surface, text_rect)
 
-    def update(self, player_rect, event):
+    def update(self, player_rect, player=None, e_proches=None, event=None):
         if self.dialogue_zone.colliderect(player_rect):
             if not self.dialogue_triggered:
                 self.start_dialogue(self.arrival_dialogue)
         else:
             self.dialogue_triggered = False
             self.is_speaking = False
+
         if self.is_speaking:
             if event and event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button in (1, 3):  # Clic gauche ou droit
+                if event.button in (1, 3):
                     self.dialogue_index += 1
-                
-                    if self.dialogue_index >= len(self.current_dialogue_list):  # out of range sinon
-                        self.is_speaking = False    # pour pas remettre le dialogue apres avoir quit
-            
-            if event and event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE: # quitte
+                    if self.dialogue_index >= len(self.current_dialogue_list):
+                        self.is_speaking = False
+
+            if event and event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.is_speaking = False
                 self.dialogue_triggered = False
     
-    def draw(self, screen):
-        """ dessine le npc et ses anims, puis la bulle """
+    def draw(self, screen, camera=None):
+        # Avancer l'animation idle
+        self.gestion_animation()
+        
+        # Blitter le sprite
+        if camera:
+            screen.blit(self.image, camera.apply(self.rect))
+        else:
+            screen.blit(self.image, self.rect)
+
+        # Bulle de dialogue
         if self.is_speaking and self.dialogue_index < len(self.current_dialogue_list):
-            self.build_dialogue_bubble(
-                screen, 
-                self.current_dialogue_list[self.dialogue_index], 
-                (self.rect.centerx, self.rect.top)
-            )
+            if camera:
+                pos = camera.apply(self.rect)
+                screen_pos = (pos.centerx, pos.top)
+            else:
+                screen_pos = (self.rect.centerx, self.rect.top)
+            self.build_dialogue_bubble(screen, self.current_dialogue_list[self.dialogue_index], screen_pos)
+
+        if camera:
+            pygame.draw.rect(screen, (255, 0, 0), camera.apply(self.rect), 2)
+        else:
+            pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
 
 class Gordon_NPC(NPC_Logic, VerticalAnimation):
     def __init__(self, fenetre, x, y):
-        sprite_sheet = f'/Assets/Npc/Gordon/idle.png'
+        sprite_sheet = f'Assets/Npc/Gordon/idle.png'
         nb_frames = 4
         width = 32
         height = 32
+        marge = 0
+        colonne = 0
         self.arrival_dialogue = [
             " salut toi, tu veux quoi ? ",
             " Bon j'ai compris, tu parles pas beaucoup hein ? ",
@@ -111,6 +133,7 @@ class Gordon_NPC(NPC_Logic, VerticalAnimation):
             " Bon, à plus alors ! "
         ]
 
-        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, self.arrival_dialogue, self.leave_dialogue)
+        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, self.arrival_dialogue, self.leave_dialogue)
+
         
 
