@@ -40,8 +40,8 @@ home_screen(fenetre)
 
 #Map
 MAP_PATH_TO_NAME = {v: k for k, v in MAP_PATHS.items()} # ça permet d'inverser le dico en gardant clé:valeur
-current_map_name, current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
-#current_map_name, current_map_path = "hollow_earth", MAP_PATHS["hollow_earth"] # --- IGNORE --- pour les tests, spawn direct au village
+#current_map_name, current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
+current_map_name, current_map_path = "hollow_earth", MAP_PATHS["hollow_earth"] # --- IGNORE --- pour les tests, spawn direct au village
 map_manager = Map_Manager(fenetre)
 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", current_map_name, current_map_path)) # charge la map actuelle
 layers = create_parallax_layers(os.path.join(Chemin_absolu, "Graphics", current_map_name), nb_layers=map_manager.nb_parallax_layers, fenetre=game_fenetre) # créer les layers de parallax pour la map actuelle
@@ -145,8 +145,20 @@ while continuer:
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Clic gauche
-                    # faire attaquer le joueur
-                    player.press_attack()
+                    pnj_en_train_de_parler = False
+                    for bot in pnj:
+                        if bot.is_speaking:
+                            pnj_en_train_de_parler = True
+                            break
+                    if not pnj_en_train_de_parler:
+                        # On vérifie si on est proche du forgeron pour l'améliorer
+                        for e in pnj:
+                            if isinstance(e, Forgeron) and e.dialogue_zone.colliderect(player.rect):
+                                e.dialogue_equipement(player)
+                                break
+                        else:
+                            # faire attaquer le joueur
+                            player.press_attack()
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
