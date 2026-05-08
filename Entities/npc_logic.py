@@ -1,19 +1,21 @@
 from Visual.sprite_sheet import VerticalAnimation , Animation
 import pygame
+from Visual.interface import charms_market
 
 class NPC_Logic():
     IDLE = "idle"
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1, arrival_dialogue=None, leave_dialogue=None):
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1, arrival_dialogue=None, leave_dialogue=None, market_seller=None):
         super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale)
         self.state = "idle"
-
         self.dialogue_triggered = False   # déclenchement dialogue
         self.dialogue_zone = pygame.Rect(self.rect.x - 50, self.rect.y - 50, self.rect.width + 100, self.rect.height + 100) # zone de déclenchement du dialogue
         self.arrival_dialogue = arrival_dialogue
         self.leave_dialogue = leave_dialogue
+        self.market_seller = market_seller
         self.dialogue_index = 0
         self.current_dialogue_list = []
         self.is_speaking = False
+        self.fenetre = fenetre
     
     def player_in_dialogue(self, player_rect):
         if self.dialogue_zone.colliderect(player_rect):
@@ -90,6 +92,10 @@ class NPC_Logic():
                 self.dialogue_index += 1
                 if self.dialogue_index >= len(self.current_dialogue_list):
                     self.is_speaking = False
+                    if self.market_seller:
+                        self.market_seller(self.fenetre)   # market seller est une fonction a modifier dans chaque npc seller
+                        # dialogue sortie
+                        self.start_dialogue(self.leave_dialogue)
 
         if self.is_speaking and event and event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             self.is_speaking = False
@@ -121,17 +127,14 @@ class NPC_Logic():
                 screen.blit(font.render("OUI", True, (255,255,255)), (screen_pos[0]-50, screen_pos[1]-52))
                 screen.blit(font.render("NON", True, (255,255,255)), (screen_pos[0]+20, screen_pos[1]-52))
 
-        if camera:
-            pygame.draw.rect(screen, (255, 0, 0), camera.apply(self.rect), 2)
-        else:
-            pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
 
 class Gordon_NPC(NPC_Logic, VerticalAnimation):
     def __init__(self, fenetre, x, y):
         sprite_sheet = f'Assets/Npc/Gordon/idle.png'
-        nb_frames = 4
-        width = 32
-        height = 32
+        y -= 50  # faire monter le npc sur Y
+        nb_frames = 51
+        width = 256
+        height = 256
         marge = 0
         colonne = 0
         self.arrival_dialogue = [
@@ -145,8 +148,8 @@ class Gordon_NPC(NPC_Logic, VerticalAnimation):
             " Bon, à plus alors ! "
         ]
 
-        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, self.arrival_dialogue, self.leave_dialogue)
-
+        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1, arrival_dialogue=self.arrival_dialogue, leave_dialogue=self.leave_dialogue)
+        self.market_seller = charms_market  # appel de la fonction des charms
 
 class Forgeron(NPC_Logic, Animation):
     def __init__(self, fenetre, x, y):
@@ -203,7 +206,7 @@ class Forgeron(NPC_Logic, Animation):
         self.orb_cost += 50 # Augmente le coût en pièce de la prochaine amélioration
         self.start_dialogue(["Ton arme a été améliorée , tu es maintenant plus fort contre les ennemis !"])
 
-    '''def draw (self, screen, camera=None):
+    def draw (self, screen, camera=None):
         # Avancer l'animation idle
         self.gestion_animation()
         
@@ -225,4 +228,4 @@ class Forgeron(NPC_Logic, Animation):
         if camera:
             pygame.draw.rect(screen, (255, 0, 0), camera.apply(self.rect), 2)
         else:
-            pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)'''
+            pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)

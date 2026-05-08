@@ -116,6 +116,7 @@ while continuer:
         intro(fenetre)
         new_game = False
 
+    event = None
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             continuer = False
@@ -477,8 +478,6 @@ while continuer:
                 game_fenetre.blit(e.image, camera.apply(e.rect))
         # Afficher les orbs
         monnaie.draw(game_fenetre)
-
-        print(current_map_path)
 
         # Afficher la jauge de sang
         font = pygame.font.Font(None, 50)
