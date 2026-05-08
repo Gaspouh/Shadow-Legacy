@@ -2,7 +2,7 @@ import pygame
 from Core.save import sauvegarder, charms_images, SAVE_FILE, supprimer_sauvegarde, buy_charm
 import os
 import json
-from World.objets import Receptacle
+from World.objets import Receptacle, Monnaie
 
 pygame.mixer.init()
 over_sound = pygame.mixer.Sound("Assets/Sounds/over_button.mp3")
@@ -194,6 +194,8 @@ def sit_on_bench(fenetre, player):
     offset_x, offset_y = 0, 0
 
     # Fond (meme que menu)
+    game_bg = fenetre.copy() # copy permet de screen l'ecran du jeu
+
     noir_transparent = pygame.Surface((fenetre.get_width(), fenetre.get_height()))
     noir_transparent.fill((0, 0, 0))
     noir_transparent.set_alpha(220) 
@@ -241,6 +243,7 @@ def sit_on_bench(fenetre, player):
             charm_selected["rect"].y = mouse_pos [1] + offset_y
 
         # Affichage
+        fenetre.blit(game_bg, (0, 0))   # jeu en fond
         fenetre.blit(noir_transparent, (0, 0))
         fenetre.blit(inventaire_pic, inventaire_rec)
 
@@ -261,19 +264,16 @@ def annonce_text(text, duration=1200):
     pygame.display.update()
     pygame.time.delay(int(duration))
 
-# ---------------------------------------
-# GASPOUH   👇
-# ---------------------------------------
 
-def charms_market(fenetre):
+def charms_market(fenetre, sell_charms):
     """ UI d'un marché de charms, pour npc par ex """
-    # dico de charms; mettre a jour quand on en aura implementé d'autres
-    sell_charms = {
-        "attack_long_range": {"price": 100, "image": "Assets/charms/attack_long_range.png"},
-        "attack_speed": {"price": 200, "image": "Assets/charms/attack_speed.png"},
-        "jump_boost": {"price": 300, "image": "Assets/charms/jump_boost.png"},
-    }
 
+    """                     Exemple de charms a vendre
+    sell_charms = {
+        "attack_long_range": {"price": 125, "image": "Assets/charms/attack_long_range.png"},
+    }
+    """
+    
     # Afficher le menu
     noir_transparent = pygame.Surface((fenetre.get_width(), fenetre.get_height()))
     noir_transparent.fill((0, 0, 0)) # Remplir avec du noir
@@ -284,6 +284,14 @@ def charms_market(fenetre):
 
     # Police pour écrire le prix
     font = pygame.font.SysFont("C4 Headline", 45)
+
+    # Player orbs, pareil que la classe monnaie (on la refais car c'est 2 boucles différentes, on peut pas appeler Monnaie directement)
+    orb_img = pygame.transform.scale(
+    pygame.image.load("Assets/Images/orbs.png").convert_alpha(), (45, 45))
+    orb_rect = orb_img.get_rect(topright=(fenetre.get_width() - 40, 40))
+    orb_font = pygame.font.SysFont("Playfair Display", 50, bold=True)
+    orb_text = orb_font.render(str(Monnaie.orbs), True, (255, 255, 255))
+
 
     # UI market (une image); affiche les images des sell_charms, et prix en dessous
     while True:
@@ -307,8 +315,8 @@ def charms_market(fenetre):
                         charm_image = pygame.transform.scale(charm_image, (120, 120))
                         
                         # Position du charm
-                        x = 150 +list(sell_charms.keys()).index(charm_name) * 220 # decaler pour les aligner
-                        y = 250
+                        x = 150 +list(sell_charms.keys()).index(charm_name) * 250 # decaler pour les aligner
+                        y = 300
                         charm_rect = charm_image.get_rect(topleft=(x, y))
 
                         if charm_rect.collidepoint(mouse_pos):
@@ -319,14 +327,18 @@ def charms_market(fenetre):
         # affichage
         fenetre.blit(bg_image, (0, 0))
         fenetre.blit(noir_transparent, (0, 0))
+        # orbs du joeur
+        fenetre.blit(orb_img, orb_rect)
+        orb_text = orb_font.render(str(Monnaie.orbs), True, (255, 255, 255))    #
+        fenetre.blit(orb_text, (orb_rect.left - orb_text.get_width() - 8, orb_rect.centery - orb_text.get_height() // 2))
 
         # afficher lesc harms
         for charm_name,asset in sell_charms.items():
             charm_image = pygame.image.load(asset["image"]).convert_alpha()
             charm_image = pygame.transform.scale(charm_image, (120, 120))
             
-            x = 150 + list(sell_charms.keys()).index(charm_name) * 220
-            y= 250
+            x = 150 + list(sell_charms.keys()).index(charm_name) * 250
+            y= 300
             fenetre.blit(charm_image, (x, y))
 
             # afficher les prix, endessous

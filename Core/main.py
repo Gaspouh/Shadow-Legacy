@@ -15,7 +15,7 @@ from World.traps import *
 from World.objets import Coeur, Monnaie, Receptacle, Minerai
 from Entities.boss_gravelion import Gravelion
 from Core.save import *
-from Visual.interface import menu, sit_on_bench, home_screen
+from Visual.interface import menu, sit_on_bench, home_screen, annonce_text
 from Core.reset import reset
 from Entities.npc_logic import Gordon_NPC , Forgeron
 
@@ -338,7 +338,7 @@ while continuer:
                 bot.update(player.rect, player, event, e_proches=None)
                 bot.draw(game_fenetre, camera)
 
-        # Checkpoints
+        # Checkpoints/bancs
         for i, cp in enumerate(checkpoints):
             # On calcule la position a l'écran
             cp_screen_rect = camera.apply(cp.rect)
@@ -363,7 +363,7 @@ while continuer:
                         sauvegarder(player, checkpoints, current_map_name, index_last_checkpoint=i)
                         set_spawn_sound.play()
                 
-                # Si le joueur est déjà assis, on permet d'ouvrir l'inventaire avec E
+                # si le joueur est deja assis, on peu ouvrir l'inventaire avec E
                 else:
                     if pygame.key.get_pressed()[pygame.K_e]:
                         sit_on_bench(fenetre, player)

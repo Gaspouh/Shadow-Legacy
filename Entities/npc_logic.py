@@ -93,13 +93,14 @@ class NPC_Logic():
                 if self.dialogue_index >= len(self.current_dialogue_list):
                     self.is_speaking = False
                     if self.market_seller:
-                        self.market_seller(self.fenetre)   # market seller est une fonction a modifier dans chaque npc seller
+                        self.market_seller(self.fenetre, self.sell_charms)   # market seller est une fonction a modifier dans chaque npc seller
                         # dialogue sortie
                         self.start_dialogue(self.leave_dialogue)
 
-        if self.is_speaking  and event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE:
-            self.is_speaking = False
-            self.dialogue_triggered = False
+        if event and event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            if self.is_speaking:
+                self.is_speaking = False
+                self.dialogue_triggered = False
     
     def draw(self, screen, camera=None):
         # Avancer l'animation idle
@@ -139,16 +140,22 @@ class Gordon_NPC(NPC_Logic, VerticalAnimation):
         colonne = 0
         self.arrival_dialogue = [
             " salut toi, tu veux quoi ? ",
-            " Bon j'ai compris, tu parles pas beaucoup hein ? ",
-            " je vend des trucs si tu veux, jette un oeil au magasin !"
+            " Un conseil, appuie sur E quand tu es assis sur un banc,",
+            " tu pourras voir les Charms que tu possèdes et en équiper jusqu'a 3.",
+            " Je vend des trucs si tu veux, jette un oeil au magasin !"
         ]
 
         self.leave_dialogue = [
-            " ... ",
-            " Bon, à plus alors ! "
+            " Les charms permettent d'améliorer tes capacités ... ",
+            " Bon, à plus alors. "
         ]
 
         super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1, arrival_dialogue=self.arrival_dialogue, leave_dialogue=self.leave_dialogue)
+        self.sell_charms = {
+            "attack_long_range": {"price": 125, "image": "Assets/charms/attack_long_range.png"},
+            "attack_speed": {"price": 100, "image": "Assets/charms/attack_speed.png"},
+            "jump_boost": {"price": 150, "image": "Assets/charms/jump_boost.png"},
+        }
         self.market_seller = charms_market  # appel de la fonction des charms
 
 class Forgeron(NPC_Logic, Animation):
