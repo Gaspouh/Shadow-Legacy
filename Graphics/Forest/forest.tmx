@@ -322,8 +322,8 @@
     <property name="obj_type" value="mob"/>
    </properties>
   </object>
-  <object id="10" name="banc" gid="343" x="407.048" y="558.903" width="18.5204" height="21"/>
-  <object id="11" name="Receptacle" x="1736.6" y="123.294" width="37.2439" height="24.2086">
+  <object id="10" name="banc" gid="343" x="380.166" y="533.097" width="18.5204" height="21"/>
+  <object id="11" name="Receptacle" x="2753.8" y="113.617" width="37.2439" height="24.2086">
    <properties>
     <property name="obj_type" value="receptacle"/>
    </properties>

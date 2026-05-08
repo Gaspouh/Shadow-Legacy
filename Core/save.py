@@ -132,6 +132,9 @@ def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None):
             "health": player.health,      
             "max_health": player.max_health,
             "orbs": Monnaie.orbs,
+            "minerais": player.minerais,
+            "réceptacles": player.receptacles,
+            "receptacles_total": player.receptacles_total,
             "found_charms" : get_player_found_charms(),
             "equipped_charms": get_player_equipped_charms()
         },
@@ -182,6 +185,21 @@ def charger(player, checkpoints, map):
         Monnaie.orbs = data["player"]["orbs"]
     else:
         data["player"]["orbs"] = Monnaie.orbs
+    
+    if "minerais" in data["player"]:
+        player.minerais = data["player"]["minerais"]
+    else:
+        data["player"]["minerais"] = player.minerais
+
+    if "réceptacles" in data["player"]:
+        player.receptacles = data["player"]["réceptacles"]
+    else:
+        data["player"]["réceptacles"] = player.receptacles
+    
+    if "receptacles_total" in data["player"]:
+        player.receptacles_total = data["player"]["receptacles_total"]
+    else:        
+        data["player"]["receptacles_total"] = player.receptacles_total
 
     # Abilities
         # quand y'aura d'autres abilities

@@ -141,7 +141,7 @@ def menu(fenetre, player, checkpoints, current_map_name):
     return pause
 
 
-def sit_on_bench(fenetre):
+def sit_on_bench(fenetre, player):
     """ Ouvre l'inventaire lorsque le joueur est assis sur un banc + gestion des charms equippés et drag """
     open_inventory = True
     with open(SAVE_FILE, "r") as f:
@@ -160,19 +160,35 @@ def sit_on_bench(fenetre):
                 charms_afficher.append({"img": image, "rect": rect, "name": name})
                 decalage_x += 50 + image.get_width()
 
-            """ for ojbets in liste_receptacles:
-        if len(ojbets.liste_receptacles) > 0: # Si il y a des receptacles dans la liste, on affiche les charms qu'ils contiennent
-            if len(ojbets.liste_receptacles) == 1:
-                image = pygame.image.load("Assets/Images/fragment1.png").convert_alpha()
-            elif len(ojbets.liste_receptacles) == 2:
-                image = pygame.image.load("Assets/Images/fragment2.png").convert_alpha()
-            elif len(ojbets.liste_receptacles) == 3:
-                image = pygame.image.load("Assets/Images/fragment3.png").convert_alpha()
-            rect = ojbets.image.get_rect(topleft=(decalage_x, 200))
-            image2 = pygame.transform.scale(image, (ojbets.image.get_width()/1.8, ojbets.image.get_height()/1.8))
-            charms_afficher.append({"img": image2, "rect": rect, "name": ojbets.name})
-            decalage_x += 50 + ojbets.image.get_width()
-                                            """
+    j = player.receptacles_total // 3 # pour afficher les receptacles en les regroupant par 3 dans l'inventaire
+
+    for i in range (j): # montre les réceptacles en les regroupant par 3
+        image = pygame.image.load("Assets/Images/fragment3.png").convert_alpha()
+        image2 = pygame.transform.scale(image, (image.get_width()/10.5, image.get_height()/10.5 - 10))
+        rect = image2.get_rect(topleft=(430 + 73 * i, 275 ))
+        charms_afficher.append({"img": image2, "rect": rect, "name": "receptacle"}) #les utiliser commme des charmes affichés dans l'inventaire
+    
+    if player.receptacles > 0: # Affiche les réceptacles en cours d'obtention dans l'inventaire
+
+        if player.receptacles == 1:
+            image = pygame.image.load("Assets/Images/fragment1.png").convert_alpha()
+
+        elif player.receptacles == 2:
+            image = pygame.image.load("Assets/Images/fragment2.png").convert_alpha()
+    
+        image2 = pygame.transform.scale(image, (image.get_width()/10.5, image.get_height()/10.5 - 10))
+        rect = image2.get_rect(topleft=(430 + 73 * j, 275 ))
+        charms_afficher.append({"img": image2, "rect": rect, "name": "receptacle"}) #les utiliser commme des charmes affichés dans l'inventaire
+
+    for i in range (player.minerais):
+        image = pygame.image.load("Assets/Images/minerai.png").convert_alpha()
+        image3 = pygame.transform.scale(image, (image.get_width()/10.5 - 10, image.get_height()/10.5 - 10))
+        if i < 4: # par ligne d'inventaire
+            rect = image3.get_rect(topleft=(385 + 74 * i, 335))
+        else:
+            rect = image3.get_rect(topleft=(385 + 74 * (i-4), 403)) # ligne d'en dessous
+        charms_afficher.append({"img": image3, "rect": rect, "name": "minerai"}) #les utiliser commme des charmes affichés dans l'inventaire
+                                            
         
     charm_selected = None   # Pouvoir selectionner un item à la fois pour le drag and drop
     offset_x, offset_y = 0, 0

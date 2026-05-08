@@ -5,6 +5,9 @@
         "health": 5,
         "max_health": 5,
         "orbs": 0,
+        "minerais": 0,
+        "réceptacles": 0,
+        "receptacles_total": 0,
         "found_charms": {
             "attack_long_range": false,
             "attack_speed": false,

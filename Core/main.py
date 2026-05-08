@@ -334,7 +334,7 @@ while continuer:
                 obj.draw_big(game_fenetre, player)# Afficher les objets pris en grand pour indiquer qu'ils ont été ramassés
             
             for bot in pnj:
-                bot.update(player.rect, player, e_proches=None, event=event)
+                bot.update(player.rect, player, event, e_proches=None)
                 bot.draw(game_fenetre, camera)
 
         # Checkpoints
@@ -365,7 +365,7 @@ while continuer:
                 # Si le joueur est déjà assis, on permet d'ouvrir l'inventaire avec E
                 else:
                     if pygame.key.get_pressed()[pygame.K_e]:
-                        sit_on_bench(fenetre)
+                        sit_on_bench(fenetre, player)
 
         # Portes
         for door in doors:
@@ -477,8 +477,6 @@ while continuer:
                 game_fenetre.blit(e.image, camera.apply(e.rect))
         # Afficher les orbs
         monnaie.draw(game_fenetre)
-
-        print(current_map_path)
 
         # Afficher la jauge de sang
         font = pygame.font.Font(None, 50)

@@ -107,6 +107,7 @@ class Receptacle(pygame.sprite.Sprite):
         # Logique pour vérifier si le joueur est proche du réceptacle et peut le prendre
         if self.rect.colliderect(player.rect) and not self.taken:
             player.receptacles += 1  # Augmente le nombre de réceptacles du joueur
+            player.receptacles_total += 1 # Augmente le nombre total de réceptacles du joueur
             self.taken = True  # Marque le réceptacle comme pris
             self.show_big = True  # Affiche le réceptacle en grand pour indiquer qu'il a été pris
             self.show_timer = pygame.time.get_ticks()  # Démarre le timer pour l'affichage en grand

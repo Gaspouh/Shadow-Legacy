@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="185" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="34">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="185" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="36">
  <tileset firstgid="1" source="forest_platform.tsx"/>
  <tileset firstgid="97" source="../traps.tsx"/>
  <tileset firstgid="195" source="forest_objects.tsx"/>
+ <tileset firstgid="260" source="../Swamp/Objects/objects.tsx"/>
  <objectgroup id="2" name="Objects">
   <object id="1" gid="252" x="5627" y="672.667" width="175" height="190"/>
   <object id="2" gid="2147483900" x="5245" y="673.667" width="175" height="190"/>
@@ -72,6 +73,12 @@
     <property name="target_spawn" value="left"/>
    </properties>
    <capsule/>
+  </object>
+  <object id="34" name="Banc" gid="301" x="610.068" y="711.984" width="14.7847" height="30"/>
+  <object id="35" name="minerai" x="5231.58" y="613.477" width="32.0755" height="30.1887">
+   <properties>
+    <property name="obj_type" value="minerai"/>
+   </properties>
   </object>
  </objectgroup>
  <layer id="1" name="Ground" width="185" height="40">

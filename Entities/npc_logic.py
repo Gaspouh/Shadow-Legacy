@@ -67,7 +67,7 @@ class NPC_Logic():
         text_rect.center = bubble_rect.center
         screen.blit(text_surface, text_rect)
 
-    def update(self, player_rect, player=None, e_proches=None, event=None):
+    def update(self, player_rect, player=None, event=None, e_proches=None):
         if self.dialogue_zone.colliderect(player_rect):
             if not self.dialogue_triggered:
                 self.start_dialogue(self.arrival_dialogue)
@@ -91,7 +91,7 @@ class NPC_Logic():
                 if self.dialogue_index >= len(self.current_dialogue_list):
                     self.is_speaking = False
 
-        if self.is_speaking and event and event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+        if self.is_speaking  and event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE:
             self.is_speaking = False
             self.dialogue_triggered = False
     
