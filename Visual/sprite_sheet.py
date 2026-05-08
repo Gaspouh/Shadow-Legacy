@@ -61,7 +61,10 @@ class Animation:
 
 # 2eme classe pour d'autres types de spritesheet
 class VerticalAnimation:
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne):
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1):
+        if scale != 1:
+            frames_droite = [pygame.transform.scale(f, (int(width * scale), int(height * scale))) for f in frames_droite]
+            frames_gauche = [pygame.transform.scale(f, (int(width * scale), int(height * scale))) for f in frames_gauche]
         self.ecran = fenetre
         sheet = pygame.image.load(sprite_sheet).convert_alpha()
         

@@ -1,5 +1,5 @@
 import pygame
-from Core.save import sauvegarder, charms_images, SAVE_FILE, supprimer_sauvegarde
+from Core.save import sauvegarder, charms_images, SAVE_FILE, supprimer_sauvegarde, buy_charm
 import os
 import json
 from World.objets import Receptacle
@@ -249,3 +249,88 @@ def sit_on_bench(fenetre, player):
             fenetre.blit(charm["img"], charm["rect"])
 
         pygame.display.update()
+
+
+def annonce_text(text, duration=1200):
+    """ pour print facilement un message a l'ecran """
+    fenetre = pygame.display.get_surface()
+    font = pygame.font.SysFont("canela", 60)
+    text_surface = font.render(text, True, (255, 0, 0)) # rouge
+    text_rect = text_surface.get_rect(center=(fenetre.get_width() // 2, fenetre.get_height() // 2))
+    fenetre.blit(text_surface, text_rect)
+    pygame.display.update()
+    pygame.time.delay(int(duration))
+
+# ---------------------------------------
+# GASPOUH   👇
+# ---------------------------------------
+
+def charms_market(fenetre):
+    """ UI d'un marché de charms, pour npc par ex """
+    # dico de charms; mettre a jour quand on en aura implementé d'autres
+    sell_charms = {
+        "attack_long_range": {"price": 100, "image": "Assets/charms/attack_long_range.png"},
+        "attack_speed": {"price": 200, "image": "Assets/charms/attack_speed.png"},
+        "jump_boost": {"price": 300, "image": "Assets/charms/jump_boost.png"},
+    }
+
+    # Afficher le menu
+    noir_transparent = pygame.Surface((fenetre.get_width(), fenetre.get_height()))
+    noir_transparent.fill((0, 0, 0)) # Remplir avec du noir
+    noir_transparent.set_alpha(100) # transparence
+    bg_image = pygame.image.load("Assets/Images/market_bg.png").convert_alpha()
+    # adapter le bg a la taille de la fenetre, + centrer le bg
+    bg_image = pygame.transform.scale(bg_image, (fenetre.get_width(), fenetre.get_height()))
+
+    # Police pour écrire le prix
+    font = pygame.font.SysFont("C4 Headline", 45)
+
+    # UI market (une image); affiche les images des sell_charms, et prix en dessous
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+                # gestion de sortie
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE or event.key == pygame.K_SPACE:
+                    return  # quitter
+                
+            # clic sur les charms
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:   # clic
+                    mouse_pos = pygame.mouse.get_pos()
+
+                    # On test chaque charm
+                    for charm_name, info in sell_charms.items():
+                        charm_image = pygame.image.load(info["image"]).convert_alpha()
+                        charm_image = pygame.transform.scale(charm_image, (120, 120))
+                        
+                        # Position du charm
+                        x = 150 +list(sell_charms.keys()).index(charm_name) * 220 # decaler pour les aligner
+                        y = 250
+                        charm_rect = charm_image.get_rect(topleft=(x, y))
+
+                        if charm_rect.collidepoint(mouse_pos):
+                            # afficher le message
+                            annonce = buy_charm(charm_name, info["price"])
+                            if annonce :  # si y'a une annonce pas encore affichée$
+                                annonce_text(annonce, 1000)
+        # affichage
+        fenetre.blit(bg_image, (0, 0))
+        fenetre.blit(noir_transparent, (0, 0))
+
+        # afficher lesc harms
+        for charm_name,asset in sell_charms.items():
+            charm_image = pygame.image.load(asset["image"]).convert_alpha()
+            charm_image = pygame.transform.scale(charm_image, (120, 120))
+            
+            x = 150 + list(sell_charms.keys()).index(charm_name) * 220
+            y= 250
+            fenetre.blit(charm_image, (x, y))
+
+            # afficher les prix, endessous
+            price_text = font.render(f"{asset['price']} Orbs", True, (150, 150, 160))
+            fenetre.blit(price_text, (x + 30, y + 140))
+
+        pygame.display.flip()
