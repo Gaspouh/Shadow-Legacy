@@ -48,9 +48,10 @@ class Demon_King(Boss):
         self.smash_jumped = False # Pour gérer le saut de l'attaque Smash
         self.fire_breath = None # Pour garder une référence à la hitbox du souffle de feu
         self.last_spell_spawn = 0 # Pour gérer l'intervalle d'apparition des projectiles de l'attaque de sortilège  
+        self.is_ghost = False
 
-        self.lava_zones = []
         self.last_sound = -1000
+        self.once = True
 
         # Animations 
         self.anims = {
@@ -63,7 +64,7 @@ class Demon_King(Boss):
             "demon_walk":         Animation(fenetre, x, y, "Assets/Boss/Demon_King/demon_king_general.png", 12, 288, 160, 0, 1, 2),
             "demon_cleave":       Animation(fenetre, x, y, "Assets/Boss/Demon_King/demon_king_general.png", 15, 288, 160, 0, 2, 2),
             "demon_smash":        Animation(fenetre, x, y, "Assets/Boss/Demon_King/demon_king_smash.png", 18, 448, 292, 0, 0, 1),
-            #"demon_fire_breath":  Animation(fenetre, x, y, "Assets/Boss/Demon_King/demon_king_fire_breath.png", 21, 1000, 100, 0, 7, 1),
+            "demon_fire_breath":  Animation(fenetre, x, y, "Assets/Boss/Demon_King/demon_king_fire_breath.png", 21, 536, 313, 0, 0, 1),
             "demon_cast_spell":   Animation(fenetre, x, y, "Assets/Boss/Demon_King/demon_king_cast_spell.png", 6, 368, 252, 0, 0, 1),
             "death":        Animation(fenetre, x, y, "Assets/Boss/Demon_King/demon_king_general.png", 22, 288, 160, 0, 4, 2),
             
@@ -78,9 +79,9 @@ class Demon_King(Boss):
             "demon_walk": 12 / v / 1.5,
             "demon_cleave": 15 / v,
             "demon_smash": 18 / v / 2,
-            #"demon_fire_breath": 7 / v * 1.5,
+            "demon_fire_breath": 7 / v,
             "demon_cast_spell": 6 / v,
-            "death": 22 / v / 2
+            "death": v #peu importe vu qu'on l'écrase après
         }
         
         for state, speed in speeds.items():
@@ -92,6 +93,7 @@ class Demon_King(Boss):
             pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\slime_1.MP3"),
             pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\slime_2.MP3"),
         ]
+        self.transformation_sound = pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\_transformation.MP3")
         self.cleave_sounds = [
             pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\epee_1.MP3"),
             pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\epee_2.MP3"),
@@ -101,15 +103,15 @@ class Demon_King(Boss):
             pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\smash_1.MP3"),
             pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\smash_2.MP3")
         ]
+        self.smash_landing_sound = pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\smash_3.MP3")
         self.cast_spell_sound = pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\cast_spell.MP3")
         self.transition_sound = pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\phase_transition.MP3")
+        self.death_sound = pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\mort.MP3")
 
         self.sounds_cooldown = {
             "slime" : 0.3,
             "cleave" : 0.5,
-            "smash" : 1,
-            "cast_spell" : 1,
-            "transition" : 2
+            "cast_spell" : 1.5,
         }
 
         self.current_anim = "idle"
@@ -157,8 +159,8 @@ class Demon_King(Boss):
                 self.slime_sound.play() 
 
             if self.pv_ennemi <= 0:
-                self.alive = True #Pour override le false de Ennemi.receive_hit()
                 self.enter_state(self.TRANSFORMING)
+                self.transformation_sound.play() 
 
         else : #Forme roi démon
             self.pv_demon -= attack_data["damage"] 
@@ -182,7 +184,7 @@ class Demon_King(Boss):
             else :
                 return random.choice([self.ATK_CLEAVE, self.ATK_SMASH, self.ATK_CAST_SPELL])
         else : #Phase 2 et 3
-            return random.choice([self.ATK_CLEAVE, self.ATK_SMASH, self.ATK_CAST_SPELL])
+            return random.choice([self.ATK_CLEAVE, self.ATK_SMASH, self.ATK_CAST_SPELL, self.ATK_FIRE_BREATH])
 
     #Update général
     def update(self, player_rect, player, platforms):
@@ -209,7 +211,6 @@ class Demon_King(Boss):
             
         elif self.state == self.IDLE:
             self.current_anim = "move"
-            print(self.velocity.x)
             self.face_player(player_rect)
             self.velocity.x += self.speed(self.vitesse_deplacement * self.direction)
             if int(self.anims["move"].index_image) == 1 and self.can_play_sound("slime"):
@@ -242,15 +243,24 @@ class Demon_King(Boss):
         elif self.state == self.ATTACKING:
             self.update_attack(elapsed, player_rect)
 
-        elif self.state == self.DISAPPEARING:
-            if self.can_play_sound("transition") :
-                self.transition_sound.play()
+        elif self.state == self.DISAPPEARING: 
+            self.is_ghost = True
+            if self.fire_breath is not None: #Pour eviter un bug de hitbox resté en l'air
+                if self.fire_breath in self.hitboxs:
+                    self.hitboxs.remove(self.fire_breath)
+                self.fire_breath = None
+                self.fire_breath_pos = None
             self.update_disappearing(elapsed)
 
         elif self.state == self.REAPPEARING:
             self.update_reappearing(elapsed, player_rect)
 
         elif self.state == self.DYING:
+            if self.fire_breath is not None:
+                if self.fire_breath in self.hitboxs:
+                    self.hitboxs.remove(self.fire_breath)
+                self.fire_breath = None
+                self.fire_breath_pos = None
             self.update_dying(elapsed)
 
         if self.state != self.DYING:
@@ -270,29 +280,42 @@ class Demon_King(Boss):
             self.current_attack = self.choose_attack(player_rect)
             self.enter_state(self.ATTACKING)
 
+    def update_dying(self, elapsed):
+        self.anims["death"].vitesse_animation = 0.1
+        self.current_anim = "death"
+        if self.once :
+            self.death_sound.play()
+            self.once = False
+        self.update_anim(once=True)
+        if self.anim_over() and elapsed > 500:
+            self.alive = False
+
     def update_attack(self, elapsed, player_rect):
         if self.current_attack == self.ATK_CLEAVE:
             self.attack_cleave(elapsed)
         elif self.current_attack == self.ATK_SMASH:
             self.attack_smash(elapsed, player_rect)
         elif self.current_attack == self.ATK_FIRE_BREATH:
-            head = self.rect.midtop + pygame.math.Vector2(30 * self.direction, 30)
-            self.attack_fire_breath(elapsed, head)
+            self.attack_fire_breath(elapsed)
         elif self.current_attack == self.ATK_CAST_SPELL:
             self.attack_cast_spell(elapsed)
 
     #transitions avec Fade
     def update_disappearing(self, elapsed):
+        if self.once :
+            self.transition_sound.play()
+            self.once = False
         self.current_anim = "demon_idle"
         self.velocity.x = 0
 
         progression = int((elapsed / 800) * 255)
         self.intensity = max(0, 255 - progression)
 
-        if elapsed > 800:
+        if elapsed > 2000:
             self.intensity = 0
             self.appliquer_phase(self.phase_en_attente)
             self.enter_state(self.REAPPEARING)
+            self.once = True
     
     def update_reappearing(self, elapsed, player_rect):
         self.current_anim = "demon_idle"
@@ -304,6 +327,7 @@ class Demon_King(Boss):
         if elapsed > 800:
             self.intensity = 255
             self.face_player(player_rect)
+            self.is_ghost = False
             self.enter_state(self.IDLE)
     
     def appliquer_phase(self, nouvelle_phase):
@@ -315,26 +339,24 @@ class Demon_King(Boss):
             self.scale_all_anims_speed(1.25)
         elif nouvelle_phase == 3:
             self.scale_all_anims_speed(1.2)
-            #Plus ajouter lave si possible
 
     #attaques
     def attack_cleave(self, elapsed):
         self.current_anim = "demon_cleave"
-        charge = self.speed(500)
+        charge = self.speed(530)
 
         if elapsed < charge: #Avance avant le coup
             self.velocity.x = self.speed(self.vitesse_deplacement / 2 * self.direction, True)
-            print(elapsed)
-            if elapsed > self.speed(210):
+            if elapsed > self.speed(220):
                 if self.can_play_sound("cleave") :
                     random.choice(self.cleave_sounds).play() 
 
         elif not self.atk_spawned:
             self.velocity.x = 0
             self.spawn_attack_zone(
-                x=self.rect.centerx -30 if self.direction == 1 else self.rect.centerx -170,
+                x=self.rect.centerx -30 if self.direction == 1 else self.rect.centerx -220,
                 y=self.rect.bottom - 200,
-                width=200,
+                width=250,
                 height=200,
                 attack_data={"damage": 2, "knockback_x": 150, "knockback_y": -10},
                 image=None,
@@ -344,7 +366,6 @@ class Demon_King(Boss):
         
         if elapsed >= charge + self.speed(500) :
             self.enter_state(self.IDLE)
-        #Double cleave pour la phase 3 ???
 
     def attack_smash(self, elapsed, player_rect):
         self.current_anim = "demon_smash"
@@ -356,8 +377,7 @@ class Demon_King(Boss):
             self.target = player_rect.centerx
             self.smash_jumped = True
             self.has_left_ground = False # Pour s'assurer que l'attaque ne se déclenche qu'après que le boss ait quitté le sol
-            if self.can_play_sound("smash") :
-                random.choice(self.smash_sounds).play()
+            random.choice(self.smash_sounds).play()
             
         if self.smash_jumped and not self.atk_spawned:
             dx = self.target - self.rect.centerx
@@ -374,6 +394,7 @@ class Demon_King(Boss):
                 self.has_left_ground = True
 
             if self.has_left_ground and self.on_ground :
+                self.smash_landing_sound.play() 
                 self.velocity.x = 0
                 self.spawn_attack_zone( 
                     x=self.rect.centerx - 150,
@@ -389,12 +410,13 @@ class Demon_King(Boss):
                         self.spawn_projectile(
                             target_x=self.rect.centerx + direction * 2000,
                             target_y=self.rect.bottom - 20,
-                            width=60,
-                            height=20,
+                            width=70,
+                            height=50,
                             speed=7,
                             damage=1,
                             offset_x=30 * self.direction,
-                            offset_y=0
+                            offset_y=10,
+                            image=pygame.image.load("Assets\Boss\Demon_King\shockwave.png").convert_alpha()
                         )
                 self.atk_spawned = True
             
@@ -402,40 +424,54 @@ class Demon_King(Boss):
             self.smash_jumped = False
             self.enter_state(self.IDLE)
 
-    def attack_fire_breath(self, elapsed, head):
+    def attack_fire_breath(self, elapsed):
         self.current_anim = "demon_fire_breath"
-        charge = self.speed(500)
-        
+        charge = self.speed(800)
+
         if elapsed >= charge:
-            if self.fire_breath is None: 
+            if self.fire_breath is None:
+                self.fire_breath_pos = pygame.math.Vector2(
+                    self.rect.centerx + (30 if self.direction == 1 else -260),
+                    self.rect.top - 130
+                )
+
                 self.fire_breath = self.spawn_attack_zone(
-                    x=head.x,
-                    y=head.y,
-                    width=10,
-                    height=800,
-                    attack_data={"damage": 2, "knockback_x": 80, "knockback_y": -2},
+                    x=self.fire_breath_pos.x,
+                    y=self.fire_breath_pos.y,
+                    width=230,
+                    height=50,
+                    attack_data={
+                        "damage": 1,
+                        "knockback_x": 80,
+                        "knockback_y": -2
+                    },
                     image=None,
                     duration=9999
                 )
-            move_speed = self.speed(7, is_proj=True)
 
-            self.fire_breath.rect.y += move_speed
+            move_speed = self.speed(2.1, is_proj=True)
+            self.fire_breath_pos.y += move_speed
 
-            head = pygame.math.Vector2(30 * self.direction, self.fire_breath.rect.y)
-            self.fire_breath.rect.midtop = (head.x, head.y)
+            self.fire_breath.rect.topleft = (
+                self.fire_breath_pos.x,
+                self.fire_breath_pos.y
+            )
 
-            if elapsed >= charge + self.speed(900):
+            if elapsed >= charge + self.speed(1700):
                 if self.fire_breath in self.hitboxs:
                     self.hitboxs.remove(self.fire_breath)
-                self.fire_breath = None
+                self.fire_breath = None #Reset variable
+                self.fire_breath_pos = None
                 self.enter_state(self.IDLE)
 
     def attack_cast_spell(self, elapsed):
         charge = self.speed(1000)
         self.current_anim = "demon_cast_spell"
         self.velocity.x = 0
-        interval = self.speed(700)
+        interval = self.speed(800)
         now = pygame.time.get_ticks()
+        if self.can_play_sound("cast_spell") and elapsed <= charge:
+            self.cast_spell_sound.play()
 
         if elapsed >= charge:
             if now - self.last_spell_spawn >= interval:
@@ -450,9 +486,7 @@ class Demon_King(Boss):
                 else : #Phase 3
                     list_angle = [random.randint(-60, 60) for _ in range(5)]
 
-                if self.can_play_sound("cast_spell") :
-                    self.cast_spell_sound.play()
-                offset_y= random.randint(-80, 20)
+                offset_y= random.randint(-100, 20)
                 for angle in list_angle:
                     radians = math.radians(angle)
                     target_x = self.rect.centerx + math.cos(radians) * 3000 * self.direction
@@ -461,14 +495,15 @@ class Demon_King(Boss):
                         target_x=target_x,
                         target_y=target_y,
                         speed=self.speed(4, is_proj=True),
-                        width=20,
-                        height=20,
+                        width=30,
+                        height=30,
                         damage=1,
-                        offset_x= 70 * self.direction,
+                        offset_x= 150 * self.direction,
                         offset_y= offset_y,
+                        image=pygame.image.load("Assets\Boss\Demon_King\Fireball.png").convert_alpha()
                     )
 
-            if elapsed >= charge + self.speed(900):
+            if elapsed >= charge + self.speed(1200):
                 self.enter_state(self.IDLE)
 
     def draw(self, fenetre, camera): #Override de la méthode de Boss
@@ -486,5 +521,4 @@ class Demon_King(Boss):
 
         for elem in self.hitboxs:
             elem.draw(fenetre, camera)
-            pygame.draw.rect(fenetre, (255, 0, 0), camera.apply(elem.rect), 2)
                 

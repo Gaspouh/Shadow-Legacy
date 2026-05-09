@@ -101,8 +101,8 @@ class Ennemi(Animation, PhysicsEntity):
         return False  # encore en vie
 
 class Projectile:
-    def __init__(self, x, y, target_x, target_y, speed, width, height, damage, gravity=0.4, \
-                  lifetime=3000, should_disappear_on_contact=True, image=None, use_gravity=False):
+    def __init__(self, x, y, target_x, target_y, speed, width, height, damage, image=None, \
+                  gravity=0.4, lifetime=9999, should_disappear_on_contact=True, use_gravity=False):
         
         dist_x = target_x - x
         dist_y = target_y - y
@@ -136,7 +136,6 @@ class Projectile:
             self.image = pygame.transform.scale(image, (width, height))
         else:
             self.image = pygame.Surface((width, height), pygame.SRCALPHA)
-            self.image.fill((255, 0, 0))  # Couleur rouge pour les projectiles sans image
 
         self.angle = math.degrees(math.atan2(-self.velocity.y, self.velocity.x))
         
@@ -187,7 +186,6 @@ class AttackZone:
             self.image = pygame.transform.scale(image, (width, height))
         else:
             self.image = pygame.Surface((width, height), pygame.SRCALPHA)
-            self.image.fill((255, 0, 0))  # Couleur rouge pour les projectiles sans image
 
     def lifetime_expired(self):
         return pygame.time.get_ticks() - self.birth_time > self.duration

@@ -280,8 +280,6 @@ class Boss(Ennemi):
     NOT_TRIGGERED = "NOT_TRIGGERED"  # avant que le joueur soit détecté
     IDLE = "IDLE"
     ATTACKING   = "ATTACKING"
-    TELEPORTING = "TELEPORTING"
-    SHIELDED    = "SHIELDED"
     STAGGER     = "STAGGER"       # temps de repos après X dégâts
     TRANSITION  = "TRANSITION"    # changement de phase
     DYING       = "DYING"
@@ -307,6 +305,7 @@ class Boss(Ennemi):
         self.stagger_threshold = stagger_threshold
         self.pv_last_stagger = pv_max
         self.stagger_duration = 3000 # 3 secondes de pause après le seuil de dégâts
+        self.touch_ground = False
 
         self.hitboxs = []
         self.anims = {}
@@ -322,6 +321,7 @@ class Boss(Ennemi):
             return
             
         super().receive_hit(attack_data, source_rect, source)
+        self.alive = True #Overwrite pour jouer l'anim de mort
 
         # Stagger
         if self.pv_last_stagger - self.pv_ennemi >= self.stagger_threshold:
@@ -410,9 +410,9 @@ class Boss(Ennemi):
         self.hitboxs.append(zone)
         return zone
 
-    def spawn_projectile(self, target_x, target_y, speed, width, height, damage, offset_x, offset_y, gravity=0.4, lifetime=3000, should_disappear_on_contact=True):
+    def spawn_projectile(self, target_x, target_y, speed, width, height, damage, offset_x, offset_y, image=None, gravity=0.4, lifetime=3000, should_disappear_on_contact=True):
         projectile = Projectile(self.rect.centerx + offset_x, self.rect.centery + offset_y,
-                                 target_x, target_y, speed, width, height, damage, gravity, lifetime, should_disappear_on_contact)
+                                 target_x, target_y, speed, width, height, damage, image, gravity, lifetime, should_disappear_on_contact)
         self.hitboxs.append(projectile)
 
     def update_hitbox(self, platforms, limite_rect):
@@ -426,39 +426,26 @@ class Boss(Ennemi):
     
     # Etats génériques
 
-    def update_stagger(self, elapsed):
+    def update_stagger(self, elapsed, platforms):
+        for platform in platforms:
+            if self.rect.colliderect(platform.rect):
+                self.touch_ground = True
+                self.rect.bottom = platform.rect.top
+        if not self.touch_ground :
+            self.position.y += 3
+            self.rect.y = self.position.y
         self.current_anim = "idle"
+        self.velocity = pygame.math.Vector2(0, 0)
         if elapsed >= self.stagger_duration:
-            self.enter_state(self.IDLE)
-
-    def update_transition(self, elapsed):
-        self.current_anim = "transition"
-        if elapsed >= 2000:
-            self.phase = 2
-            self.scale_all_anims_speed(1.5)
             self.enter_state(self.TELEPORTING)
+            self.touch_ground = False
 
     def update_teleport(self, elapsed, player_rect):
-        self.current_anim = "idle"
-        if elapsed >= 500:
+        self.current_anim = "glowing"
+        if elapsed >= 600:
             self.teleport_random()
             self.face_player(player_rect)
             self.enter_state(self.IDLE)
-
-    def update_dying(self, elapsed):
-        self.current_anim = "death"
-        self.update_anim(once=True)
-        if self.anim_over() and elapsed > 500:
-            self.alive = False
-    
-    #Affichage
-
-    def draw(self, fenetre, camera):
-        if not self.alive:
-            return
-        fenetre.blit(self.image, camera.apply(self.rect))
-        for elem in self.hitboxs:
-            elem.draw(fenetre, camera)
 
 class Golem(Boss):
     ATK_SMASH = "smash"

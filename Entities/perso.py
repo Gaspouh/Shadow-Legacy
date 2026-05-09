@@ -442,6 +442,10 @@ class Player(PhysicsEntity):
         if not target.apply_knockback:
             return
         
+        if hasattr(target, "is_ghost"):
+            if target.is_ghost:
+                return
+        
         if self.attack_direction == "DOWN": 
             self.velocity.y = self.pogo_strength # Rebondir vers le haut après une attaque vers le bas
             self.double_jump.reset()
@@ -464,6 +468,10 @@ class Player(PhysicsEntity):
         if self.invincible and not source.ignore_invincibility:
             return 0, 0
         
+        if hasattr(source, "is_ghost"):
+            if source.is_ghost:
+                return 0,0
+            
         damage_amount = attack_data["damage"]
 
         self.health -= damage_amount # Réduire la santé du joueur lorsqu'il est touché

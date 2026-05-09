@@ -11,6 +11,10 @@ class Gravelion(Boss):
     AIR_GAUCHE = 2
     AIR_DROIT = 3
 
+    #Etats specifiques à ce boss
+    TELEPORTING = "TELEPORTING"
+    SHIELDED    = "SHIELDED"
+
     #Noms des attaques :
     ATK_MELEE       = "melee"
     ATK_ARM         = "arm"
@@ -18,17 +22,13 @@ class Gravelion(Boss):
     ATK_COCON       = "cocon"
 
     def __init__(self, fenetre,x, y, arene_rect):
-        marge_x = 150
-        hauteur_air = arene_rect.top + 150
-        # ---------------------- Pour le trailer --------------------------
-        arene_w = 1200
-        arene_h = 700
-        arene_rect = pygame.Rect(x - arene_w // 2, y - arene_h, arene_w, arene_h)
+        marge_x = 300
+        hauteur_air = arene_rect.top + 300
+        hauteur_sol = arene_rect.bottom - 250
 
-        # -----------------------------------------------------------------
         tp_points = [
-            (arene_rect.left + marge_x, arene_rect.bottom),
-            (arene_rect.right - marge_x, arene_rect.bottom),
+            (arene_rect.left + marge_x, hauteur_sol),
+            (arene_rect.right - marge_x, hauteur_sol),
             (arene_rect.left + marge_x, hauteur_air),
             (arene_rect.right - marge_x, hauteur_air)
         ]
@@ -50,7 +50,7 @@ class Gravelion(Boss):
             "melee":        Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 7, 100, 100, 0, 4, 1),
             "laser_charge": Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 7, 100, 100, 0, 5, 1),
             "transition":   Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 10, 100, 100, 0, 6, 1),
-            "death":        Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 10, 1000, 100, 0, 7, 1) #Probleme avec la classe a regler pour fonctionner sur deux lignes
+            "death":        Animation(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_death.png", 14, 100, 100, 0, 0, 1)
         }
 
         #Vitesse d'animation 
@@ -63,7 +63,7 @@ class Gravelion(Boss):
             "melee": 7 / v * 1.5,
             "laser_charge": 7 / v,
             "transition": 10 / v / 2,
-            "death": 14 / v / 3
+            "death": 14 / v / 2
         }
         
         for state, speed in speeds.items():
@@ -79,9 +79,9 @@ class Gravelion(Boss):
             ]
         
         self.current_anim = "idle"
+        self.rect = pygame.Rect(0, 0, 80, 80)
+        self.rect.center = (x, y)
         self.image = self.anims["idle"].frames_droite[0]
-        self.rect = self.image.get_rect(midbottom=(x, y))
-        self.hitbox = self.rect.inflate(-40, -40)
 
         # Timers et variables d'attaque
         self.idle_duration = 1500
@@ -91,7 +91,7 @@ class Gravelion(Boss):
 
         #Spawn (direct pour le trailer)
         self.enter_state(self.IDLE)
-        self.rect.midbottom = (x, y)  #spawn position ds tiled
+        self.rect.center = (x, y)  #spawn position ds tiled
         self.position = pygame.math.Vector2(self.rect.centerx, self.rect.bottom)
 
 
@@ -101,14 +101,13 @@ class Gravelion(Boss):
     def choose_attack(self, player_rect):
         distance = abs(player_rect.centerx - self.rect.centerx)
 
-        cocon_chance = 1/4 if self.phase == 2 else self.cocon_chance
-        if random.random() < cocon_chance:
+        if random.random() < self.cocon_chance:
             return self.ATK_COCON
         
         if not self.is_on_ground():
             return random.choice([self.ATK_LASER, self.ATK_ARM])
         
-        if distance < 200:
+        if distance < 200 and self.phase == 1:
             return self.ATK_MELEE
         return random.choice([self.ATK_MELEE, self.ATK_ARM])
     
@@ -137,17 +136,16 @@ class Gravelion(Boss):
             self.update_cocon(elapsed, player_rect, player)
 
         elif self.state == self.STAGGER:
-            self.update_stagger(elapsed)
+            self.update_stagger(elapsed, platforms)
 
         elif self.state == self.TRANSITION:
-            self.update_transition(elapsed)
+            self.update_transition()
 
         elif self.state == self.DYING:
             self.update_dying(elapsed)
 
         self.update_hitbox(platforms, self.arene_rect)
-        self.hitbox.topleft = self.rect.center
-                
+                        
         once_states = ["melee", "arm", "cocon", "laser_charge", "transition", "death"]
         self.update_anim(self.current_anim in once_states)
 
@@ -162,6 +160,22 @@ class Gravelion(Boss):
                 self.enter_state(self.SHIELDED)
             else:
                 self.enter_state(self.ATTACKING)
+
+    def update_dying(self, elapsed):
+        self.current_anim = "death"
+        if self.anim_over() and elapsed > 500:
+            self.alive = False
+
+    def update_transition(self):
+        self.current_anim = "transition"
+        self.velocity = pygame.math.Vector2(0, 0)
+        self.update_anim(once=True)
+        if self.anim_over():
+            self.phase = 2
+            self.scale_all_anims_speed(1.3)
+            self.idle_duration = 1000
+            self.cocon_chance = 1/4
+            self.enter_state(self.TELEPORTING)
         
     def update_attack(self, elapsed, player_rect):
         if self.current_attack == self.ATK_MELEE:
@@ -182,7 +196,7 @@ class Gravelion(Boss):
             self.is_shielded = False
             self.position.x = player.position.x - 100 * player.direction # Se téléporte dans le dos du joeur
             self.position.y = player.position.y
-            self.rect.midbottom = (self.position.x, self.position.y)
+            self.rect.center = (self.position.x, self.position.y)
             self.face_player(player_rect)
             self.current_attack = self.ATK_MELEE
             self.enter_state(self.ATTACKING)
@@ -200,9 +214,9 @@ class Gravelion(Boss):
         if elapsed >= charge and not self.atk_spawned:
 
             self.spawn_attack_zone(
-                x=self.rect.centerx + 20 * self.direction,
+                x=self.rect.centerx + (20 if self.direction == 1 else -120),
                 y=self.rect.bottom - 100,
-                width=70,
+                width=100,
                 height=100,
                 attack_data={"damage": 1, "knockback_x": 40, "knockback_y": -10},
                 image=None,
@@ -211,19 +225,18 @@ class Gravelion(Boss):
 
             self.spawn_projectile(
                 target_x=self.arene_rect.right if self.direction == 1 else self.arene_rect.left,
-                target_y=self.rect.bottom -30,
+                target_y=self.rect.bottom,
                 speed=self.speed(10, is_proj=True),
-                width=50,
-                height=30,
+                width=70,
+                height=50,
                 damage=1,
-                offset_x=self.direction * 50,
-                offset_y=30,
-                lifetime=9999,
-                should_disappear_on_contact=False
+                offset_x=-70 if self.direction != 1 else 0,
+                offset_y=0,
+                image=pygame.image.load("Assets\Boss\Gravelion\shockwave.png").convert_alpha()
             )
             self.atk_spawned = True
         
-        if elapsed >= charge + 800:
+        if elapsed >= charge + self.speed(800):
             self.enter_state(self.TELEPORTING)
 
     def attack_arm(self, elapsed, player_rect):
@@ -234,11 +247,12 @@ class Gravelion(Boss):
                 target_x=player_rect.centerx,
                 target_y=player_rect.centery,
                 speed=self.speed(8, is_proj=True),
-                width=30,
-                height=15,
+                width=60,
+                height=25,
                 damage=1,
                 offset_x=self.direction * 60,
-                offset_y=-30
+                offset_y=-20,
+                image=pygame.image.load("Assets\Boss\Gravelion\Arm_projectile.png").convert_alpha()
             )
             self.atk_spawned = True
         
@@ -257,7 +271,7 @@ class Gravelion(Boss):
                     width=10,
                     height=800,
                     attack_data={"damage": 2, "knockback_x": 80, "knockback_y": -2},
-                    image=None,
+                    image=pygame.image.load("Assets\Boss\Gravelion\Laser_sheet.png"),
                     duration=9999
                 )
             move_speed = self.speed(7, is_proj=True)
@@ -274,3 +288,14 @@ class Gravelion(Boss):
                     self.hitboxs.remove(self.laser)
                 self.laser = None
                 self.enter_state(self.TELEPORTING)
+    
+    def draw(self, fenetre, camera):
+        if not self.alive:
+            return
+        
+        sprite_rect = self.image.get_rect(center=self.rect.center)
+
+        fenetre.blit(self.image, camera.apply(sprite_rect))
+        
+        for elem in self.hitboxs:
+            elem.draw(fenetre, camera)

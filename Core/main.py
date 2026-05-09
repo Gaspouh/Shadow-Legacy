@@ -146,14 +146,14 @@ while continuer:
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Clic gauche
-                    pnj_en_train_de_parler = False
+                    """pnj_en_train_de_parler = False
                     for bot in pnj:
                         if bot.is_speaking:
                             pnj_en_train_de_parler = True
                             break
                         else:
-                            # faire attaquer le joueur
-                            player.press_attack()
+                            # faire attaquer le joueur"""
+                    player.press_attack()
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
@@ -205,11 +205,13 @@ while continuer:
                 elif hasattr(e, "update"):
                     e.update(player.rect, player, platforms)
 
-                if not e.alive:
+                if not e.alive and hasattr(e, "animation_mort"):
                     fin = e.mort()
                     if fin:
                         liste_entites.remove(e)
                     continue
+                elif not e.alive :
+                    liste_entites.remove
 
                 if hasattr(e, "patrouille"):
                     e.patrouille(platforms)
