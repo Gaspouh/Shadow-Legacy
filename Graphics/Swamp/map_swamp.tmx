@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="115" height="30" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="79">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="115" height="30" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="85">
  <tileset firstgid="1" name="platform" tilewidth="32" tileheight="32" tilecount="60" columns="10">
   <image source="Tiles/Tileset.png" width="320" height="192"/>
   <tile id="0">
@@ -308,7 +308,6 @@
  <objectgroup id="3" name="Objects">
   <object id="5" gid="66" x="2334.05" y="738.286" width="31" height="26"/>
   <object id="6" gid="89" x="3146.27" y="896.346" width="53" height="47"/>
-  <object id="7" name="Banc" gid="102" x="1939.8" y="617.067" width="14.7847" height="30"/>
   <object id="12" name="Banc" gid="102" x="524.195" y="621.572" width="14.7847" height="33"/>
   <object id="14" name="araignee" x="2512.33" y="794.932">
    <properties>
@@ -389,7 +388,7 @@
     <property name="obj_type" value="npc"/>
    </properties>
   </object>
-  <object id="78" name="minerai" x="207.547" y="592.453" width="32.0755" height="30.1887">
+  <object id="79" name="minerai" x="350" y="843.396" width="32.0755" height="30.1887">
    <properties>
     <property name="obj_type" value="minerai"/>
    </properties>

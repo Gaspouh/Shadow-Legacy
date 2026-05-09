@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="200" height="70" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="37">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="200" height="70" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="38">
  <tileset firstgid="1" source="platforms_2/platforms_2.tsx"/>
  <tileset firstgid="257" source="platforms_3/platforms_3.tsx"/>
  <tileset firstgid="461" source="platforms_4/platforms_4.tsx"/>
@@ -477,6 +477,11 @@
     <property name="target_spawn" value="left"/>
    </properties>
    <capsule/>
+  </object>
+  <object id="37" name="minerai" x="5369.64" y="1541.49" width="32.0755" height="30.1887">
+   <properties>
+    <property name="obj_type" value="minerai"/>
+   </properties>
   </object>
  </objectgroup>
 </map>

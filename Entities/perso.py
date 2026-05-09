@@ -27,8 +27,9 @@ class Player(PhysicsEntity):
         self.sang = 0
         self.sang_max = 99
         self.is_sitting = False
-        self.receptacles = 0
-        self.minerais = 0
+        self.receptacles = 0 # nombre de receptacles que le joueur a ramassé
+        self.minerais = 0 # nombre minerai ramassé
+        self.receptacles_total = 0 # nombre total de réceptacles ramassés (même ceux déjà transformé en coeur)
 
         # PHYSIQUE DU JOUEUR
         self.direction = 1 # 1 pour droite, -1 pour gauche
@@ -364,7 +365,7 @@ class Player(PhysicsEntity):
             
         else:
             self.acceleration.x = 0 # Ne pas permettre au joueur de se déplacer pendant le stun
-            self.animate() # Forcer l'idle
+            self.animate() # Forcer l'idle pendant le stun
 
     def press_jump(self):
         self.is_sitting = False # Si joueur assis et saute il se leve

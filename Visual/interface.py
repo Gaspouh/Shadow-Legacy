@@ -1,8 +1,8 @@
 import pygame
-from Core.save import sauvegarder, charms_images, SAVE_FILE, supprimer_sauvegarde
+from Core.save import sauvegarder, charms_images, SAVE_FILE, supprimer_sauvegarde, buy_charm
 import os
 import json
-from World.objets import Receptacle
+from World.objets import Receptacle, Monnaie
 
 pygame.mixer.init()
 over_sound = pygame.mixer.Sound("Assets/Sounds/over_button.mp3")
@@ -141,7 +141,7 @@ def menu(fenetre, player, checkpoints, current_map_name):
     return pause
 
 
-def sit_on_bench(fenetre):
+def sit_on_bench(fenetre, player):
     """ Ouvre l'inventaire lorsque le joueur est assis sur un banc + gestion des charms equippés et drag """
     open_inventory = True
     with open(SAVE_FILE, "r") as f:
@@ -160,24 +160,42 @@ def sit_on_bench(fenetre):
                 charms_afficher.append({"img": image, "rect": rect, "name": name})
                 decalage_x += 50 + image.get_width()
 
-            """ for ojbets in liste_receptacles:
-        if len(ojbets.liste_receptacles) > 0: # Si il y a des receptacles dans la liste, on affiche les charms qu'ils contiennent
-            if len(ojbets.liste_receptacles) == 1:
-                image = pygame.image.load("Assets/Images/fragment1.png").convert_alpha()
-            elif len(ojbets.liste_receptacles) == 2:
-                image = pygame.image.load("Assets/Images/fragment2.png").convert_alpha()
-            elif len(ojbets.liste_receptacles) == 3:
-                image = pygame.image.load("Assets/Images/fragment3.png").convert_alpha()
-            rect = ojbets.image.get_rect(topleft=(decalage_x, 200))
-            image2 = pygame.transform.scale(image, (ojbets.image.get_width()/1.8, ojbets.image.get_height()/1.8))
-            charms_afficher.append({"img": image2, "rect": rect, "name": ojbets.name})
-            decalage_x += 50 + ojbets.image.get_width()
-                                            """
+    j = player.receptacles_total // 3 # pour afficher les receptacles en les regroupant par 3 dans l'inventaire
+
+    for i in range (j): # montre les réceptacles en les regroupant par 3
+        image = pygame.image.load("Assets/Images/fragment3.png").convert_alpha()
+        image2 = pygame.transform.scale(image, (image.get_width()/10.5, image.get_height()/10.5 - 10))
+        rect = image2.get_rect(topleft=(430 + 73 * i, 275 ))
+        charms_afficher.append({"img": image2, "rect": rect, "name": "receptacle"}) #les utiliser commme des charmes affichés dans l'inventaire
+    
+    if player.receptacles > 0: # Affiche les réceptacles en cours d'obtention dans l'inventaire
+
+        if player.receptacles == 1:
+            image = pygame.image.load("Assets/Images/fragment1.png").convert_alpha()
+
+        elif player.receptacles == 2:
+            image = pygame.image.load("Assets/Images/fragment2.png").convert_alpha()
+    
+        image2 = pygame.transform.scale(image, (image.get_width()/10.5, image.get_height()/10.5 - 10))
+        rect = image2.get_rect(topleft=(430 + 73 * j, 275 ))
+        charms_afficher.append({"img": image2, "rect": rect, "name": "receptacle"}) #les utiliser commme des charmes affichés dans l'inventaire
+
+    for i in range (player.minerais):
+        image = pygame.image.load("Assets/Images/minerai.png").convert_alpha()
+        image3 = pygame.transform.scale(image, (image.get_width()/10.5 - 10, image.get_height()/10.5 - 10))
+        if i < 4: # par ligne d'inventaire
+            rect = image3.get_rect(topleft=(385 + 74 * i, 335))
+        else:
+            rect = image3.get_rect(topleft=(385 + 74 * (i-4), 403)) # ligne d'en dessous
+        charms_afficher.append({"img": image3, "rect": rect, "name": "minerai"}) #les utiliser commme des charmes affichés dans l'inventaire
+                                            
         
     charm_selected = None   # Pouvoir selectionner un item à la fois pour le drag and drop
     offset_x, offset_y = 0, 0
 
     # Fond (meme que menu)
+    game_bg = fenetre.copy() # copy permet de screen l'ecran du jeu
+
     noir_transparent = pygame.Surface((fenetre.get_width(), fenetre.get_height()))
     noir_transparent.fill((0, 0, 0))
     noir_transparent.set_alpha(220) 
@@ -225,6 +243,7 @@ def sit_on_bench(fenetre):
             charm_selected["rect"].y = mouse_pos [1] + offset_y
 
         # Affichage
+        fenetre.blit(game_bg, (0, 0))   # jeu en fond
         fenetre.blit(noir_transparent, (0, 0))
         fenetre.blit(inventaire_pic, inventaire_rec)
 
@@ -233,3 +252,97 @@ def sit_on_bench(fenetre):
             fenetre.blit(charm["img"], charm["rect"])
 
         pygame.display.update()
+
+
+def annonce_text(text, duration=1200):
+    """ pour print facilement un message a l'ecran """
+    fenetre = pygame.display.get_surface()
+    font = pygame.font.SysFont("canela", 60)
+    text_surface = font.render(text, True, (255, 0, 0)) # rouge
+    text_rect = text_surface.get_rect(center=(fenetre.get_width() // 2, fenetre.get_height() // 2))
+    fenetre.blit(text_surface, text_rect)
+    pygame.display.update()
+    pygame.time.delay(int(duration))
+
+
+def charms_market(fenetre, sell_charms):
+    """ UI d'un marché de charms, pour npc par ex """
+
+    """                     Exemple de charms a vendre
+    sell_charms = {
+        "attack_long_range": {"price": 125, "image": "Assets/charms/attack_long_range.png"},
+    }
+    """
+    
+    # Afficher le menu
+    noir_transparent = pygame.Surface((fenetre.get_width(), fenetre.get_height()))
+    noir_transparent.fill((0, 0, 0)) # Remplir avec du noir
+    noir_transparent.set_alpha(100) # transparence
+    bg_image = pygame.image.load("Assets/Images/market_bg.png").convert_alpha()
+    # adapter le bg a la taille de la fenetre, + centrer le bg
+    bg_image = pygame.transform.scale(bg_image, (fenetre.get_width(), fenetre.get_height()))
+
+    # Police pour écrire le prix
+    font = pygame.font.SysFont("C4 Headline", 45)
+
+    # Player orbs, pareil que la classe monnaie (on la refais car c'est 2 boucles différentes, on peut pas appeler Monnaie directement)
+    orb_img = pygame.transform.scale(
+    pygame.image.load("Assets/Images/orbs.png").convert_alpha(), (45, 45))
+    orb_rect = orb_img.get_rect(topright=(fenetre.get_width() - 40, 40))
+    orb_font = pygame.font.SysFont("Playfair Display", 50, bold=True)
+    orb_text = orb_font.render(str(Monnaie.orbs), True, (255, 255, 255))
+
+
+    # UI market (une image); affiche les images des sell_charms, et prix en dessous
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+                # gestion de sortie
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE or event.key == pygame.K_SPACE:
+                    return  # quitter
+                
+            # clic sur les charms
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:   # clic
+                    mouse_pos = pygame.mouse.get_pos()
+
+                    # On test chaque charm
+                    for charm_name, info in sell_charms.items():
+                        charm_image = pygame.image.load(info["image"]).convert_alpha()
+                        charm_image = pygame.transform.scale(charm_image, (120, 120))
+                        
+                        # Position du charm
+                        x = 150 +list(sell_charms.keys()).index(charm_name) * 250 # decaler pour les aligner
+                        y = 300
+                        charm_rect = charm_image.get_rect(topleft=(x, y))
+
+                        if charm_rect.collidepoint(mouse_pos):
+                            # afficher le message
+                            annonce = buy_charm(charm_name, info["price"])
+                            if annonce :  # si y'a une annonce pas encore affichée$
+                                annonce_text(annonce, 1000)
+        # affichage
+        fenetre.blit(bg_image, (0, 0))
+        fenetre.blit(noir_transparent, (0, 0))
+        # orbs du joeur
+        fenetre.blit(orb_img, orb_rect)
+        orb_text = orb_font.render(str(Monnaie.orbs), True, (255, 255, 255))    #
+        fenetre.blit(orb_text, (orb_rect.left - orb_text.get_width() - 8, orb_rect.centery - orb_text.get_height() // 2))
+
+        # afficher lesc harms
+        for charm_name,asset in sell_charms.items():
+            charm_image = pygame.image.load(asset["image"]).convert_alpha()
+            charm_image = pygame.transform.scale(charm_image, (120, 120))
+            
+            x = 150 + list(sell_charms.keys()).index(charm_name) * 250
+            y= 300
+            fenetre.blit(charm_image, (x, y))
+
+            # afficher les prix, endessous
+            price_text = font.render(f"{asset['price']} Orbs", True, (150, 150, 160))
+            fenetre.blit(price_text, (x + 30, y + 140))
+
+        pygame.display.flip()

@@ -6,7 +6,7 @@ from Entities.boss_wolf_black import Black_Wolf
 from World.traps import *
 from Entities.ennemi import Araignee, Volant, Fighter, Chargeur, Tourelle
 from Entities.boss_logic import Golem
-from World.objets import Receptacle, Minerai
+from World.objets import Receptacle, Minerai, petit_sac, moyen_sac, grand_sac
 from Entities.boss_wolf_red import Red_Wolf
 from Entities.boss_gravelion import Gravelion
 from Core.save import get_chunks_params
@@ -228,6 +228,15 @@ def create_map(tmx_data, fenetre):
         elif obj_type == "minerai":
             y = int(y - obj.height)
             objets.append(Minerai(x, y))
+
+        elif obj_type == "petit_sac":
+            objets.append(petit_sac(x, y))
+
+        elif obj_type == "moyen_sac":
+            objets.append(moyen_sac(x, y))
+
+        elif obj_type == "grand_sac":
+            objets.append(grand_sac(x, y))
         
         elif obj_type == "spawnpoint":
             name = obj.name

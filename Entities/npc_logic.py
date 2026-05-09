@@ -1,23 +1,21 @@
 from Visual.sprite_sheet import VerticalAnimation , Animation
 import pygame
+from Visual.interface import charms_market
 
 class NPC_Logic():
     IDLE = "idle"
-    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1, arrival_dialogue=None, leave_dialogue=None):
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1, arrival_dialogue=None, leave_dialogue=None, market_seller=None):
         super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale)
         self.state = "idle"
-
-        # variable necessaires pour fonctionner meme si inutiles
-        self.alive = True
-        self.attack_data = {"damage": 0}
-
         self.dialogue_triggered = False   # déclenchement dialogue
         self.dialogue_zone = pygame.Rect(self.rect.x - 50, self.rect.y - 50, self.rect.width + 100, self.rect.height + 100) # zone de déclenchement du dialogue
         self.arrival_dialogue = arrival_dialogue
         self.leave_dialogue = leave_dialogue
+        self.market_seller = market_seller
         self.dialogue_index = 0
         self.current_dialogue_list = []
         self.is_speaking = False
+        self.fenetre = fenetre
     
     def player_in_dialogue(self, player_rect):
         if self.dialogue_zone.colliderect(player_rect):
@@ -71,7 +69,7 @@ class NPC_Logic():
         text_rect.center = bubble_rect.center
         screen.blit(text_surface, text_rect)
 
-    def update(self, player_rect, player=None, e_proches=None, event=None):
+    def update(self, player_rect, player=None, event=None, e_proches=None):
         if self.dialogue_zone.colliderect(player_rect):
             if not self.dialogue_triggered:
                 self.start_dialogue(self.arrival_dialogue)
@@ -79,14 +77,28 @@ class NPC_Logic():
             self.dialogue_triggered = False
             self.is_speaking = False
 
-        if self.is_speaking:
-            if event and event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button in (1, 3):
-                    self.dialogue_index += 1
-                    if self.dialogue_index >= len(self.current_dialogue_list):
-                        self.is_speaking = False
+        if self.is_speaking and event and event.type == pygame.MOUSEBUTTONUP:
+            if event.button in (1, 3):
 
-            if event and event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                # Si on est sur le dialogue d'amélioration, on vérifie les boutons d'abord
+                if hasattr(self, 'upgrade_dialogue') and self.current_dialogue_list == self.upgrade_dialogue:
+                    if hasattr(self, 'rect_oui') and self.rect_oui.collidepoint(event.pos):
+                        self.confirm_upgrade(player)
+                        return # On quitte pour ne pas incrémenter dialogue_index
+                    elif hasattr(self, 'rect_non') and self.rect_non.collidepoint(event.pos):
+                        self.is_speaking = False
+                        return
+                # passage au dialogue suivant
+                self.dialogue_index += 1
+                if self.dialogue_index >= len(self.current_dialogue_list):
+                    self.is_speaking = False
+                    if self.market_seller:
+                        self.market_seller(self.fenetre, self.sell_charms)   # market seller est une fonction a modifier dans chaque npc seller
+                        # dialogue sortie
+                        self.start_dialogue(self.leave_dialogue)
+
+        if event and event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            if self.is_speaking:
                 self.is_speaking = False
                 self.dialogue_triggered = False
     
@@ -109,42 +121,54 @@ class NPC_Logic():
                 screen_pos = (self.rect.centerx, self.rect.top)
             self.build_dialogue_bubble(screen, self.current_dialogue_list[self.dialogue_index], screen_pos)
 
-        if camera:
-            pygame.draw.rect(screen, (255, 0, 0), camera.apply(self.rect), 2)
-        else:
-            pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
+            if hasattr(self, 'upgrade_dialogue') and self.current_dialogue_list == self.upgrade_dialogue:
+                self.rect_oui = pygame.draw.rect(screen, (0, 200, 0), (screen_pos[0]-60, screen_pos[1]-60, 50, 30))
+                self.rect_non = pygame.draw.rect(screen, (200, 0, 0), (screen_pos[0]+10, screen_pos[1]-60, 50, 30))
+                font = pygame.font.SysFont("Arial", 12, bold=True)
+                screen.blit(font.render("OUI", True, (255,255,255)), (screen_pos[0]-50, screen_pos[1]-52))
+                screen.blit(font.render("NON", True, (255,255,255)), (screen_pos[0]+20, screen_pos[1]-52))
+
 
 class Gordon_NPC(NPC_Logic, VerticalAnimation):
     def __init__(self, fenetre, x, y):
         sprite_sheet = f'Assets/Npc/Gordon/idle.png'
-        nb_frames = 4
-        width = 32
-        height = 32
+        y -= 50  # faire monter le npc sur Y
+        nb_frames = 51
+        width = 256
+        height = 256
         marge = 0
         colonne = 0
         self.arrival_dialogue = [
             " salut toi, tu veux quoi ? ",
-            " Bon j'ai compris, tu parles pas beaucoup hein ? ",
-            " je vend des trucs si tu veux, jette un oeil au magasin !"
+            " Un conseil, appuie sur E quand tu es assis sur un banc,",
+            " tu pourras voir les Charms que tu possèdes et en équiper jusqu'a 3.",
+            " Je vend des trucs si tu veux, jette un oeil au magasin !"
         ]
 
         self.leave_dialogue = [
-            " ... ",
-            " Bon, à plus alors ! "
+            " Les charms permettent d'améliorer tes capacités ... ",
+            " Bon, à plus alors. "
         ]
 
-        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, self.arrival_dialogue, self.leave_dialogue)
-
+        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1, arrival_dialogue=self.arrival_dialogue, leave_dialogue=self.leave_dialogue)
+        self.sell_charms = {
+            "attack_long_range": {"price": 125, "image": "Assets/charms/attack_long_range.png"},
+            "attack_speed": {"price": 100, "image": "Assets/charms/attack_speed.png"},
+            "jump_boost": {"price": 150, "image": "Assets/charms/jump_boost.png"},
+        }
+        self.market_seller = charms_market  # appel de la fonction des charms
 
 class Forgeron(NPC_Logic, Animation):
     def __init__(self, fenetre, x, y):
-        sprite_sheet = 'Assets/Images/forgeron.png'
-        nb_frames = 7
+        sprite_sheet = 'Assets/Npc/forgeron.png'
+        nb_frames = 9
         width = 62
         height = 50
         marge = 5
-        colonne = 0
-        self.alive = True
+        ligne= 0
+        self.upgrade_done = 0
+        self.upgrade_cost = 1
+        self.orb_cost = 100
 
         self.arrival_dialogue = [
             "Bonjour étrange voyageur, que puis-je faire pour toi ?",
@@ -154,15 +178,18 @@ class Forgeron(NPC_Logic, Animation):
             "À bientôt, prends garde aux ténèbres qui rôdent dans ce monde."
         ]
 
-        self.upgrade_dialogue = [
-            "Je peux améliorer ton arme si tu me donnes 3 minerais et 200 pièces. Veux-tu procéder à l'amélioration ?"
-        ]
-        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1, arrival_dialogue=self.arrival_dialogue, leave_dialogue=self.leave_dialogue)
+        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, scale=1, arrival_dialogue=self.arrival_dialogue, leave_dialogue=self.leave_dialogue)
     
     def dialogue_equipement(self, player): 
         # lance le dialogue d'amélioration
+
+        self.upgrade_dialogue = [
+            "Je peux améliorer ton arme si tu me donnes " + str(self.upgrade_cost) + " minerais et " + str(self.orb_cost) + " pièces. Veux-tu procéder à l'amélioration ?"
+        ]
+
         self.start_dialogue(self.upgrade_dialogue)
 
+    def confirm_upgrade(self, player):
         if player.minerais >= 3 and player.monnaie >= 200: # Vérifie si le joueur a les ressources nécessaires pour l'amélioration
             self.upgrade(player) # Effectue l'amélioration de l'équipement du joueur
             
@@ -171,7 +198,41 @@ class Forgeron(NPC_Logic, Animation):
 
     def upgrade(self, player):
         # Retire les ressources du joueur
-        player.minerais -= 3
-        player.monnaie -= 200
+        if self.upgrade_done == 0:
+            player.minerais -= 1
+            player.monnaie -= 100
+        elif self.upgrade_done == 1:
+            player.minerais -= 2
+            player.monnaie -= 150
+        elif self.upgrade_done == 2:
+            player.minerais -= 3
+            player.monnaie -= 200
         player.attack += 1 # Améliore l'attaque du joueur
+        self.upgrade_done += 1 # Incrémente le nombre d'améliorations effectuées
+        self.upgrade_cost += 1 # Augmente le coût de la prochaine amélioration
+        self.orb_cost += 50 # Augmente le coût en pièce de la prochaine amélioration
         self.start_dialogue(["Ton arme a été améliorée , tu es maintenant plus fort contre les ennemis !"])
+
+    def draw (self, screen, camera=None):
+        # Avancer l'animation idle
+        self.gestion_animation()
+        
+        # Blitter le sprite
+        if camera:
+            screen.blit(self.image, camera.apply(self.rect))
+        else:
+            screen.blit(self.image, self.rect)
+
+        # Bulle de dialogue
+        if self.is_speaking and self.dialogue_index < len(self.current_dialogue_list):
+            if camera:
+                pos = camera.apply(self.rect)
+                screen_pos = (pos.centerx, pos.top)
+            else:
+                screen_pos = (self.rect.centerx, self.rect.top)
+            self.build_dialogue_bubble(screen, self.current_dialogue_list[self.dialogue_index], screen_pos)
+
+        if camera:
+            pygame.draw.rect(screen, (255, 0, 0), camera.apply(self.rect), 2)
+        else:
+            pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)

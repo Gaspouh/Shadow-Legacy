@@ -3,7 +3,6 @@ import os
 import pygame
 from World.objets import Monnaie
 
-
 # Path
 CORE_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_FILE = os.path.join(CORE_DIR, "save.json")
@@ -20,6 +19,7 @@ MAP_PATHS = {
     "cave": "cave.tmx",
     "forest":"forest.tmx",
     "hollow_earth": "hollow_earth.tmx",
+    "parcours": "Parcours.tmx",
     "mines": "final_boss.tmx"
 }
 
@@ -134,6 +134,9 @@ def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None):
             "health": player.health,      
             "max_health": player.max_health,
             "orbs": Monnaie.orbs,
+            "minerais": player.minerais,
+            "réceptacles": player.receptacles,
+            "receptacles_total": player.receptacles_total,
             "found_charms" : get_player_found_charms(),
             "equipped_charms": get_player_equipped_charms()
         },
@@ -184,6 +187,21 @@ def charger(player, checkpoints, map):
         Monnaie.orbs = data["player"]["orbs"]
     else:
         data["player"]["orbs"] = Monnaie.orbs
+    
+    if "minerais" in data["player"]:
+        player.minerais = data["player"]["minerais"]
+    else:
+        data["player"]["minerais"] = player.minerais
+
+    if "réceptacles" in data["player"]:
+        player.receptacles = data["player"]["réceptacles"]
+    else:
+        data["player"]["réceptacles"] = player.receptacles
+    
+    if "receptacles_total" in data["player"]:
+        player.receptacles_total = data["player"]["receptacles_total"]
+    else:        
+        data["player"]["receptacles_total"] = player.receptacles_total
 
     # Abilities
         # quand y'aura d'autres abilities
@@ -252,3 +270,38 @@ def get_chunks_params():
         data = json.load(f)
     return data.get("chunks", 5)
 
+
+def buy_charm(charm_name, price):
+    """ gestion de charms, dans save pour gestion plus facile du json """
+
+    buy_sound = pygame.mixer.Sound("Assets/sounds/buy_item.mp3")
+    buy_sound.set_volume(0.5)
+
+    error_sound = pygame.mixer.Sound("Assets/sounds/error.mp3")
+    error_sound.set_volume(0.3)
+
+    if Monnaie.orbs >= price and charm_name:
+        Monnaie.orbs -= price            
+        found_charms = get_player_found_charms() or {charm_name: False}
+        if found_charms.get(charm_name) != True:  # True = trouvé
+            # MAJ du json
+            with open(SAVE_FILE, "r") as f:
+                data = json.load(f)
+            data["player"]["found_charms"][charm_name] = True   # charms est trouvé et ajouté
+        
+            with open(SAVE_FILE, "w") as f:
+                json.dump(data, f, indent=4)
+            
+            buy_sound.play()
+            return " Charm acheté "
+
+        else:
+            error_sound.play()
+            Monnaie.orbs += price  # faut bien rembourser si le joueur achete un charm qu'il a deja
+            print("Vous possédez déjà ce charme.")
+            return "Vous possédez déjà ce charme."
+
+    else:
+        error_sound.play()
+        print("Pas assez d'Orbs ....")
+        return "Pas assez d'Orbs ...."

@@ -15,7 +15,7 @@ from World.traps import *
 from World.objets import Coeur, Monnaie, Receptacle, Minerai
 from Entities.boss_gravelion import Gravelion
 from Core.save import *
-from Visual.interface import menu, sit_on_bench, home_screen
+from Visual.interface import menu, sit_on_bench, home_screen, annonce_text
 from Core.reset import reset
 from Entities.npc_logic import Gordon_NPC , Forgeron
 
@@ -116,6 +116,7 @@ while continuer:
         intro(fenetre)
         new_game = False
 
+    event = None
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             continuer = False
@@ -145,8 +146,14 @@ while continuer:
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Clic gauche
-                    # faire attaquer le joueur
-                    player.press_attack()
+                    pnj_en_train_de_parler = False
+                    for bot in pnj:
+                        if bot.is_speaking:
+                            pnj_en_train_de_parler = True
+                            break
+                        else:
+                            # faire attaquer le joueur
+                            player.press_attack()
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
@@ -265,10 +272,10 @@ while continuer:
             offset_x = -camera.camera.x
             offset_y = -camera.camera.y
             
-            if current_map_name == "Parcours.tmx":
+            if current_map_path == "Forest/Parcours.tmx":
                 background_luciole(game_fenetre, offset_x, offset_y, now) # Remplir le fond 
 
-            # Backgroud avec parallax
+            # Background avec parallax
             else:
                 draw_parallax(game_fenetre, camera, layers)
                 
@@ -324,10 +331,10 @@ while continuer:
                 obj.draw_big(game_fenetre, player)# Afficher les objets pris en grand pour indiquer qu'ils ont été ramassés
             
             for bot in pnj:
-                bot.update(player.rect, player, e_proches=None, event=event)
+                bot.update(player.rect, player, event, e_proches=None)
                 bot.draw(game_fenetre, camera)
 
-        # Checkpoints
+        # Checkpoints/bancs
         for i, cp in enumerate(checkpoints):
             # On calcule la position a l'écran
             cp_screen_rect = camera.apply(cp.rect)
@@ -352,10 +359,10 @@ while continuer:
                         sauvegarder(player, checkpoints, current_map_name, index_last_checkpoint=i)
                         set_spawn_sound.play()
                 
-                # Si le joueur est déjà assis, on permet d'ouvrir l'inventaire avec E
+                # si le joueur est deja assis, on peu ouvrir l'inventaire avec E
                 else:
                     if pygame.key.get_pressed()[pygame.K_e]:
-                        sit_on_bench(fenetre)
+                        sit_on_bench(fenetre, player)
 
         # Portes
         for door in doors:
