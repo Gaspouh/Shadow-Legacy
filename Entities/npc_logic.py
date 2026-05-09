@@ -35,7 +35,7 @@ class NPC_Logic():
     def build_dialogue_bubble(self, screen, text, pos):
         
         """
-        FAIT PAR AI : GEMINI FAST 3.0 (bruh), @everyone 🤓👆, c'est juste parce que y'a le match j'ai pas le temps
+        BULLE FAITE PAR AI : GEMINI FAST 3.0
 
         """
         font = pygame.font.SysFont("Arial", 16, bold=True)
