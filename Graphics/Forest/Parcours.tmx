@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="185" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="36">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="185" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="37">
  <tileset firstgid="1" source="forest_platform.tsx"/>
  <tileset firstgid="97" source="../traps.tsx"/>
  <tileset firstgid="195" source="forest_objects.tsx"/>
@@ -79,6 +79,12 @@
    <properties>
     <property name="obj_type" value="minerai"/>
    </properties>
+  </object>
+  <object id="36" name="Petit Sac" x="4552.67" y="494.667" width="74.6667" height="49.3333">
+   <properties>
+    <property name="obj_type" value="petit_sac"/>
+   </properties>
+   <capsule/>
   </object>
  </objectgroup>
  <layer id="1" name="Ground" width="185" height="40">

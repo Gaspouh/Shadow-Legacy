@@ -12,12 +12,12 @@ from World.map import Map_Manager, chunck_zone, platforme_la_plus_proche
 from Visual.camera import Camera, background_luciole, intro, create_parallax_layers, draw_parallax
 from Visual.vfx import particles, Particle, Fade, HealParticle, heal_particles
 from World.traps import *
-from World.objets import Coeur, Monnaie, Receptacle, Minerai
+from World.objets import Coeur, Monnaie, Receptacle, Minerai, Cadavre
 from Entities.boss_gravelion import Gravelion
 from Core.save import *
 from Visual.interface import menu, sit_on_bench, home_screen, annonce_text
 from Core.reset import reset
-from Entities.npc_logic import Gordon_NPC , Forgeron
+from Entities.npc_logic import Gordon1_NPC, Gordon2_NPC , Forgeron
 
 new_game = save_backup()
 
@@ -73,9 +73,14 @@ chunks = chunck_zone(platforms)
 
 #Joueur
 player = Player(100, 100, fenetre)
-spawn_point = charger(player, checkpoints, current_map_name)  # charge la save si elle existe, sinon spawn par défaut
+spawn_point, cadavre_data = charger(player, checkpoints, current_map_name)  # charge la save si elle existe, sinon spawn par défaut + le cadavre
 player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
 player.rect.midbottom = player.position # pareil avec la hitbox
+
+cadavre = None
+if cadavre_data and cadavre_data["map"] == current_map_name:
+    cadavre = Cadavre(cadavre_data["x"], cadavre_data["y"], cadavre_data["orbs"], current_map_name)
+last_pos = (100, 100)   # derniere fois que le joueur a touché le sol
 
 #Boss
 
@@ -151,9 +156,9 @@ while continuer:
                         if bot.is_speaking:
                             pnj_en_train_de_parler = True
                             break
-                        else:
-                            # faire attaquer le joueur
-                            player.press_attack()
+                    # faire attaquer le joueur
+                    if not pnj_en_train_de_parler:
+                        player.press_attack()
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
@@ -193,14 +198,19 @@ while continuer:
                     elif sp.effect == "ice":
                         player.on_ice = True
 
-            #update joueur (+opti chunk)
+            #update joueur (+opti chunk) + gestion de last pos du cadavre
             proche = platforme_la_plus_proche(chunks, player.rect)
             player.update(proche + special_surfaces)# Mettre à jour le joueur avec les plateformes pour gérer les collisions
             camera.update(player, shake_amount) # Mettre à jour la caméra pour suivre le joueur
+            if player.on_ground:
+                last_pos = (player.rect.centerx, player.rect.bottom)
+
 
             for e in liste_entites[:]:
                 e_proches = platforme_la_plus_proche(chunks, e.rect)    
-                if isinstance(e, Gordon_NPC):
+                if isinstance(e, Gordon1_NPC):
+                    e.update(player.rect, player, event=event)
+                elif isinstance(e, Gordon2_NPC):
                     e.update(player.rect, player, event=event)
                 elif hasattr(e, "update"):
                     e.update(player.rect, player, platforms)
@@ -329,6 +339,10 @@ while continuer:
                 if not obj.taken:# Afficher les objets qui n'ont pas été pris
                     game_fenetre.blit(obj.image, camera.apply(obj.rect))
                 obj.draw_big(game_fenetre, player)# Afficher les objets pris en grand pour indiquer qu'ils ont été ramassés
+
+            if cadavre and cadavre.alive:
+                cadavre.update(player)
+                cadavre.draw(game_fenetre, camera)
             
             for bot in pnj:
                 bot.update(player.rect, player, event, e_proches=None)
@@ -393,7 +407,8 @@ while continuer:
                         print("CRITICAL: No spawn points in this map!")
                         door_collided = None
                         continue
-
+                
+                # charger :
                 platforms = map_manager.platforms
                 chunks = chunck_zone(platforms)
                 special_platforms = map_manager.special_platforms
@@ -403,7 +418,15 @@ while continuer:
                 checkpoints = map_manager.checkpoints
                 spawnpoints = map_manager.spawnpoints
                 doors = map_manager.doors
+                objects = map_manager.objets
+                pnj = map_manager.pnj
                 entities_to_spawn = map_manager.entities_to_spawn
+                # charger cadavre
+                if cadavre_data and cadavre_data["map"] == current_map_name:
+                    cadavre = Cadavre(cadavre_data["x"], cadavre_data["y"], cadavre_data["orbs"], current_map_name)
+                else:
+                    cadavre = None
+
 
                 MAP_WIDTH, MAP_HEIGHT = map_manager.map_width, map_manager.map_height
                 MAP_RECT = pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)
@@ -417,6 +440,7 @@ while continuer:
                 player.rect.midbottom = player.position
                 door_collided = None
                 player.on_ground=False
+                last_pos = (player.rect.centerx, player.rect.bottom)
                 wait = True
 
         if wait and player.on_ground:
@@ -508,6 +532,10 @@ while continuer:
 
     # Gestion de mort
     else:
+        cadavre = Cadavre(last_pos[0], last_pos[1], Monnaie.orbs, current_map_name)   # créer le  cadavrte a la dernire pos
+        Monnaie.orbs = 0
+        sauvegarder(player, checkpoints, current_map_name, index_last_checkpoint=None, cadavre=cadavre) # sauvegarder la position du cadavre
+
         death_sound.play()
         debut_mort = pygame.time.get_ticks()
         duree_mort = 4500

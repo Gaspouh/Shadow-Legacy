@@ -10,7 +10,7 @@ from World.objets import Receptacle, Minerai, petit_sac, moyen_sac, grand_sac
 from Entities.boss_wolf_red import Red_Wolf
 from Entities.boss_gravelion import Gravelion
 from Core.save import get_chunks_params
-from Entities.npc_logic import Gordon_NPC, Forgeron
+from Entities.npc_logic import Gordon1_NPC, Gordon2_NPC, Forgeron
 
 TILE_SIZE = 32
 RENDU_CHUNCK = get_chunks_params() # pareil, mais pour les collisions et autres, la valeur c'est la taille d'un coté du carré (en tile) qui sont calculé
@@ -258,8 +258,10 @@ def create_map(tmx_data, fenetre):
 
         elif obj_type == "npc":
             name = obj.name
-            if name == "gordon":
-                pnj.append(Gordon_NPC(fenetre, x, y))
+            if name == "gordon1":
+                pnj.append(Gordon1_NPC(fenetre, x, y))
+            elif name == "gordon2":
+                pnj.append(Gordon2_NPC(fenetre, x, y))
             elif name == "forgeron":
                 pnj.append(Forgeron(fenetre, x, y))
 

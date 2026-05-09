@@ -129,7 +129,7 @@ class NPC_Logic():
                 screen.blit(font.render("NON", True, (255,255,255)), (screen_pos[0]+20, screen_pos[1]-52))
 
 
-class Gordon_NPC(NPC_Logic, VerticalAnimation):
+class Gordon1_NPC(NPC_Logic, VerticalAnimation):
     def __init__(self, fenetre, x, y):
         sprite_sheet = f'Assets/Npc/Gordon/idle.png'
         y -= 50  # faire monter le npc sur Y
@@ -142,19 +142,46 @@ class Gordon_NPC(NPC_Logic, VerticalAnimation):
             " salut toi, tu veux quoi ? ",
             " Un conseil, appuie sur E quand tu es assis sur un banc,",
             " tu pourras voir les Charms que tu possèdes et en équiper jusqu'a 3.",
+            " Aussi, lorsque tu meurs, n'oublie pas de recuperer tes orbes.",
             " Je vend des trucs si tu veux, jette un oeil au magasin !"
         ]
 
         self.leave_dialogue = [
             " Les charms permettent d'améliorer tes capacités ... ",
-            " Bon, à plus alors. "
+            " reviens quand tu auras assez d'argents "
         ]
 
         super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1, arrival_dialogue=self.arrival_dialogue, leave_dialogue=self.leave_dialogue)
         self.sell_charms = {
-            "attack_long_range": {"price": 125, "image": "Assets/charms/attack_long_range.png"},
-            "attack_speed": {"price": 100, "image": "Assets/charms/attack_speed.png"},
-            "jump_boost": {"price": 150, "image": "Assets/charms/jump_boost.png"},
+            "attack_speed": {"price": 100, "image": "Assets/charms/attack_speed.png"}
+        }
+        self.market_seller = charms_market  # appel de la fonction des charms
+
+class Gordon2_NPC(NPC_Logic, VerticalAnimation):
+    def __init__(self, fenetre, x, y):
+        sprite_sheet = f'Assets/Npc/Gordon/idle.png'
+        y -= 50  # faire monter le npc sur Y
+        nb_frames = 51
+        width = 256
+        height = 256
+        marge = 0
+        colonne = 0
+        self.arrival_dialogue = [
+            " ça fait longtemps que je t'attends,",
+            " je vois que tu as bien survecu, mais tu n'es pas encore pret.",
+            " j'ai de quoi t'aider, check ma boutique !"
+        ]
+
+        self.leave_dialogue = [
+            "On raconte qu'un boss que personne n'a osé affronter encore se trouve pas loin d'ici...",
+            "Bonne chance frr 🦾"
+        ]
+
+        super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1, arrival_dialogue=self.arrival_dialogue, leave_dialogue=self.leave_dialogue)
+        self.sell_charms = {
+            "attack_long_range": {"price": 275, "image": "Assets/charms/attack_long_range.png"},
+            "attack_speed": {"price": 150, "image": "Assets/charms/attack_speed.png"},
+            "jump_boost": {"price": 250, "image": "Assets/charms/jump_boost.png"},
         }
         self.market_seller = charms_market  # appel de la fonction des charms
 
