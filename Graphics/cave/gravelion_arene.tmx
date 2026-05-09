@@ -74,7 +74,7 @@
    <properties>
     <property name="obj_type" value="door"/>
     <property name="target_map" value="cave/cave.tmx"/>
-    <property name="target_spawn" value="boss_defeated"/>
+    <property name="target_spawn" value="boss_defeated2"/>
    </properties>
    <capsule/>
   </object>

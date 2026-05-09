@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="124" height="81" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="28">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="124" height="81" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="28">
  <tileset firstgid="1" source="Objects/Objects.tsx"/>
  <tileset firstgid="1025" source="color/colors.tsx"/>
  <tileset firstgid="1026" source="platforms_2/platforms_2.tsx"/>
@@ -391,35 +392,12 @@
     <property name="obj_type" value="decor"/>
    </properties>
   </object>
-  <object id="18" name="gordon" x="952.27" y="2414.14">
+  <object id="18" name="gordon2" x="952.27" y="2414.14">
    <properties>
     <property name="obj_type" value="npc"/>
    </properties>
    <polygon points="-11.3739,3.66412 -58.0071,15.1145 -78.4801,-17.8626 -51.1827,-49.4656 9.66784,-30.687 54.5949,-53.5877 97.2471,-21.9847 68.2436,17.8626 27.8661,-4.58015 27.2974,-238.168 -19.9044,-238.168"/>
   </object>
   <object id="20" name="Banc" gid="1886" x="734.108" y="2420" width="14.7847" height="33"/>
-  <object id="22" name="Petit Sac" x="588" y="2381.33" width="74.6667" height="49.3333">
-   <properties>
-    <property name="obj_type" value="petit_sac"/>
-   </properties>
-   <capsule/>
-  </object>
-  <object id="25" name="Moyen Sac" x="356" y="2382" width="74.6667" height="49.3333">
-   <properties>
-    <property name="obj_type" value="moyen_sac"/>
-   </properties>
-   <capsule/>
-  </object>
-  <object id="26" name="Grand Sac" x="118.667" y="2216.67" width="74.6667" height="49.3333">
-   <properties>
-    <property name="obj_type" value="grand_sac"/>
-   </properties>
-   <capsule/>
-  </object>
-  <object id="27" name="forgeron" x="2523.81" y="2400.84" width="66.0377" height="26.4151">
-   <properties>
-    <property name="obj_type" value="npc"/>
-   </properties>
-  </object>
  </objectgroup>
 </map>

@@ -51,7 +51,7 @@ class Coeur(Animation):
                 
         # on affiche un cœur vide si le cœur est mort
         elif self.state == "DEAD":
-           self.image = self.frames_droite[-1]  
+           self.image = self.frames_droite[-1] 
             
 class Monnaie:
     global orbs
@@ -280,3 +280,50 @@ class grand_sac(Sac_logic):
         y+=1
         super().__init__(x, y, orbs=25, image=image, life=3)
         self.rect = self.image.get_rect(topleft=(x, y))
+
+
+
+class Cadavre:
+    """ permet au  jouerr de recuperer ses orbes apres etre mort"""
+    def __init__(self, x, y, orbs, map_name):
+        self.orbs = orbs
+        self.alive = True
+        self.image = pygame.image.load("Assets/Player/dead_inventory.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (50, 50))
+        self.rect = self.image.get_rect(midbottom=(x, y))
+        self.font = pygame.font.SysFont("Arial", 16, bold=True)
+        self.map_name = map_name
+
+    def update(self, player):
+        if self.alive and self.rect.colliderect(player.rect):
+            from Core.save import SAVE_FILE # imoport ici sinon ça bug a cause du circular import
+            import json
+            Monnaie.add_orbs(self.orbs) # recupere ses orbs
+            self.alive = False
+            # maj du json, on supprime le cadavre (le met a none)
+            with open(SAVE_FILE, "r") as f:
+                data = json.load(f)
+            data["cadavre"] = None
+            with open(SAVE_FILE, "w") as f:
+                json.dump(data, f, indent=4)
+
+    def draw(self, screen, camera=None):
+        if not self.alive:
+            return
+
+        # Détermination de la position d'affichage
+        if camera:
+            pos = camera.apply(self.rect)
+        else:
+            pos = self.rect
+
+        # Dessin de l'image du cadavre
+        screen.blit(self.image, pos)
+
+        # Préparation et affichage du texte (nombre d'orbes)
+        texte = self.font.render(str(self.orbs), True, (255, 255, 255))
+        # Calcul des coordonnées pour centrer le texte au-dessus
+        texte_x = pos.centerx - (texte.get_width()//2)
+        texte_y = pos.top -20
+        
+        screen.blit(texte, (texte_x, texte_y))
