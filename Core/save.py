@@ -125,6 +125,14 @@ def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None, cadav
     safe_map_name = map_name.lower() if map_name else "swamp"
     tmx_file = MAP_PATHS.get(safe_map_name, MAP_PATHS["swamp"])
 
+    if os.path.exists(SAVE_FILE): # pour ne pas écraser les objets ramassés, on vérifie d'abord ce qui est déjà dans le json
+        with open(SAVE_FILE, "r") as f:
+            old_data = json.load(f)
+
+        taken_objects = old_data.get("taken_objects", [])
+    else:
+        taken_objects = []
+
     data = {    # on modifiera perso.py, abilities.py, et autres fichiers pour qu'ils dependent du json et pas l'inverse
         # player
         "current_map_name": map_name,
@@ -162,6 +170,10 @@ def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None, cadav
             for cp in checkpoints
         ],
         "last_checkpoint": index_last_checkpoint,
+        
+        # objets ramassés
+        "taken_objects": taken_objects,
+
         "cadavre": {
             "map": cadavre.map_name,
             "x": cadavre.rect.centerx,
