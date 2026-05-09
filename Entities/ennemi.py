@@ -18,6 +18,8 @@ class Ennemi(Animation, PhysicsEntity):
         self.can_receive_knockback = True
         self.apply_knockback = True
         self.is_knocked_back = False
+        self.animation_mort = None
+        self.dead = False
 
         #Position initiale (pour le reset)
         self.position_initiale = pygame.math.Vector2(x, y)
@@ -78,28 +80,35 @@ class Ennemi(Animation, PhysicsEntity):
         if self.pv_ennemi <= 0:
             self.pv_ennemi = 0
             self.alive = False
-    
+
     def mort(self):
         fin = False
-        
         if not self.alive and not self.dead:
             self.dead = True
-            self.animation_mort.gestion_animation() # Jouer l'animation de mort
-            Monnaie.add_orbs(self.reward)    # la reward
+            Monnaie.add_orbs(self.reward)
+
+        # Si l'ennemi est mort
         if self.dead:
-            image = self.animation_mort.gestion_animation()
-            if self.direction == 1:
-                self.image = self.animation_mort.frames_droite[int(self.animation_mort.index_image)]
-            else:
-                self.image = self.animation_mort.frames_gauche[int(self.animation_mort.index_image)]
-                
-            if self.animation_mort.index_image >= len(self.animation_mort.frames_droite) - 1:
-                    fin = True
 
-            return fin  # True quand l'animation est terminée
+            # Cas avec animation de mort
+            if self.animation_mort:
+                self.animation_mort.gestion_animation()
 
-        return False  # encore en vie
+                if self.direction == 1:
+                    self.image = self.animation_mort.frames_droite[int(self.animation_mort.index_image)]
+                else:
+                    self.image = self.animation_mort.frames_gauche[int(self.animation_mort.index_image)]
 
+                # Fin animation
+                if self.animation_mort.index_image >= len(self.animation_mort.frames_droite) - 1:
+                    return True
+
+                return False
+
+            # Cas sans animation de mort
+            return True
+        return False
+    
 class Projectile:
     def __init__(self, x, y, target_x, target_y, speed, width, height, damage, image=None, \
                   gravity=0.4, lifetime=9999, should_disappear_on_contact=True, use_gravity=False):
@@ -255,7 +264,6 @@ class Araignee(Patrouilleur):
         super().__init__(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 5, 3, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1, reward=4)
 
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 7, 62, 50, 27, 7, scale=1)
-        self.dead = False
         self.death_sound = pygame.mixer.Sound("Assets/Sounds/ennemi_death.mp3")
         self.death_sound.set_volume(0.2)
         self.death_sound_played = False
@@ -266,13 +274,6 @@ class Araignee(Patrouilleur):
             self.death_sound_played = True
         return super().mort()
 
-class Scorpion(Patrouilleur):
-    def __init__(self, fenetre, x, y):
-        super().__init__(fenetre, x, y, 'Assets/Images/scorpion.png', 8, 64, 64, 0, 0, 4, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1, reward=5)
-
-        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
-        self.dead = False
-
 class Volant(Ennemi):
     def __init__(self, fenetre, x, y):
         
@@ -282,8 +283,6 @@ class Volant(Ennemi):
         self.image = self.frames_droite[0]
         self.use_gravity = False
         self.friction = -0.3
-        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
-        self.dead = False
         self.death_sound = pygame.mixer.Sound("Assets/Sounds/ennemi_death.mp3")
         self.death_sound.set_volume(0.2)
         self.death_sound_played = False
@@ -326,9 +325,7 @@ class Tourelle(Ennemi):
         # On applique les caractéristique de l'ennemi débutant a la tourelle
         super().__init__(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 70, 63, 0, 0, 1, 1.7, {"damage": 1, "knockback_x": 80, "knockback_y": -4}, scale=1, reward=0)
 
-        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
         self.animation_tir = Animation(fenetre, x, y, 'Assets/Images/tourelle.png', 8, 70, 63, 0, 0, scale=1)
-        self.dead = False
         self.use_gravity = False
         self.can_receive_knockback = False
         self.apply_knockback = False
@@ -408,9 +405,7 @@ class Fighter(Ennemi):
         
         # On applique les caractéristique de l'ennemi débutant a la tourelle
         super().__init__(fenetre, x, y, 'Assets/Images/fighter.png', 8, 62, 70, 3, 0, 10, 1.5, {"damage": 2, "knockback_x": 40, "knockback_y": -4}, scale=1, reward=5)
-        self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/insecte_sheet2.png', 8, 70, 50, 13, 7, scale=1)
         self.animation_attaque = Animation(fenetre, x, y, 'Assets/Images/attaque_fighter.png', 4, 83, 76, 0, 0, scale=1)
-        self.dead = False
         self.use_gravity = True
         self.cooldown = 0
         self.attacking = False
@@ -424,21 +419,26 @@ class Fighter(Ennemi):
 
         if self.cooldown > 0: # Gérer le cooldown pour limiter la fréquence des attaques
             self.cooldown -= 1
-        # Calculer la direction vers le joueur
-        if player_rect.x > self.rect.x and abs(player_rect.centerx - self.rect.centerx) > 80:
-            self.direction = 1 # Aller vers la droite
-        elif player_rect.x < self.rect.x and abs(player_rect.centerx - self.rect.centerx) > 80:
-            self.direction = -1 # Aller vers la gauche
-        else:
-            self.attaque() # Attaquer si proche du joueur
-        
-        if self.is_knocked_back:
-            # Appliquer la physique (déplacements et collisions) pendant le knockback
-            self.physics_update(platforms)
-            if self.on_ground and abs(self.velocity.x) < 0.5:
-                self.is_knocked_back = False
-        else:
-            self.velocity.x = self.vitesse_deplacement * self.direction
+        if self.dans_trigger(player_rect, trigger_range=500):
+            # Calculer la direction vers le joueur
+            if player_rect.x > self.rect.x:
+                self.direction = 1 # Aller vers la droite
+            elif player_rect.x < self.rect.x:
+                self.direction = -1 # Aller vers la gauche
+
+            if abs(player_rect.centerx - self.rect.centerx) < 80 and abs(player_rect.centery - self.rect.centery) < 50:  # Si le joueur est à portée d'attaque
+                self.attaque() # Attaquer si proche du joueur
+            
+            if self.is_knocked_back:
+                # Appliquer la physique (déplacements et collisions) pendant le knockback
+                self.physics_update(platforms)
+                if self.on_ground and abs(self.velocity.x) < 0.5:
+                    self.is_knocked_back = False
+            else:
+                self.velocity.x = self.vitesse_deplacement * self.direction
+                self.physics_update(platforms)
+        else :
+            self.velocity.x = 0
             self.physics_update(platforms)
         
         if self.attacking:
@@ -474,7 +474,6 @@ class Chargeur(Ennemi):
         super().__init__(fenetre, x, y, 'Assets/Images/chargeur.png', 8, 82, 58, 3, 0, 3, 3, {"damage": 1, "knockback_x": 150, "knockback_y": -4}, scale=1, reward=8)
 
         self.animation_mort = Animation(fenetre, x, y, 'Assets/Images/chargeur_dead.png', 8, 82, 58, 3, 0, scale=1)
-        self.dead = False
         self.charge_timer = 0
         self.attacking = False
         self.duree_charge = 0
@@ -501,19 +500,23 @@ class Chargeur(Ennemi):
                 self.charge_timer = 0
 
         else:
+         if self.dans_trigger(player_rect, trigger_range=400) and not self.attacking:
             # Calculer la direction vers le joueur
             if player_rect.x > self.rect.x:
                 self.direction = 1 # Aller vers la droite
             else:
                 self.direction = -1 # Aller vers la gauche
                  
-            if abs(player_rect.centerx - self.rect.centerx) < 300:  # Si le joueur est à portée de charge
+            if abs(player_rect.centerx - self.rect.centerx) < 300 and abs(player_rect.centery - self.rect.centery) < 200:  # Si le joueur est à portée de charge
                 self.charge_timer += 1
                 if self.charge_timer >= 70:  # Temps de charge avant de se lancer
                     self.duree_charge = 90  # Durée pendant laquelle le chargeur reste en mode charge
                     self.attacking = True
 
             self.velocity.x = self.vitesse_deplacement * self.direction  # Se déplacer normalement
+
+         else:
+            self.velocity.x = 0  # Rester immobile si le joueur est hors de portée
 
         # Appliquer la physique (déplacements et collisions)
         self.physics_update(platforms)

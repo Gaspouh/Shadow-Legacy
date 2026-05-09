@@ -174,7 +174,7 @@ def draw_luciole(surface, x, y, luciole, now):
 
 def intro(fenetre):
     clock = pygame.time.Clock()
-    font = pygame.font.Font(None, 60)
+    font = pygame.font.Font("Assets/Font/Cinzel.ttf", 40)
     texte = ["Le monde est tombé dans l’ombre", "Les royaumes ont disparu", "et la lumière s’est éteinte", "Il ne reste que des ruines"\
               ,"et un silence sans fin", "Mais une lueur persiste encore", "Et cette lueur, c’est toi", "va jeune héros et sauve le monde de l'obscurité"]
 
@@ -198,19 +198,13 @@ def intro(fenetre):
         fenetre.fill((0,0,0))
 
         for i, ligne in enumerate(texte):
-            text_surface = font.render(ligne, True, (200, 200, 200), (255, 0, 0))
+            text_surface = font.render(ligne, True, (180, 180, 200))
             text_rect = text_surface.get_rect(center=(fenetre.get_width()//2, y_offset + i * 80))
 
             fenetre.blit(text_surface, text_rect)
         
-        #fenetre.blit(
-        #    pygame.transform.scale(fenetre, fenetre.get_size()),
-        #    (0, 0)
-        #)
-        
         pygame.display.update()
         clock.tick(60)
-
 
         if temps > duration :
             running = False

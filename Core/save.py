@@ -48,12 +48,12 @@ MAP_PARALLAX_LAYERS = {
 
 # spawns
 DEFAULT_SPAWNS = {
-    "swamp":{"x": 100, "y": 100},
-    "terre_aride": {"x": 10,  "y": 1200},
-    "cave": {"x": 100, "y": 100},
-    "forest": {"x": 100, "y": 100},
-    "parcours": {"x": 500, "y": 1000},
-    "hollow_earth": {"x": 500, "y": 2450}
+    "swamp":{"x": 3, "y": 568},
+    "terre_aride": {"x": 50,  "y": 1197},
+    "cave": {"x": 46, "y": 180},
+    "forest": {"x": 42, "y": 600},
+    "parcours": {"x": 300 , "y": 1000},
+    "hollow_earth": {"x": 135, "y": 2290}
 }
 # Position de spawn par défaut selon la map (si aucun checkpoint activé)
 
@@ -119,11 +119,19 @@ def get_player_found_charms():
     return data.get("player", {}).get("found_charms", None)
 
 
-def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None):
+def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None, cadavre=None):
     # Sauvegarder l'état du jeu dans un fichier json
     spawn = get_spawn_from_checkpoints(checkpoints, map_name)
     safe_map_name = map_name.lower() if map_name else "swamp"
     tmx_file = MAP_PATHS.get(safe_map_name, MAP_PATHS["swamp"])
+
+    if os.path.exists(SAVE_FILE): # pour ne pas écraser les objets ramassés, on vérifie d'abord ce qui est déjà dans le json
+        with open(SAVE_FILE, "r") as f:
+            old_data = json.load(f)
+
+        taken_objects = old_data.get("taken_objects", [])
+    else:
+        taken_objects = []
 
     data = {    # on modifiera perso.py, abilities.py, et autres fichiers pour qu'ils dependent du json et pas l'inverse
         # player
@@ -161,10 +169,24 @@ def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None):
             }
             for cp in checkpoints
         ],
-        "last_checkpoint": index_last_checkpoint
+        "last_checkpoint": index_last_checkpoint,
+        
+        # objets ramassés
+        "taken_objects": taken_objects,
+
+        "cadavre": {
+            "map": cadavre.map_name,
+            "x": cadavre.rect.centerx,
+            "y": cadavre.rect.bottom,
+            "orbs": cadavre.orbs
+        } if cadavre and cadavre.alive else None    # Verifie que le cadabre existe
         
     }
-
+    if cadavre is None:
+        with open(SAVE_FILE, "r") as f:
+            existing = json.load(f)
+        data["cadavre"] = existing.get("cadavre")
+        
     with open(SAVE_FILE, "w") as f:
         json.dump(data, f, indent=4)
     print("saved")
@@ -174,7 +196,7 @@ def charger(player, checkpoints, map):
     """Pour load le json et mettre à jour les données du joueur"""
 
     if not os.path.exists(SAVE_FILE):
-        return pygame.math.Vector2(DEFAULT_SPAWNS[map]["x"], DEFAULT_SPAWNS[map]["y"]) # si y'a pas de save : spawn par défaut
+        return pygame.math.Vector2(DEFAULT_SPAWNS[map]["x"], DEFAULT_SPAWNS[map]["y"]), None # si y'a pas de save : spawn par défaut + pas de cadavre
 
     with open(SAVE_FILE, "r") as f:
         data = json.load(f)
@@ -213,13 +235,15 @@ def charger(player, checkpoints, map):
 
     last_checkpoint_index = data.get("last_checkpoint")
     if last_checkpoint_index is not None and last_checkpoint_index < len(checkpoints):
-        # Renvoie le dernier banc avec la pos des coordonnées
-        return pygame.math.Vector2(checkpoints[last_checkpoint_index].rect.x, checkpoints[last_checkpoint_index].rect.y)
+        # Renvoie le dernier banc avec la pos des coordonnées et le cadavre
+        return pygame.math.Vector2(checkpoints[last_checkpoint_index].rect.x, checkpoints[last_checkpoint_index].rect.y), data.get("cadavre")
 
     # On recalcule depuis les checkpoints rechargés (pour etre sur)
     spawn_point = get_spawn_from_checkpoints(checkpoints, map)
-    return spawn_point
 
+    # Cadavre
+    cadavre_data = data.get("cadavre")
+    return spawn_point, cadavre_data
 
 def supprimer_sauvegarde():
     """Supprime la sauvegarde pour une nouvelle game par exemple"""

@@ -1,7 +1,6 @@
 import pygame
 from Visual.sprite_sheet import Animation
 
-#Images toutes mises a insecte_sheet2.png pour éviter les problemes de chemin d'acces impossible
 class Rectangular_Obstacle():
     def __init__(self, x, y, size, damage, image_path, hitbox_size_mult=(1,1), hitbox_offset=(0,0), direction="up", animation=False):
 

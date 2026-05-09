@@ -657,6 +657,10 @@ class Golem(Boss):
         if not self.death_sound_played:
             self.death_sound.play()
             self.death_sound_played = True
+    
+    def mort(self):
+        self.alive = False
+        return True
 
     def draw(self, fenetre, camera):
         if not self.alive:

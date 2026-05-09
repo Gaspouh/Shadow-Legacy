@@ -112,12 +112,21 @@ def menu(fenetre, player, checkpoints, current_map_name):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if bouton_reprendre.collidepoint(event.pos):
                     return False  # Reprendre le jeu
-                #elif bouton_options.collidepoint(event.pos):
-                    
+                
+                elif bouton_options.collidepoint(event.pos):
+                    font = pygame.font.Font("Assets/Font/Cinzel.ttf", 30)
+                    texte = ["Contrôles :", "ZQSD pour se déplacer", "Espace pour sauter", "Z pour interagir", "E pour l'inventaire quand sur banc", "echapp pour le menu pause",\
+                             "F pour les attaques à distance", "O pour le soin",]
+                    for i, ligne in enumerate(texte):
+                        text_surface = font.render(ligne, True, (180, 180, 200))
+                        text_rect = text_surface.get_rect(center=(fenetre.get_width()//2 - 400, i * 80 + 100))
+                        fenetre.blit(text_surface, text_rect)
+                    pygame.display.update()
+
                 elif bouton_quitter.collidepoint(event.pos):
                     sauvegarder(player, checkpoints, current_map_name) # Sauvegarder avant de quitter
-                    return "QUIT"   # au lieu de mainloop.continuer = False
-
+                    return "QUIT"  # Quitter le jeu
+                
         if bouton_reprendre.collidepoint(souris_pos):
             r1, g1, b1 = 255, 255 , 255
         else :
@@ -142,23 +151,39 @@ def menu(fenetre, player, checkpoints, current_map_name):
 
 
 def sit_on_bench(fenetre, player):
-    """ Ouvre l'inventaire lorsque le joueur est assis sur un banc + gestion des charms equippés et drag """
+    """ Drag and drop : Ouvre l'inventaire lorsque le joueur est assis sur un banc + gestion des charms equippés et drag (max 3). Systeme de slot en gros."""        
     open_inventory = True
     with open(SAVE_FILE, "r") as f:
         data = json.load(f)
+
+    # Equippement
+    equipped_charms_data = data.get("player", {}).get("equipped_charms", {})
+    equip_charms_rect =  pygame.Rect(fenetre.get_width() - fenetre.get_width() // 3.2, fenetre.get_height() - fenetre.get_height() // 2.3, 450, 300)   # dessiner un carré pour emplacement des charms equipés
+    # écrire au dessus "Equipement" pour indiquer que c'est la partie equipement
+    font = pygame.font.SysFont("camela", 30)
+    equipement_text = font.render("Charms équipés :", True, (255, 255, 255))
+    # Trouvés
     found_charms_data = data.get("player", {}).get("found_charms", {})
     assets_path = charms_images()
     charms_afficher = []    # Initialisation des charms trouvé affichable
-    decalage_x = 100 # valeur test pour apres pouvroi aligner les charms
+    charms_equiper = []     # pareil
+    decalage_x = 80    # aligner les charms found
+    decalage_found_x = equip_charms_rect.x + 20
 
-    for name, active in found_charms_data.items():  # Pour récupérer valeur et clé de chaque charm
+    for name, active in found_charms_data.items():  # Pour récupérer valeur et clé de chaque charm et les placer
         if active == True:  # Si charm trouvé c'est True, il est affiché alors
             if name in assets_path:
                 image_1 = pygame.image.load(assets_path[name]).convert_alpha()   #Compare avec la liste de path d'image, pour récuperer l'asset
                 image = pygame.transform.scale(image_1, (image_1.get_width()/1.8, image_1.get_height()/1.8))
-                rect = image.get_rect(topleft=(decalage_x, 200))
-                charms_afficher.append({"img": image, "rect": rect, "name": name})
-                decalage_x += 50 + image.get_width()
+                if equipped_charms_data.get(name) == True:  # recupere les charms équipés
+                    rect = image.get_rect(topleft=(decalage_found_x, equip_charms_rect.y + 20))
+                    charms_equiper.append({"img": image, "rect": rect, "name": name})
+                    decalage_found_x += 40 + image.get_width() # prochain charm a coté
+
+                else:   # sinon il est on affiche que les found, avec meme logique
+                    rect = image.get_rect(topleft=(decalage_x, 200))
+                    charms_afficher.append({"img": image, "rect": rect, "name": name})
+                    decalage_x += 50 + image.get_width()
 
     j = player.receptacles_total // 3 # pour afficher les receptacles en les regroupant par 3 dans l'inventaire
 
@@ -207,6 +232,7 @@ def sit_on_bench(fenetre, player):
     pos_x = fenetre.get_width() // 2 - inventaire_pic.get_width() // 2
     pos_y = fenetre.get_height() // 2 - inventaire_pic.get_height() // 2
 
+
     pygame.display.update()
 
     while open_inventory:
@@ -225,7 +251,7 @@ def sit_on_bench(fenetre, player):
             # Gestion du clic
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:    # le clic gauche
-                    for charm in charms_afficher:
+                    for charm in charms_afficher + charms_equiper: # cherche les 2 list
                         if charm["rect"].collidepoint(mouse_pos):
                             charm_selected = charm  # le charm selectionné est le charm où la pos de la souris y est
                             # ajout d'un delta pour calculer la différence entre la ou on clic et la ou se situe le rect :
@@ -233,9 +259,33 @@ def sit_on_bench(fenetre, player):
                             offset_y = charm["rect"].y- mouse_pos[1]
                             break
                                     
-            # si relachement il n'y a plus de charme selectionné
+            # si relachement il n'y a plus de charme selectionné, detecte le drop
             if event.type == pygame.MOUSEBUTTONUP:
-                charm_selected = None
+                if charm_selected:
+                    # si charms selectionné et dans la zone equipperment des charms (drag and drop)
+                    if equip_charms_rect.collidepoint(mouse_pos) and charm_selected["name"] not in [i["name"] for i in charms_equiper]: # i pour verifier que le charm appartient pas deja a ceux equipés
+                        if len(charms_equiper) < 2:    # maximum 3 charms équipés
+                            charm_selected["rect"].topleft = (equip_charms_rect.x +20+len(charms_equiper) *(charm_selected["img"].get_width() + 20), equip_charms_rect.y + 20)
+                            charms_equiper.append(charm_selected)
+                            charms_afficher.remove(charm_selected)  # remplace le charm
+                            # save les charms equipés
+                            with open(SAVE_FILE, "r") as f:
+                                d = json.load(f)
+                            d["player"]["equipped_charms"][charm_selected["name"]] = True
+                            with open(SAVE_FILE, "w") as f:
+                                json.dump(d, f, indent=4)
+
+                    elif not equip_charms_rect.collidepoint(mouse_pos) and charm_selected in charms_equiper:
+                        # a l'inverse, si on enleve un charm de ceux equipés, il va ds ceux trouvés
+                        charms_equiper.remove(charm_selected)
+                        charm_selected["rect"].topleft = (decalage_x, 200)
+                        charms_afficher.append(charm_selected)
+                        decalage_x += 50 + charm_selected["img"].get_width()
+                        with open(SAVE_FILE, "r") as f: d = json.load(f)
+                        d["player"]["equipped_charms"][charm_selected["name"]] = False
+                        with open(SAVE_FILE, "w") as f: json.dump(d, f, indent=4)
+                        
+                charm_selected = None   # relachement (drop)
             
         # gestion deplacement quand un charm est selectionné
         if charm_selected != None:
@@ -245,12 +295,17 @@ def sit_on_bench(fenetre, player):
         # Affichage
         fenetre.blit(game_bg, (0, 0))   # jeu en fond
         fenetre.blit(noir_transparent, (0, 0))
+        fenetre.blit(equipement_text, (equip_charms_rect.x + equip_charms_rect.width // 2 - equipement_text.get_width() // 2, equip_charms_rect.y - 40))
         fenetre.blit(inventaire_pic, inventaire_rec)
 
-        # dessiner chaque charms possédés
+        # dessiner chaque charms possédés et équipés
         for charm in charms_afficher:
             fenetre.blit(charm["img"], charm["rect"])
+        for charm in charms_equiper:
+            fenetre.blit(charm["img"], charm["rect"])
 
+        
+        pygame.draw.rect(fenetre, (255, 255, 255), equip_charms_rect, 3)
         pygame.display.update()
 
 
