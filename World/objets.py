@@ -233,7 +233,7 @@ class Sac_logic:
         self.hit = False
         self.taken = False
         
-    def update(self, player, objects=None):
+    def update(self, player, objects=None, current_map_name=None, data=None):
         # gestion de collision avc le joueur
         if player.is_attacking and player.attack_rect.colliderect(self.rect):
             if not self.hit:
