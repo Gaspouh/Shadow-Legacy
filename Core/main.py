@@ -105,6 +105,20 @@ tir_tourelle = []
 hitstop_until = -1 # Temps jusqu'auquel le hitstop est actif (initialisé à une valeur passée)
 shake_amount = 0 # Intensité du screen shake
 
+# Charger les objets ramassés depuis la save
+with open(SAVE_FILE, "r") as f:
+    data = json.load(f)
+
+taken_objects = data.get("taken_objects", [])
+for obj in objects:
+    objet_data = {
+        "map": current_map_name,
+        "x": obj.rect.x,
+        "y": obj.rect.y
+    }
+    if objet_data in taken_objects:
+        obj.taken = True
+
 #Loop
 continuer = True
 pause = False
@@ -325,7 +339,7 @@ while continuer:
                     game_fenetre.blit(deco.image, camera.apply(deco.rect))
     
             for obj in objects[:]:
-                obj.update(player, objects)# Mettre à jour les réceptacles
+                obj.update(player, objects, current_map_name, data)# Mettre à jour les objets
                 if not obj.taken:# Afficher les objets qui n'ont pas été pris
                     game_fenetre.blit(obj.image, camera.apply(obj.rect))
                 obj.draw_big(game_fenetre, player)# Afficher les objets pris en grand pour indiquer qu'ils ont été ramassés
@@ -418,6 +432,19 @@ while continuer:
                 door_collided = None
                 player.on_ground=False
                 wait = True
+                # Charger les objets ramassés depuis la save
+                with open(SAVE_FILE, "r") as f:
+                    data = json.load(f)
+
+                taken_objects = data.get("taken_objects", [])
+                for obj in objects:
+                    objet_data = {
+                        "map": current_map_name,
+                        "x": obj.rect.x,
+                        "y": obj.rect.y
+                    }
+                    if objet_data in taken_objects:
+                        obj.taken = True
 
         if wait and player.on_ground:
             wait = False
