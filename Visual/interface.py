@@ -112,12 +112,21 @@ def menu(fenetre, player, checkpoints, current_map_name):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if bouton_reprendre.collidepoint(event.pos):
                     return False  # Reprendre le jeu
-                #elif bouton_options.collidepoint(event.pos):
-                    
+                
+                elif bouton_options.collidepoint(event.pos):
+                    font = pygame.font.Font("Assets/Font/Cinzel.ttf", 30)
+                    texte = ["Contrôles :", "ZQSD pour se déplacer", "Espace pour sauter", "Z pour interagir", "E pour l'inventaire quand sur banc", "echapp pour le menu pause",\
+                             "F pour les attaques à distance", "O pour le soin",]
+                    for i, ligne in enumerate(texte):
+                        text_surface = font.render(ligne, True, (180, 180, 200))
+                        text_rect = text_surface.get_rect(center=(fenetre.get_width()//2 - 400, i * 80 + 100))
+                        fenetre.blit(text_surface, text_rect)
+                    pygame.display.update()
+
                 elif bouton_quitter.collidepoint(event.pos):
                     sauvegarder(player, checkpoints, current_map_name) # Sauvegarder avant de quitter
-                    return "QUIT"   # au lieu de mainloop.continuer = False
-
+                    return "QUIT"  # Quitter le jeu
+                
         if bouton_reprendre.collidepoint(souris_pos):
             r1, g1, b1 = 255, 255 , 255
         else :
