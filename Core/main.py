@@ -151,7 +151,7 @@ while continuer:
                         if bot.is_speaking:
                             pnj_en_train_de_parler = True
                             break
-                        else:
+                    if not pnj_en_train_de_parler: # Si on n'est pas en train de parler à un PNJ, on attaque normalement
                             # faire attaquer le joueur
                             player.press_attack()
 

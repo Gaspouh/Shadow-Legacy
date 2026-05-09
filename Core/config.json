@@ -9,7 +9,7 @@
         "max_speed": 10,
         "speed": 2.5,
 
-        "attack": 10,
+        "attack": 1,
         "attack_cooldown": 350,
         "attack_duration": 240,
         "attack_knockback_x": 80,

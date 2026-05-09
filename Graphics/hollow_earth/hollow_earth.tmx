@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="124" height="81" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="27">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="124" height="81" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="28">
  <tileset firstgid="1" source="Objects/Objects.tsx"/>
  <tileset firstgid="1025" source="color/colors.tsx"/>
  <tileset firstgid="1026" source="platforms_2/platforms_2.tsx"/>
@@ -415,6 +415,11 @@
     <property name="obj_type" value="grand_sac"/>
    </properties>
    <capsule/>
+  </object>
+  <object id="27" name="forgeron" x="2523.81" y="2400.84" width="66.0377" height="26.4151">
+   <properties>
+    <property name="obj_type" value="npc"/>
+   </properties>
   </object>
  </objectgroup>
 </map>
