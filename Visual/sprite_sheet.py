@@ -4,11 +4,13 @@ class Animation:
     def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, scale):
         self.ecran = fenetre
         self.scale = scale
+        self.fin = False
 
         # Charger une image d'ennemi
         sheet = pygame.image.load(sprite_sheet).convert_alpha()
         frames_droite = []
         frames_gauche = []
+        
         for i in range(nb_frames): 
             # stocker les frames d'animation dans des listes pour la droite et la gauche
             frame = pygame.Surface((width, height), pygame.SRCALPHA)
@@ -47,16 +49,14 @@ class Animation:
             return self.image
     
     def gestion_animation_once(self):
-        self.vitesse_animation = 0.2
-        fin = False
         self.index_image += self.vitesse_animation
 
         if self.index_image >= len(self.frames_droite) - 1:
             self.index_image = len(self.frames_droite) - 1  # Rester sur la dernière frame
-            fin = True
+            self.fin = True
 
         self.image = self.frames_droite[int(self.index_image)]
-        return self.image, fin  # Retourner le bool fin pour indiquer si l'animation est terminée
+        return self.image, self.fin  # Retourner le bool fin pour indiquer si l'animation est terminée
     
 
 # 2eme classe pour d'autres types de spritesheet

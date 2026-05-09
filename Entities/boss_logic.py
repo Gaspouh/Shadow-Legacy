@@ -290,6 +290,7 @@ class Boss(Ennemi):
         super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data, scale=1)
         
         self.can_receive_knockback = False # Pas de recul pour les boss
+        self.sprite_inverted = False
         self.combat_lance = False
         self.dead = False #pour l'animation de mort
 
@@ -345,7 +346,10 @@ class Boss(Ennemi):
         self.state = new_state
         self.state_timer = pygame.time.get_ticks()
         self.atk_spawned = False
-
+        if self.current_anim in self.anims:
+            self.anims[self.current_anim].index_image = 0.0  # Réinitialiser l'animation à chaque changement d'état
+            self.anims[self.current_anim].fin = False  # Réinitialiser le flag de fin d'animation
+    
     def face_player(self, player_rect):
         if player_rect.centerx > self.rect.centerx:
             self.direction = 1
@@ -377,14 +381,14 @@ class Boss(Ennemi):
 
         index = int(anim.index_image)
         
-        if self.direction == 1 :
+        if self.direction == 1 and not self.sprite_inverted or self.direction != 1 and self.sprite_inverted:
             self.image = anim.frames_droite[index]
         else:
             self.image = anim.frames_gauche[index]
 
     def anim_over(self):
-        # Vrai si l'index de l'animation actuelle a bouclé (retourné à 0 après avoir atteint la fin)
-        return self.anims[self.current_anim].index_image < self.anims[self.current_anim].vitesse_animation
+        anim = self.anims[self.current_anim]
+        return anim.fin
     
     def speed(self, valeur_base, is_proj=False):
         # Augmente la vitesse de déplacement et d'animation en fonction de la phase
@@ -406,9 +410,9 @@ class Boss(Ennemi):
         self.hitboxs.append(zone)
         return zone
 
-    def spawn_projectile(self, target_x, target_y, speed, width, height, damage, offset_x, offset_y, lifetime=3000, should_disappear_on_contact=True):
+    def spawn_projectile(self, target_x, target_y, speed, width, height, damage, offset_x, offset_y, gravity=0.4, lifetime=3000, should_disappear_on_contact=True):
         projectile = Projectile(self.rect.centerx + offset_x, self.rect.centery + offset_y,
-                                 target_x, target_y, speed, width, height, damage, lifetime, should_disappear_on_contact)
+                                 target_x, target_y, speed, width, height, damage, gravity, lifetime, should_disappear_on_contact)
         self.hitboxs.append(projectile)
 
     def update_hitbox(self, platforms, limite_rect):

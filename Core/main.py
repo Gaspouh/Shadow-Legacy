@@ -65,7 +65,7 @@ pnj= map_manager.pnj
 
 special_surfaces = [sp.surface for sp in special_platforms if sp.surface is not None]
 
-liste_entites = map_manager.spawn_entities(fenetre)
+liste_entites = map_manager.spawn_entities(fenetre, MAP_RECT)
 
 # optimisations
 repndu_visible = ... # defini dans la boucle. optimisation du rendu pour blit dans la caméra
@@ -196,7 +196,7 @@ while continuer:
                 if isinstance(e, Gordon_NPC):
                     e.update(player.rect, player, event=event)
                 elif hasattr(e, "update"):
-                    e.update(player.rect, player, e_proches)
+                    e.update(player.rect, player, platforms)
 
                 if not e.alive:
                     fin = e.mort()
@@ -206,7 +206,6 @@ while continuer:
 
                 if hasattr(e, "patrouille"):
                     e.patrouille(platforms)
-
                 
                 if hasattr(e, "poursuite"): #pour les volants
                     e.poursuite(player.rect, platforms)
@@ -219,9 +218,6 @@ while continuer:
 
                 if hasattr(e, "charge"): #pour les chargeurs
                     e.charge(player.rect, platforms)
-
-                if hasattr(e, "update"):
-                    e.update(player.rect, player, platforms) 
 
                 if e.rect.colliderect(player.rect):
                     hitstop_duration, shake_amount = player.take_damage(e.attack_data, e.rect, e) # Appliquer les effets de recul au joueur si un ennemi le touche
@@ -382,6 +378,14 @@ while continuer:
                 current_map_name = TMX_TO_FOLDER.get(os.path.basename(current_map_path))
                 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", door_collided.target_map))
                 spawn = map_manager.get_spawn(door_collided.target_spawn)
+                
+                if spawn is None:
+                    print(f"ERROR: Spawn point '{door_collided.target_spawn}' not found!")
+                    spawn = list(map_manager.spawnpoints.values())[0] if map_manager.spawnpoints else None
+                    if spawn is None:
+                        print("CRITICAL: No spawn points in this map!")
+                        door_collided = None
+                        continue
 
                 platforms = map_manager.platforms
                 chunks = chunck_zone(platforms)
@@ -399,7 +403,7 @@ while continuer:
                 camera.update_map_size(MAP_WIDTH, MAP_HEIGHT)
                 layers = create_parallax_layers(os.path.join(Chemin_absolu, "Graphics", current_map_name), nb_layers=map_manager.nb_parallax_layers, fenetre=game_fenetre) # créer les layers de parallax pour la map actuelle
 
-                liste_entites = map_manager.spawn_entities(fenetre)
+                liste_entites = map_manager.spawn_entities(fenetre, MAP_RECT)
                 spawn = map_manager.get_spawn(door_collided.target_spawn)
 
                 player.position = spawn.position

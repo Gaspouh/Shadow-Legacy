@@ -1,6 +1,7 @@
 import os
 import pygame
 import pytmx
+from Entities.boss_demon_king import Demon_King
 from Entities.boss_wolf_black import Black_Wolf
 from World.traps import *
 from Entities.ennemi import Araignee, Volant, Fighter, Chargeur, Tourelle
@@ -93,8 +94,9 @@ class Map_Manager:
         background_folder = os.path.join(os.path.dirname(path), "Background") 
         
         self.nb_parallax_layers = len([fichier for fichier in os.listdir(background_folder) if fichier != "0.png"])
-    def spawn_entities(self, fenetre):
-        araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf, gravelion = [], [], [], [], [], [], [], [], []
+    
+    def spawn_entities(self, fenetre, map_rect):
+        araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf, gravelion, demon_king= [], [], [], [], [], [], [], [], [], []
 
         for e in self.entities_to_spawn:
             if e["type"] == "mob":
@@ -114,18 +116,22 @@ class Map_Manager:
                     blackwolf.append(Black_Wolf(fenetre, e["x"], e["y"]))
                 elif e["name"] == "redwolf":
                     redwolf.append(Red_Wolf(fenetre, e["x"], e["y"]))
+                
+            if e["type"] == "boss":
+                if e["name"] == "demon_king":
+                    demon_king.append(Demon_King(fenetre, e["x"], e["y"], map_rect))
                 elif e["name"] == "gravelion":
-                    gravelion.append(Gravelion(fenetre, e["x"], e["y"], arene_rect))
-
-
+                    gravelion.append(Gravelion(fenetre, e["x"], e["y"], map_rect))
                     
-        liste_entites = araignee + volant + golem + chargeur + tourelle + fighter + blackwolf + redwolf + gravelion
+        liste_entites = araignee + volant + golem + chargeur + tourelle + fighter + blackwolf + redwolf + gravelion + demon_king
         return liste_entites
     
     def get_spawn(self, name):
-        return self.spawnpoints.get(name)
+        spawn = self.spawnpoints.get(name)
+        if spawn is None:
+            print(f"WARNING: Spawn point '{name}' not found. Available spawns: {list(self.spawnpoints.keys())}")
+        return spawn
     
-
 def create_map(tmx_data, fenetre):
     platforms = []
     special_platforms = []

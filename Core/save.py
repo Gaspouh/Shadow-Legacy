@@ -12,14 +12,15 @@ DEFAULT_SAVE = os.path.join(CORE_DIR, "default_save.json")
 
 # Dico des maps à mettre à jour
 
-MAP_NAME = ["swamp", "terre_aride", "cave", "forest", "hollow_earth"]
+MAP_NAME = ["swamp", "terre_aride", "cave", "forest", "hollow_earth", "mines"]
 
 MAP_PATHS = {
     "swamp": "map_swamp.tmx",
     "terre_aride": "ascension.tmx",
     "cave": "cave.tmx",
     "forest":"forest.tmx",
-    "hollow_earth": "hollow_earth.tmx"
+    "hollow_earth": "hollow_earth.tmx",
+    "mines": "final_boss.tmx"
 }
 
 TMX_TO_FOLDER = {
@@ -30,7 +31,8 @@ TMX_TO_FOLDER = {
     "Parcours.tmx": "forest",
     "forest.tmx": "forest",
     "gravelion_arene.tmx": "cave",
-    "hollow_earth.tmx": "hollow_earth"
+    "hollow_earth.tmx": "hollow_earth",
+    "final_boss.tmx": "mines"
 }
 
 # facilite l'utilisationn du parallax
@@ -40,7 +42,8 @@ MAP_PARALLAX_LAYERS = {
     "cave": 3,
     "boss_arene":0,
     "forest":5,
-    "hollow_earth": 2
+    "hollow_earth": 2,
+    "mines": 1
 }
 
 # spawns
