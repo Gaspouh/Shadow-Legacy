@@ -21,7 +21,8 @@ MAP_PATHS = {
     "hollow_earth": "hollow_earth.tmx",
     "parcours": "Parcours.tmx",
     "parcours": "Parcours_2.tmx",
-    "mines": "final_boss.tmx"
+    "mines": "final_boss.tmx",
+    "industrial": "gravelion_arene"
 }
 
 TMX_TO_FOLDER = {
@@ -35,7 +36,7 @@ TMX_TO_FOLDER = {
     "min_boss_arene.tmx": "cave",
     "hollow_earth.tmx": "hollow_earth",
     "final_boss.tmx": "mines",
-    "gravelion_arene": "industrial",
+    "gravelion_arene.tmx": "industrial"
 }
 
 # facilite l'utilisationn du parallax
@@ -52,13 +53,14 @@ MAP_PARALLAX_LAYERS = {
 
 # spawns
 DEFAULT_SPAWNS = {
-    "swamp": {"x": 3, "y": 568},
+    "swamp": {"x": 50, "y": 568},
     "terre_aride": {"x": 50, "y": 1197},
     "cave": {"x": 46, "y": 180},
     "forest": {"x": 42, "y": 600},
     "parcours": {"x": 300, "y": 1000},
     "parcours_2": {"x": 300, "y": 3500},
     "hollow_earth": {"x": 135, "y": 2290},
+    "industrial" : {"x": 1500, "y": 150}
 }
 # Position de spawn par défaut selon la map (si aucun checkpoint activé)
 

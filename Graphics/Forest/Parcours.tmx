@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="185" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="40">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="185" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="41">
  <tileset firstgid="1" source="forest_platform.tsx"/>
  <tileset firstgid="97" source="../traps.tsx"/>
  <tileset firstgid="195" source="forest_objects.tsx"/>
@@ -85,6 +85,12 @@
    <properties>
     <property name="obj_type" value="minerai"/>
    </properties>
+  </object>
+  <object id="40" name="right" x="5755.33" y="611.333" width="52" height="52">
+   <properties>
+    <property name="obj_type" value="spawnpoint"/>
+   </properties>
+   <ellipse/>
   </object>
  </objectgroup>
  <layer id="1" name="Ground" width="185" height="40">

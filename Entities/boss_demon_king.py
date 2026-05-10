@@ -217,7 +217,7 @@ class Demon_King(Boss):
             pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\slime_1.MP3"),
             pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\slime_2.MP3"),
         ]
-        self.transformation_sound = pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\_transformation.MP3")
+        self.transformation_sound = pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\Transformation.MP3")
         self.cleave_sounds = [
             pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\epee_1.MP3"),
             pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\epee_2.MP3"),
@@ -228,6 +228,7 @@ class Demon_King(Boss):
             pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\smash_2.MP3"),
         ]
         self.smash_landing_sound = pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\smash_3.MP3")
+        self.fire_breath_sound = pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\Fire_breath.MP3")
         self.cast_spell_sound = pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\cast_spell.MP3")
         self.transition_sound = pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\phase_transition.MP3")
         self.death_sound = pygame.mixer.Sound("Assets\Boss\Demon_King\Sons\mort.MP3")
@@ -235,6 +236,7 @@ class Demon_King(Boss):
         self.sounds_cooldown = {
             "slime": 0.3,
             "cleave": 0.5,
+            "fire_breath": 0.8,
             "cast_spell": 1.5,
         }
 
@@ -631,6 +633,8 @@ class Demon_King(Boss):
         """
         self.current_anim = "demon_fire_breath"
         charge = self.speed(800)
+        if self.can_play_sound("fire_breath") and elapsed < charge:
+            self.fire_breath_sound.play()
 
         if elapsed >= charge:
             if self.fire_breath is None:

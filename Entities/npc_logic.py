@@ -231,7 +231,11 @@ class Gordon1_NPC(NPC_Logic, VerticalAnimation):
             arrival_dialogue=self.arrival_dialogue,
             leave_dialogue=self.leave_dialogue,
         )
-        self.sell_charms = {"more_coin": {"price": 100, "image": "Assets/charms/attack_speed.png"}}
+        self.sell_charms = {
+            "more_coin": {"price": 100, "image": "Assets/charms/more_coin.png"},
+            "no_knockback": {"price": 150, "image": "Assets/charms/no_knockback.png"},
+            "fast_heal": {"price": 200, "image": "Assets/charms/fast_heal.png"},
+            }
         self.market_seller = charms_market  # appel de la fonction des charms
 
 
@@ -270,12 +274,14 @@ class Gordon2_NPC(NPC_Logic, VerticalAnimation):
             leave_dialogue=self.leave_dialogue,
         )
         self.sell_charms = {
-            "attack_long_range": {
-                "price": 275,
-                "image": "Assets/charms/attack_long_range.png",
-            },
-            "attack_speed": {"price": 150, "image": "Assets/charms/attack_speed.png"},
-            "jump_boost": {"price": 250, "image": "Assets/charms/jump_boost.png"},
+            "attack_long_range": {"price": 275,"image": "Assets/charms/attack_long_range.png",},
+            "attack_speed": {"price": 225, "image": "Assets/charms/attack_speed.png"},
+            "jump_boost": {"price": 125, "image": "Assets/charms/jump_boost.png"},
+            "more_blood": {"price": 150, "image": "Assets/charms/more_blood.png"},
+            "speed_boost": {"price": 175, "image": "Assets/charms/speed_boost.png"},
+            "life_boost": {"price": 300, "image": "Assets/charms/life_boost.png"},
+            "spell_master": {"price": 250, "image": "Assets/charms/spell_master.png"}
+
         }
         self.market_seller = charms_market  # appel de la fonction des charms
 

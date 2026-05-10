@@ -507,7 +507,7 @@ class Player(PhysicsEntity):
             self.velocity.y = self.pogo_strength  # Rebondir vers le haut après une attaque vers le bas
             self.double_jump.reset()
         else:
-            if self.no_kb:
+            if not self.no_kb:
                 if self.attack_direction == "UP":  # Pour avoir un léger ressenti sans écraser le joeur au sol
                     if self.velocity.y < 0:
                         self.velocity.y *= 0.5

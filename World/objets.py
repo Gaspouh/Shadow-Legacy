@@ -274,11 +274,11 @@ class Sac_logic:
         Sortie: Aucune valeur renvoyée (None).
         """
         if player.is_attacking and player.attack_rect.colliderect(self.rect):
-            if not self.hit:
+            if not self.hit and not self.taken:
                 self.life -= 1
                 self.hit = True
                 self.sound.play()
-                if self.life <= 0:
+                if self.life <= 0 :
                     Monnaie.add_orbs(self.orbs)
                     # faire disparaitre le sac et l'image
                     self.alive = False
@@ -316,7 +316,7 @@ class moyen_sac(Sac_logic):
     def __init__(self, x, y):
         image = pygame.transform.scale(pygame.image.load("Assets/Images/sac_2.png").convert_alpha(), (50, 50))
         y += 5
-        super().__init__(x, y, orbs=15, image=image, life=2)
+        super().__init__(x, y, orbs=15, image=image, life=3)
         self.rect = self.image.get_rect(topleft=(x, y))
 
 
@@ -324,7 +324,7 @@ class grand_sac(Sac_logic):
     def __init__(self, x, y):
         image = pygame.transform.scale(pygame.image.load("Assets/Images/sac_3.png").convert_alpha(), (60, 60))
         y += 1
-        super().__init__(x, y, orbs=25, image=image, life=3)
+        super().__init__(x, y, orbs=25, image=image, life=6)
         self.rect = self.image.get_rect(topleft=(x, y))
 
 
