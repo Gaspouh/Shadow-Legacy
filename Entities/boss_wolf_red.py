@@ -6,7 +6,6 @@ from World.objets import Monnaie
 
 
 class Red_Wolf(Boss):
-
     def __init__(self, fenetre, x, y):
         path = "Assets/Boss/Loups/Red_Wolf"
         self.fenetre = fenetre
@@ -15,16 +14,22 @@ class Red_Wolf(Boss):
         self.run_start_time = None  # quand il a commencé à courir
         self.run_min_duration = 2000  # 2s minimum de course
 
-
         super().__init__(
-            fenetre, x, y,
-            path+"/Idle.png", 8, 128, 128, 0, 0,
+            fenetre,
+            x,
+            y,
+            path + "/Idle.png",
+            8,
+            128,
+            128,
+            0,
+            0,
             pv_max=18,
             vitesse=vitesse_initiale,
             attack_data={"damage": 1, "knockback_x": 50, "knockback_y": -5},
             tp_points=[(x, y)],
             stagger_threshold=50,
-            scale=1
+            scale=1,
         )
         self.vitesse = vitesse_initiale
         self.can_receive_knockback = True
@@ -56,31 +61,35 @@ class Red_Wolf(Boss):
         w, h = 128, 128
         scale = self.scale
         self.anims = {
-            "idle": Animation(fenetre, x, y, path+"/Idle.png", 8, w, h, 0, 0, scale),
-            "walk": Animation(fenetre, x, y, path+"/walk.png", 11, w, h, 0, 0, scale),
-            "run": Animation(fenetre, x, y, path+"/Run.png", 9, w, h, 0, 0, scale),
-            "jump": Animation(fenetre, x, y, path+"/Jump.png", 11, w, h, 0, 0, scale),
-            "hurt": Animation(fenetre, x, y, path+"/Hurt.png", 2, w, h, 0, 0, scale),
-            "death": Animation(fenetre, x, y, path+"/Dead.png", 2, w, h, 0, 0, scale),
-            "attack1": Animation(fenetre, x, y, path+"/Attack_1.png", 6, w, h, 0, 0, scale),
-            "attack2": Animation(fenetre, x, y, path+"/Attack_2.png", 4, w, h, 0, 0, scale),
-            "attack3": Animation(fenetre, x, y, path+"/Attack_3.png", 5, w, h, 0, 0, scale),
-            "run_attack": Animation(fenetre, x, y, path+"/Run+Attack.png", 7, w, h, 0, 0, scale)
+            "idle": Animation(fenetre, x, y, path + "/Idle.png", 8, w, h, 0, 0, scale),
+            "walk": Animation(fenetre, x, y, path + "/walk.png", 11, w, h, 0, 0, scale),
+            "run": Animation(fenetre, x, y, path + "/Run.png", 9, w, h, 0, 0, scale),
+            "jump": Animation(fenetre, x, y, path + "/Jump.png", 11, w, h, 0, 0, scale),
+            "hurt": Animation(fenetre, x, y, path + "/Hurt.png", 2, w, h, 0, 0, scale),
+            "death": Animation(fenetre, x, y, path + "/Dead.png", 2, w, h, 0, 0, scale),
+            "attack1": Animation(fenetre, x, y, path + "/Attack_1.png", 6, w, h, 0, 0, scale),
+            "attack2": Animation(fenetre, x, y, path + "/Attack_2.png", 4, w, h, 0, 0, scale),
+            "attack3": Animation(fenetre, x, y, path + "/Attack_3.png", 5, w, h, 0, 0, scale),
+            "run_attack": Animation(fenetre, x, y, path + "/Run+Attack.png", 7, w, h, 0, 0, scale),
         }
         for anim in self.anims.values():
             anim.vitesse_animation = 0.08
             for anim in self.anims.values():
                 anim.vitesse_animation = 0.08
-                anim.frames_droite = [pygame.transform.scale(f, (int(128 * 1.4), int(128 * 1.4))) for f in anim.frames_droite]
-                anim.frames_gauche = [pygame.transform.scale(f, (int(128 * 1.4), int(128 * 1.4))) for f in anim.frames_gauche]
+                anim.frames_droite = [
+                    pygame.transform.scale(f, (int(128 * 1.4), int(128 * 1.4))) for f in anim.frames_droite
+                ]
+                anim.frames_gauche = [
+                    pygame.transform.scale(f, (int(128 * 1.4), int(128 * 1.4))) for f in anim.frames_gauche
+                ]
 
         self.current_anim = "idle"  # anim de base
         self.image = self.anims["idle"].frames_droite[0]
 
         # gestion hitbox
         w_scaled = int(w * 1.4)
-        self.hitbox_offset_x =  w_scaled // 3   # valeur ajustée visuellement
-        hitbox_w = w_scaled -self.hitbox_offset_x * 2
+        self.hitbox_offset_x = w_scaled // 3  # valeur ajustée visuellement
+        hitbox_w = w_scaled - self.hitbox_offset_x * 2
         self.offset_y = 70
         self.rect = pygame.Rect(x + self.hitbox_offset_x, y + offset_y, hitbox_w, int((72) * 1.5))
         self.position = pygame.math.Vector2(self.rect.centerx, self.rect.bottom)
@@ -97,6 +106,7 @@ class Red_Wolf(Boss):
         super().enter_state(new_state)
 
     """ partie de gestion de la detection """
+
     def joueur_detecte(self, player_rect):
         # zone moins large sur x
         dx = abs(player_rect.centerx - self.rect.centerx) * 1.35
@@ -117,25 +127,32 @@ class Red_Wolf(Boss):
                     self.last_seen_time = None
                     self.enter_state(self.NOT_TRIGGERED)
 
-
     def zone_attaque(self):
         if self.direction == 1:
-            return pygame.Rect(self.rect.right, self.rect.centery - self.attack_range_y // 2,
-                               self.attack_range_x, self.attack_range_y)
-        
-        return pygame.Rect(self.rect.left - self.attack_range_x, self.rect.centery - self.attack_range_y // 2,
-                           self.attack_range_x, self.attack_range_y)
+            return pygame.Rect(
+                self.rect.right,
+                self.rect.centery - self.attack_range_y // 2,
+                self.attack_range_x,
+                self.attack_range_y,
+            )
+
+        return pygame.Rect(
+            self.rect.left - self.attack_range_x,
+            self.rect.centery - self.attack_range_y // 2,
+            self.attack_range_x,
+            self.attack_range_y,
+        )
 
     def joueur_dans_attack(self, player_rect):
         return self.zone_attaque().colliderect(player_rect)
-    
+
     def receive_hit(self, attack_data, source_rect, source):
         if not self.alive or self.is_shielded:
             return
         self.pv_ennemi -= attack_data["damage"]
 
         # gestion knockback
-        direction = 1 if source_rect.centerx< self.rect.centerx else -1
+        direction = 1 if source_rect.centerx < self.rect.centerx else -1
         self.velocity.x = attack_data.get("knockback_x", 0) * direction * 0.3
         self.velocity.y = attack_data.get("knockback_y", 0)
 
@@ -145,9 +162,8 @@ class Red_Wolf(Boss):
             if self.state != self.DYING:
                 self.enter_state(self.DYING)
 
-
     def update(self, player_rect, player, platforms=[]):
-        """ fonction update main du blackwolf """
+        """fonction update main du blackwolf"""
         now = pygame.time.get_ticks()
         elapsed = now - self.state_timer
 
@@ -197,10 +213,7 @@ class Red_Wolf(Boss):
         d_x = abs(player_rect.centerx - self.rect.centerx)
 
         # jump attack
-        jump_dispo = (
-            self.pursuit_start_time is not None and
-            now - self.last_jump_time >= self.jump_cooldown
-        )
+        jump_dispo = self.pursuit_start_time is not None and now - self.last_jump_time >= self.jump_cooldown
 
         # gestion attaque
         if self.joueur_dans_attack(player_rect):
@@ -219,19 +232,21 @@ class Red_Wolf(Boss):
 
         # poursuite normale
         if d_x > 5:
-            if d_x > 300: # il run si il est loin
+            if d_x > 300:  # il run si il est loin
                 if self.run_start_time is None:
                     self.run_start_time = now
                 self.current_anim = "run"
                 self.velocity.x = self.vitesse * 4.5 * self.direction
-            else: # sinon marche
-                run_end = self.run_start_time is None or now - self.run_start_time >= self.run_min_duration # verifie si le run est fini
+            else:  # sinon marche
+                run_end = (
+                    self.run_start_time is None or now - self.run_start_time >= self.run_min_duration
+                )  # verifie si le run est fini
                 if run_end:
                     self.run_start_time = None  # reset
                     self.current_anim = "walk"
                     self.velocity.x = self.vitesse * self.direction
                 else:
-                    #continue de sprint
+                    # continue de sprint
                     self.current_anim = "run"
                     self.velocity.x = self.vitesse * 4.5 * self.direction
 
@@ -259,7 +274,7 @@ class Red_Wolf(Boss):
                     height=self.attack_range_y + 20,
                     attack_data=self.attack_data,
                     image=None,
-                    duration=250
+                    duration=250,
                 )
                 self.atk_spawned = True
 
@@ -278,7 +293,7 @@ class Red_Wolf(Boss):
                     height=self.attack_range_y,
                     attack_data=self.attack_data,
                     image=None,
-                    duration=200
+                    duration=200,
                 )
                 self.atk_spawned = True
 
@@ -287,7 +302,7 @@ class Red_Wolf(Boss):
 
         self.update_anim()
 
-   # gesiton de mort (et la reward)
+    # gesiton de mort (et la reward)
     def mort(self):
         if not self.alive:
             if not self.orbs_added:
@@ -295,7 +310,7 @@ class Red_Wolf(Boss):
                 self.orbs_added = True
             return True
         return False
-    
+
     def update_dying(self, elapsed):
         self.current_anim = "death"
         self.update_anim(once=True)
@@ -306,7 +321,6 @@ class Red_Wolf(Boss):
         if anim.index_image >= len(anim.frames_droite) - 1 and elapsed > 500:
             self.alive = False
 
-
     # affichage
     def draw(self, fenetre, camera):
         if not self.alive:
@@ -315,4 +329,4 @@ class Red_Wolf(Boss):
         # le sprite est plus large que la hitbox, on le recentre
         fenetre.blit(self.image, (cam_rect.x - self.hitbox_offset_x, cam_rect.y - self.offset_y))
         for elem in self.hitboxs:
-            elem.draw(fenetre, camera)  
+            elem.draw(fenetre, camera)

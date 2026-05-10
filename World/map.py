@@ -14,7 +14,10 @@ from Core.save import get_chunks_params
 from Entities.npc_logic import Gordon1_NPC, Gordon2_NPC, Forgeron
 
 TILE_SIZE = 32
-RENDU_CHUNCK = get_chunks_params() # pareil, mais pour les collisions et autres, la valeur c'est la taille d'un coté du carré (en tile) qui sont calculé
+RENDU_CHUNCK = (
+    get_chunks_params()
+)  # pareil, mais pour les collisions et autres, la valeur c'est la taille d'un coté du carré (en tile) qui sont calculé
+
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, image):
@@ -22,51 +25,57 @@ class Platform(pygame.sprite.Sprite):
         self.image = image
         self.rect = self.image.get_rect(topleft=(x, y))
 
+
 class Special_Platform(Platform):
     def __init__(self, x, y, image, effect=None, slow_factor=1, jump_factor=1):
         super().__init__(x, y, image)
         self.effect = effect
         self.slow_factor = slow_factor
-        self.jump_factor = jump_factor    
-        
+        self.jump_factor = jump_factor
+
         width = image.get_width()
 
         if effect == "mud":
             self.surface = Platform(x, y + 5, pygame.Surface((width, 5)))
-            
-        elif effect =="ice" :
-           self.surface = Platform(x, y + 1, pygame.Surface((width, 5)))
 
-        else :
+        elif effect == "ice":
+            self.surface = Platform(x, y + 1, pygame.Surface((width, 5)))
+
+        else:
             self.surface = None
+
 
 class Map_Object(pygame.sprite.Sprite):
     def __init__(self, x, y, image):
         super().__init__()
         self.image = image
-        self.rect = self.image.get_rect(topleft=(x,y))
+        self.rect = self.image.get_rect(topleft=(x, y))
+
 
 class Checkpoint(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         scale_x = scale_y = 85
-        self.image = pygame.image.load('Assets/Images/banc.png')  # sans fill
+        self.image = pygame.image.load("Assets/Images/banc.png")  # sans fill
         self.image = pygame.transform.scale(self.image, (scale_x, scale_y))  # adapter la taille
         self.rect = self.image.get_rect(topleft=(x, y))
         self.activated = False  # devient True quand le joueur passe dessus
 
-        #pygame.draw.rect(self.image, (0, 255, 0), self.image.get_rect(), 2) # hitbox pour test du gameplay
+        # pygame.draw.rect(self.image, (0, 255, 0), self.image.get_rect(), 2) # hitbox pour test du gameplay
 
-class SpawnPoint: #L'endroit ou le joeur spawn apres un changement de salle
+
+class SpawnPoint:  # L'endroit ou le joeur spawn apres un changement de salle
     def __init__(self, x, y, name):
         self.position = pygame.math.Vector2(x, y)
-        self.name = name #Pour différencier les spawn point d'une meme salle
-    
+        self.name = name  # Pour différencier les spawn point d'une meme salle
+
+
 class Door:
     def __init__(self, x, y, width, height, target_map, target_spawn):
         self.rect = pygame.Rect(x, y, width, height)
         self.target_map = target_map
         self.target_spawn = target_spawn
+
 
 class Map_Manager:
     def __init__(self, fenetre):
@@ -78,16 +87,38 @@ class Map_Manager:
 
         self.map_width = tmx_data.width * TILE_SIZE
         self.map_height = tmx_data.height * TILE_SIZE
-        
-        self.platforms, self.special_platforms, self.traps, self.decorations, self.checkpoints, \
-            self.spawnpoints, self.doors, self.entities_to_spawn, self.objets, self.pnj, self.abilities = create_map(tmx_data, self.fenetre)
-        
-        background_folder = os.path.join(os.path.dirname(path), "Background") 
-        
+
+        (
+            self.platforms,
+            self.special_platforms,
+            self.traps,
+            self.decorations,
+            self.checkpoints,
+            self.spawnpoints,
+            self.doors,
+            self.entities_to_spawn,
+            self.objets,
+            self.pnj,
+            self.abilities,
+        ) = create_map(tmx_data, self.fenetre)
+
+        background_folder = os.path.join(os.path.dirname(path), "Background")
+
         self.nb_parallax_layers = len([fichier for fichier in os.listdir(background_folder) if fichier != "0.png"])
-    
+
     def spawn_entities(self, fenetre, map_rect):
-        araignee, volant, golem, chargeur, tourelle, fighter, blackwolf, redwolf, gravelion, demon_king= [], [], [], [], [], [], [], [], [], []
+        (
+            araignee,
+            volant,
+            golem,
+            chargeur,
+            tourelle,
+            fighter,
+            blackwolf,
+            redwolf,
+            gravelion,
+            demon_king,
+        ) = [], [], [], [], [], [], [], [], [], []
 
         for e in self.entities_to_spawn:
             if e["type"] == "mob":
@@ -107,22 +138,23 @@ class Map_Manager:
                     blackwolf.append(Black_Wolf(fenetre, e["x"], e["y"]))
                 elif e["name"] == "redwolf":
                     redwolf.append(Red_Wolf(fenetre, e["x"], e["y"]))
-                
+
             if e["type"] == "boss":
                 if e["name"] == "demon_king":
                     demon_king.append(Demon_King(fenetre, e["x"], e["y"], map_rect))
                 elif e["name"] == "gravelion":
                     gravelion.append(Gravelion(fenetre, e["x"], e["y"], map_rect))
-                    
-        liste_entites = araignee + volant + golem + chargeur + tourelle + fighter + blackwolf + redwolf + gravelion + demon_king
+
+        liste_entites = (
+            araignee + volant + golem + chargeur + tourelle + fighter + blackwolf + redwolf + gravelion + demon_king
+        )
         return liste_entites
-    
+
     def get_spawn(self, name):
         spawn = self.spawnpoints.get(name)
-        if spawn is None:
-            print(f"WARNING: Spawn point '{name}' not found. Available spawns: {list(self.spawnpoints.keys())}")
         return spawn
-    
+
+
 def create_map(tmx_data, fenetre):
     platforms = []
     special_platforms = []
@@ -139,11 +171,11 @@ def create_map(tmx_data, fenetre):
     spawnpoints = {}
 
     for layer in tmx_data.visible_layers:
-        if not hasattr(layer, 'data'):
-             continue
+        if not hasattr(layer, "data"):
+            continue
 
-        for x, y, gid in layer: 
-            if gid == 0: #Si la tuile est vide
+        for x, y, gid in layer:
+            if gid == 0:  # Si la tuile est vide
                 continue
 
             props = tmx_data.get_tile_properties_by_gid(gid)
@@ -157,14 +189,14 @@ def create_map(tmx_data, fenetre):
             pos_x = x * TILE_SIZE
             pos_y = y * TILE_SIZE
 
-            #Platformes classiques
+            # Platformes classiques
             if tile_type == "ground":
                 platforms.append(Platform(pos_x, pos_y, image))
-            
+
             elif tile_type == "decor":
                 decorations.append(Map_Object(pos_x, pos_y, image))
 
-            #Platformes spéciales
+            # Platformes spéciales
             elif tile_type == "quicksand":
                 sp = Special_Platform(pos_x, pos_y, image, effect="quicksand")
                 special_platforms.append(sp)
@@ -174,17 +206,15 @@ def create_map(tmx_data, fenetre):
                 special_platforms.append(sp)
 
             elif tile_type == "ice":
-                special_platforms.append(
-                    Special_Platform(pos_x, pos_y, image, effect="ice")
-                )
+                special_platforms.append(Special_Platform(pos_x, pos_y, image, effect="ice"))
 
-            #Pièges
-            elif tile_type == "lava": #'198, 69, 36) - 1
+            # Pièges
+            elif tile_type == "lava":  #'198, 69, 36) - 1
                 traps.append(Lava(pos_x, pos_y, TILE_SIZE))
-                    
-            elif tile_type == "acid": #(30, 110, 80) - 2
+
+            elif tile_type == "acid":  # (30, 110, 80) - 2
                 traps.append(Acid(pos_x, pos_y, TILE_SIZE))
-                    
+
             elif tile_type == "thorns":
                 direction = props.get("direction")
                 traps.append(Thorns(pos_x, pos_y, TILE_SIZE, direction))
@@ -197,7 +227,7 @@ def create_map(tmx_data, fenetre):
                 pass
 
             elif tile_type == "saw":
-                traps.append(Saw(pos_x, pos_y, TILE_SIZE//2))
+                traps.append(Saw(pos_x, pos_y, TILE_SIZE // 2))
 
     for obj in tmx_data.objects:
         obj_type = obj.properties.get("obj_type")
@@ -208,15 +238,15 @@ def create_map(tmx_data, fenetre):
 
         if obj_type == "decor":
             decorations.append(Map_Object(x, y, image))
-        
+
         elif obj_type == "banc":
-            y = int (y - obj.height)
+            y = int(y - obj.height)
             checkpoints.append(Checkpoint(x, y))
-        
+
         elif obj_type == "receptacle":
             y = int(y - obj.height)
             objets.append(Receptacle(x, y))
-        
+
         elif obj_type == "minerai":
             y = int(y - obj.height)
             objets.append(Minerai(x, y))
@@ -229,10 +259,10 @@ def create_map(tmx_data, fenetre):
 
         elif obj_type == "grand_sac":
             objets.append(grand_sac(x, y))
-        
+
         elif obj_type == "spawnpoint":
             name = obj.name
-            spawnpoints[name] = (SpawnPoint(x, y, name))
+            spawnpoints[name] = SpawnPoint(x, y, name)
 
         elif obj_type == "door":
             target_map = obj.properties.get("target_map")
@@ -241,12 +271,7 @@ def create_map(tmx_data, fenetre):
 
         elif obj_type == "mob":
             name = obj.name
-            entities_to_spawn.append({
-                "type": "mob",
-                "name": name,
-                "x": x,
-                "y": y
-            })
+            entities_to_spawn.append({"type": "mob", "name": name, "x": x, "y": y})
 
         elif obj_type == "npc":
             name = obj.name
@@ -259,37 +284,49 @@ def create_map(tmx_data, fenetre):
 
         elif obj_type == "boss":
             name = obj.name
-            entities_to_spawn.append({
-                "type": "boss",
-                "name": name,
-                "x": x,
-                "y": y
-            })
-        
+            entities_to_spawn.append({"type": "boss", "name": name, "x": x, "y": y})
+
         elif obj_type == "ability":
             name = obj.name
             ability_name = obj.properties.get("ability")
             abilities.append(Ability(x, y, obj.width, obj.height, ability_name, name))
 
-    return platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, doors, entities_to_spawn, objets, pnj, abilities
+    return (
+        platforms,
+        special_platforms,
+        traps,
+        decorations,
+        checkpoints,
+        spawnpoints,
+        doors,
+        entities_to_spawn,
+        objets,
+        pnj,
+        abilities,
+    )
+
 
 def chunck_zone(platforms):
     zone = {}
     for i in platforms:
-        x = i.rect.x // (TILE_SIZE*RENDU_CHUNCK)
-        y = i.rect.y// (TILE_SIZE*RENDU_CHUNCK)
-        if (x,y) not in zone: # si pas de platforme ds le chunck on créer une liste (pour apres ajouter les platsformes)
-            zone[(x,y)] = []
-        zone[(x,y)].append(i)
+        x = i.rect.x // (TILE_SIZE * RENDU_CHUNCK)
+        y = i.rect.y // (TILE_SIZE * RENDU_CHUNCK)
+        if (
+            x,
+            y,
+        ) not in zone:  # si pas de platforme ds le chunck on créer une liste (pour apres ajouter les platsformes)
+            zone[(x, y)] = []
+        zone[(x, y)].append(i)
     return zone
 
+
 def platforme_la_plus_proche(zone, rect):
-    x = rect.centerx // (TILE_SIZE*RENDU_CHUNCK)
-    y = rect.centery // (TILE_SIZE*RENDU_CHUNCK)
+    x = rect.centerx // (TILE_SIZE * RENDU_CHUNCK)
+    y = rect.centery // (TILE_SIZE * RENDU_CHUNCK)
     proche = []
     # check les 9 chunks autour du joueur et avoir les platformes les plus proche
-    for i in (-1,0,1):
-        for j in (-1,0,1):
-            if (x+i,y+j) in zone:
-                proche.extend(zone[(x+i,y+j)])
+    for i in (-1, 0, 1):
+        for j in (-1, 0, 1):
+            if (x + i, y + j) in zone:
+                proche.extend(zone[(x + i, y + j)])
     return proche

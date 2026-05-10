@@ -1,7 +1,8 @@
 import pygame
 
+
 class PhysicsEntity:
-    def __init__(self, x, y, width, height, gravity = 0.4, friction = -0.5, use_gravity = True):
+    def __init__(self, x, y, width, height, gravity=0.4, friction=-0.5, use_gravity=True):
 
         # Création hitbox de l'entité
         self.rect = pygame.Rect(x, y, width, height)
@@ -17,13 +18,12 @@ class PhysicsEntity:
         self.use_gravity = use_gravity
         self.on_ground = False
 
-
     def apply_physics(self):
 
         self.acceleration.x = 0
         self.acceleration.y = 0
 
-        if self.use_gravity : # Gravité
+        if self.use_gravity:  # Gravité
             self.acceleration.y = self.gravity
         else:
             self.acceleration.y += self.velocity.y * self.friction
@@ -35,9 +35,8 @@ class PhysicsEntity:
         if abs(self.velocity.x) < 0.1:
             self.velocity.x = 0
 
-        if self.velocity.y > 20: # Limite vitesse de chute
+        if self.velocity.y > 20:  # Limite vitesse de chute
             self.velocity.y = 20
-
 
     def move_horizontal(self, platforms):
 
@@ -47,21 +46,18 @@ class PhysicsEntity:
 
         # Collision entité
         for platform in platforms:
-
             if self.rect.colliderect(platform.rect):
-
-                if self.velocity.x > 0: # Se déplace vers la droite
+                if self.velocity.x > 0:  # Se déplace vers la droite
                     self.rect.right = platform.rect.left
 
-                elif self.velocity.x < 0: # Se déplace vers la gauche
+                elif self.velocity.x < 0:  # Se déplace vers la gauche
                     self.rect.left = platform.rect.right
 
                 self.position.x = self.rect.centerx
-                self.velocity.x = 0 # Arrêter le mouvement horizontal en cas de collision
-
+                self.velocity.x = 0  # Arrêter le mouvement horizontal en cas de collision
 
     def move_vertical(self, platforms):
-            
+
         # Déplacement entité
         self.position.y += self.velocity.y + 0.5 * self.acceleration.y
         self.rect.bottom = self.position.y
@@ -69,9 +65,7 @@ class PhysicsEntity:
         # Collision entité
         self.on_ground = False
         for platform in platforms:
-
             if self.rect.colliderect(platform.rect):
-
                 if self.velocity.y > 0:  # Se déplace vers le bas
                     self.rect.bottom = platform.rect.top
                     self.on_ground = True
@@ -80,8 +74,7 @@ class PhysicsEntity:
                     self.rect.top = platform.rect.bottom
 
                 self.position.y = self.rect.bottom
-                self.velocity.y = 0 # Arreter le mouvement vertical en cas de 
-
+                self.velocity.y = 0  # Arreter le mouvement vertical en cas de
 
     def physics_update(self, platforms):
 
