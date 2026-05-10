@@ -80,7 +80,16 @@ for npc in pnj:
 
 #Joueur
 player = Player(100, 100, fenetre)
-spawn_point, cadavre_data = charger(player, checkpoints, current_map_name, forgeron_instance)  # charge la save si elle existe, sinon spawn par défaut + le cadavre
+spawn_point, cadavre_data, spawn_map = charger(player, checkpoints, current_map_name, forgeron_instance)  # charge la save si elle existe, sinon spawn par défaut + le cadavre
+
+# pour le spawn map, si le joueur est ds une map != de la spawn map il faut la charger
+if spawn_map and spawn_map != current_map_name:
+    current_map_name = spawn_map
+    current_map_path = MAP_PATHS[current_map_name]
+    map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", current_map_name, current_map_path))
+    layers = create_parallax_layers(os.path.join(Chemin_absolu, "Graphics", current_map_name), nb_layers=map_manager.nb_parallax_layers, fenetre=game_fenetre)
+    platforms = map_manager.platforms
+
 player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
 player.rect.midbottom = player.position # pareil avec la hitbox
 
@@ -612,8 +621,37 @@ while continuer:
             
             pygame.display.update()
             clock.tick(60)
+        
+        # avant de reset il faut changer la map en fonction de spawn_map
 
-        reset(player, liste_entites, hearts, spawn_point)
+        with open(SAVE_FILE, "r") as f:
+            save_data = json.load(f)
+        main_spawn = save_data.get("main_spawn")
+
+        # Tout remettre en fonction de cette map
+        if main_spawn and main_spawn.get("map") != current_map_name:
+            current_map_name = main_spawn["map"]
+            current_map_path = MAP_PATHS[current_map_name]
+            map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", current_map_name, current_map_path))
+            layers = create_parallax_layers(os.path.join(Chemin_absolu, "Graphics", current_map_name), nb_layers=map_manager.nb_parallax_layers, fenetre=game_fenetre)
+            platforms = map_manager.platforms
+            chunks = chunck_zone(platforms)
+            special_platforms = map_manager.special_platforms
+            special_surfaces = [sp.surface for sp in special_platforms if sp.surface is not None]
+            traps = map_manager.traps
+            decorations = map_manager.decorations
+            checkpoints = map_manager.checkpoints
+            doors = map_manager.doors
+            objects = map_manager.objets
+            pnj = map_manager.pnj
+            MAP_WIDTH, MAP_HEIGHT = map_manager.map_width, map_manager.map_height
+            MAP_RECT = pygame.Rect(0, 0, MAP_WIDTH, MAP_HEIGHT)
+            camera.update_map_size(MAP_WIDTH, MAP_HEIGHT)
+            liste_entites = map_manager.spawn_entities(fenetre, MAP_RECT)
+
+
+        spawn_point = pygame.math.Vector2(main_spawn["x"], main_spawn["y"]) if main_spawn else spawn_point  # reset avec le bon spawn point
+        reset(player, liste_entites, hearts, spawn_point)   # reset tout
 
 # Mettre à jour l'affichage
     if not pause or not new_game:

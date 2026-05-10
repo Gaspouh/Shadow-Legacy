@@ -53,5 +53,6 @@
         }
     ],
     "last_checkpoint": null,
+    "global_spawn": {"x": 3, "y": 568, "map": "map_swamp.tmx"},
     "cadavre": null
 }
