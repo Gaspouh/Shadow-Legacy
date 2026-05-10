@@ -141,7 +141,7 @@ def unlock_ability(ability_name):
         json.dump(data, f, indent=4)
 
 
-def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None, cadavre=None):
+def sauvegarder(player, checkpoints, map_name,forgeron_instance=None, index_last_checkpoint=None, cadavre=None):
     # Sauvegarder l'état du jeu dans un fichier json
     spawn = get_spawn_from_checkpoints(checkpoints, map_name)
     safe_map_name = map_name.lower() if map_name else "swamp"
@@ -168,7 +168,9 @@ def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None, cadav
             "réceptacles": player.receptacles,
             "receptacles_total": player.receptacles_total,
             "found_charms" : get_player_found_charms(),
-            "equipped_charms": get_player_equipped_charms()
+            "equipped_charms": get_player_equipped_charms(),
+            "upgrade_cost": forgeron_instance.upgrade_cost if forgeron_instance else 1, # sauvegarde du coût d'amélioration du forgeron
+            "orbs_cost": forgeron_instance.orb_cost if forgeron_instance else 100 # sauvegarde du coût en orbs du forgeron
         },
     
         # spawn
@@ -212,7 +214,7 @@ def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None, cadav
     print("saved")
 
     
-def charger(player, checkpoints, map):
+def charger(player, checkpoints, map, Forgeron=None):
     """Pour load le json et mettre à jour les données du joueur"""
 
     if not os.path.exists(SAVE_FILE):
@@ -220,7 +222,8 @@ def charger(player, checkpoints, map):
 
     with open(SAVE_FILE, "r") as f:
         data = json.load(f)
-
+    
+ 
     # Player
     player.health = data["player"]["health"]
     player.max_health = data["player"]["max_health"]
@@ -244,6 +247,14 @@ def charger(player, checkpoints, map):
         player.receptacles_total = data["player"]["receptacles_total"]
     else:        
         data["player"]["receptacles_total"] = player.receptacles_total
+    
+    if Forgeron is not None and "upgrade_cost" in data["player"] and "orbs_cost" in data["player"]:
+        Forgeron.upgrade_cost = data["player"]["upgrade_cost"]
+        Forgeron.orb_cost = data["player"]["orbs_cost"]
+    else:
+        if Forgeron is not None:
+            data["player"]["upgrade_cost"] = Forgeron.upgrade_cost
+            data["player"]["orbs_cost"] = Forgeron.orb_cost
 
     # Abilities
     abilities_data = data.get("abilities", {})

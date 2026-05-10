@@ -124,7 +124,7 @@ def menu(fenetre, player, checkpoints, current_map_name):
                     pygame.display.update()
 
                 elif bouton_quitter.collidepoint(event.pos):
-                    sauvegarder(player, checkpoints, current_map_name) # Sauvegarder avant de quitter
+                    sauvegarder(player, checkpoints, current_map_name, forgeron_instance=None) # Sauvegarder avant de quitter
                     return "QUIT"  # Quitter le jeu
                 
         if bouton_reprendre.collidepoint(souris_pos):

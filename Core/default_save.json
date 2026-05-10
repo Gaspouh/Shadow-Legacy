@@ -20,6 +20,8 @@
             "life_boost": false,
             "spell_master": false
         },
+        "orbs_cost": 100,
+        "upgrade_cost": 1,
         "equipped_charms": {
             "attack_long_range": false,
             "attack_speed": false,
