@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="70" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="12">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="70" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="24">
  <tileset firstgid="1" source="color/colors.tsx"/>
  <tileset firstgid="2" source="platforms_4/platforms_4.tsx"/>
  <tileset firstgid="102" source="Objects/village.tsx"/>
@@ -28,7 +28,7 @@
 1,1,1,1,1,1,1,1,1,1,1,1,1,2684354582,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1610612758,
 1,1,1,1,1,1,1,1,1,1,1,1,1,2684354582,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1610612758,
 1,1,1,1,1,1,1,1,1,1,1,1,1,2684354582,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-1,1,1,1,1,1,1,1,1,1,1,1,1,2684354582,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+1,1,1,1,1,1,1,1,1,1,1,1,1,2684354582,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,25,26,27,28,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 1,1,1,1,1,1,1,1,1,1,1,1,1,2684354582,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1610612758,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1610612758,
@@ -64,7 +64,7 @@
    </properties>
    <ellipse/>
   </object>
-  <object id="2" name="gravelion" x="1504" y="896">
+  <object id="2" name="golem" x="1678" y="886">
    <properties>
     <property name="obj_type" value="mob"/>
    </properties>
@@ -83,6 +83,71 @@
     <property name="obj_type" value="door"/>
     <property name="target_map" value="cave/cave.tmx"/>
     <property name="target_spawn" value="boss_defeated3"/>
+   </properties>
+   <capsule/>
+  </object>
+  <object id="12" name="golem" x="922" y="905">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+   <polygon points="-7.10998,0 12.324,14.8928 10.5465,-34.0714 -10.0725,-11.4643 -34.0094,-35.3571 -32.9429,18.6429"/>
+  </object>
+  <object id="13" name="araignee" x="1273" y="913">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="14" name="araignee" x="2025" y="905">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="15" name="tourelle" x="449.121" y="647.168" width="45.7579" height="47.6644">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="16" name="tourelle" x="2164.12" y="854.168" width="45.7579" height="47.6644">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="17" name="volant" x="1932" y="683">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="18" name="volant" x="1109" y="653">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="19" name="chargeur" x="1451.31" y="905.561" width="53.3842" height="22.8789">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="20" name="fighter" x="1090.65" y="882.24" width="44.6927" height="33.5196">
+   <properties>
+    <property name="obj_type" value="mob"/>
+   </properties>
+  </object>
+  <object id="21" name="Receptacle" x="1306.38" y="576.896" width="37.2439" height="24.2086">
+   <properties>
+    <property name="obj_type" value="receptacle"/>
+   </properties>
+  </object>
+  <object id="22" name="Moyen Sac" x="1249.67" y="686.333" width="63.6667" height="49.3333">
+   <properties>
+    <property name="obj_type" value="moyen_sac"/>
+   </properties>
+   <capsule/>
+  </object>
+  <object id="23" name="Moyen Sac" x="1336.67" y="685.333" width="74.6667" height="49.3333">
+   <properties>
+    <property name="obj_type" value="moyen_sac"/>
    </properties>
    <capsule/>
   </object>

@@ -31,7 +31,7 @@ class Demon_King(Boss):
             (arene_rect.right - marge_x, arene_rect.bottom - 150),
             (arene_rect.centerx, arene_rect.bottom)
         ]
-        super().__init__(fenetre, x, y, "Assets/Boss/Demon_King/slime_idle.png", 6, 64, 64, 0, 0, 100, 2,\
+        super().__init__(fenetre, x, y, "Assets/Boss/Demon_King/slime_idle.png", 6, 64, 64, 0, 0, 80, 2,\
                         {"damage": 1, "knockback_x": 60, "knockback_y": -5}, tp_points, stagger_threshold=9999, scale=1)
 
         self.arene_rect = arene_rect
@@ -39,8 +39,8 @@ class Demon_King(Boss):
         self.sprite_inverted = True
         self.friction = -0.4
         
-        self.pv_demon = 300
-        self.pv_demon_max = 300
+        self.pv_demon = 500
+        self.pv_demon_max = 500
         self.transformed = False
         self.phase_en_attente = None
 

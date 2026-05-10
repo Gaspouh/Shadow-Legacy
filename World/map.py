@@ -6,6 +6,7 @@ from Entities.boss_wolf_black import Black_Wolf
 from World.traps import *
 from Entities.ennemi import Araignee, Volant, Fighter, Chargeur, Tourelle
 from Entities.boss_logic import Golem
+from Entities.player_abilities import Ability
 from World.objets import Receptacle, Minerai, petit_sac, moyen_sac, grand_sac
 from Entities.boss_wolf_red import Red_Wolf
 from Entities.boss_gravelion import Gravelion
@@ -67,16 +68,6 @@ class Door:
         self.target_map = target_map
         self.target_spawn = target_spawn
 
-# Arène de Gravelion (après les plateformes existantes)
-
-"""arene_platforms = [
-    Platform(5000,    600,  1000,    20,  (80, 80, 80)),   # sol
-    Platform(6000,      0,    20,   600,  (80, 80, 80)),   # mur droit
-    Platform(5000,      0,  1000,    20,  (80, 80, 80)),   # plafond
-]"""
-
-arene_rect = pygame.Rect(5000, 0, 1000, 600)  # délimitation de l'arène
-
 class Map_Manager:
     def __init__(self, fenetre):
         self.current_map = None
@@ -88,8 +79,8 @@ class Map_Manager:
         self.map_width = tmx_data.width * TILE_SIZE
         self.map_height = tmx_data.height * TILE_SIZE
         
-        self.platforms, self.special_platforms, self.traps, self.decorations, \
-            self.checkpoints, self.spawnpoints, self.doors, self.entities_to_spawn, self.objets, self.pnj = create_map(tmx_data, self.fenetre)
+        self.platforms, self.special_platforms, self.traps, self.decorations, self.checkpoints, \
+            self.spawnpoints, self.doors, self.entities_to_spawn, self.objets, self.pnj, self.abilities = create_map(tmx_data, self.fenetre)
         
         background_folder = os.path.join(os.path.dirname(path), "Background") 
         
@@ -143,6 +134,7 @@ def create_map(tmx_data, fenetre):
     doors = []
     entities_to_spawn = []
     pnj = []
+    abilities = []
 
     spawnpoints = {}
 
@@ -273,8 +265,13 @@ def create_map(tmx_data, fenetre):
                 "x": x,
                 "y": y
             })
+        
+        elif obj_type == "ability":
+            name = obj.name
+            ability_name = obj.properties.get("ability")
+            abilities.append(Ability(x, y, obj.width, obj.height, ability_name, name))
 
-    return platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, doors, entities_to_spawn, objets , pnj
+    return platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, doors, entities_to_spawn, objets, pnj, abilities
 
 def chunck_zone(platforms):
     zone = {}

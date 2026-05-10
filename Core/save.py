@@ -20,7 +20,9 @@ MAP_PATHS = {
     "forest":"forest.tmx",
     "hollow_earth": "hollow_earth.tmx",
     "parcours": "Parcours.tmx",
+    "parcours": "Parcours_2.tmx",
     "mines": "final_boss.tmx"
+    "industrial" "gravelion_arene"
 }
 
 TMX_TO_FOLDER = {
@@ -29,10 +31,12 @@ TMX_TO_FOLDER = {
     "cave.tmx": "cave",
     "boss_arene.tmx": "cave",
     "Parcours.tmx": "forest",
+    "Parcours_2.tmx": "forest",
     "forest.tmx": "forest",
     "gravelion_arene.tmx": "cave",
     "hollow_earth.tmx": "hollow_earth",
-    "final_boss.tmx": "mines"
+    "final_boss.tmx": "mines",
+    "gravelion_arene": "industrial"
 }
 
 # facilite l'utilisationn du parallax
@@ -43,7 +47,8 @@ MAP_PARALLAX_LAYERS = {
     "boss_arene":0,
     "forest":5,
     "hollow_earth": 2,
-    "mines": 1
+    "mines": 1,
+    "industrial" : 5
 }
 
 # spawns
@@ -53,6 +58,7 @@ DEFAULT_SPAWNS = {
     "cave": {"x": 46, "y": 180},
     "forest": {"x": 42, "y": 600},
     "parcours": {"x": 300 , "y": 1000},
+    "parcours_2": {"x": 300 , "y": 3500},
     "hollow_earth": {"x": 135, "y": 2290}
 }
 # Position de spawn par défaut selon la map (si aucun checkpoint activé)
@@ -118,6 +124,22 @@ def get_player_found_charms():
     
     return data.get("player", {}).get("found_charms", None)
 
+def get_player_unlocked_abilities():
+    if not os.path.exists(SAVE_FILE):
+        return {"dash": False, "double_jump": False}
+    with open(SAVE_FILE, "r") as f:
+        data = json.load(f)
+    return data.get("abilities", {"dash": False, "double_jump": False})
+
+def unlock_ability(ability_name):
+    if not os.path.exists(SAVE_FILE):
+        return
+    with open(SAVE_FILE, "r") as f:
+        data = json.load(f)
+    data["abilities"][ability_name] = True
+    with open(SAVE_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
 
 def sauvegarder(player, checkpoints, map_name,forgeron_instance=None, index_last_checkpoint=None, cadavre=None):
     # Sauvegarder l'état du jeu dans un fichier json
@@ -171,10 +193,8 @@ def sauvegarder(player, checkpoints, map_name,forgeron_instance=None, index_last
         },
 
         # abilities
-        "abilities": {
-            # *
-        },
-
+        "abilities": get_player_unlocked_abilities(),
+        
         # bancs
         "checkpoints": [
             {
@@ -253,8 +273,9 @@ def charger(player, checkpoints, map, Forgeron=None):
             data["player"]["orbs_cost"] = Forgeron.orb_cost
 
     # Abilities
-        # quand y'aura d'autres abilities
-
+    abilities_data = data.get("abilities", {})
+    player.dash.unlocked = abilities_data["dash"]
+    player.double_jump.unlocked = abilities_data["double_jump"]
     # Checkpoints
     main_spawn = data.get("main_spawn")
     if main_spawn:
@@ -298,7 +319,7 @@ def charms_images():
         "attack_long_range" : path + "/attack_long_range.png",
         "attack_speed" : path + "/attack_speed.png",
         "jump_boost" : path + "/jump_boost.png",
-        "no_knockback": path + "/attack_long_range.png",
+        "no_knockback": path + "/no_knockback.png",
         "more_coin": path + "/more_coin.png",
         "fast_heal": path + "/fast_heal.png",
         "more_blood": path + "/more_blood.png",

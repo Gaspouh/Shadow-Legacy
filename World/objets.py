@@ -65,9 +65,9 @@ class Monnaie:
         self.rect = self.image.get_rect(topright=(fenetre.get_width() - 50, 50))
 
     @staticmethod   # permet de rendre global
-    def add_orbs(amount):
+    def add_orbs(amount, cadavre =False):
         from Core.save import get_player_equipped_charms
-        if get_player_equipped_charms().get("more_coin", False):
+        if get_player_equipped_charms().get("more_coin", False) and not cadavre:
             Monnaie.orbs += amount * 1.3
         else :
             Monnaie.orbs += amount
@@ -302,7 +302,7 @@ class Cadavre:
         if self.alive and self.rect.colliderect(player.rect):
             from Core.save import SAVE_FILE # imoport ici sinon ça bug a cause du circular import
             import json
-            Monnaie.add_orbs(self.orbs) # recupere ses orbs
+            Monnaie.add_orbs(self.orbs, cadavre=True) # recupere ses orbs mais sans multiplicateur
             self.alive = False
             # maj du json, on supprime le cadavre (le met a none)
             with open(SAVE_FILE, "r") as f:

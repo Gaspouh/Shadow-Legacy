@@ -9,7 +9,7 @@
         "max_speed": 10,
         "speed": 2.5,
 
-        "attack": 10,
+        "attack": 5,
         "attack_cooldown": 350,
         "attack_duration": 240,
         "attack_knockback_x": 80,
@@ -39,7 +39,7 @@
         "fast_heal": null,
         "more_blood": null,
         "speed_boost": null,
-        "life_boost": null,
+        "life_boost": null, 
         "spell_master": null
     },
     "chunks" : 4

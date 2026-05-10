@@ -11,16 +11,11 @@ class Player(PhysicsEntity):
         super().__init__(x, y, 25, 60, gravity=0.4 , friction=-0.5, use_gravity=True)
         self.window = fenetre
         p = load_config().get("player", {}) if load_config() else {}
-        equipped_charms = get_player_equipped_charms()
         # STATS DU JOUEUR
         self.health = p.get("health", 5) # Le 2eme argument est un fallback au cas ou la clé n'existe pas dans le json
         self.max_health = p.get("max_health", 5)
         self.attack = p.get("attack", 1)
-        if equipped_charms["jump_boost"] == True:
-            self.jump_strength = p.get("jump_strength", -14) * 1.2 # jump boost
-        else:
-            self.jump_strength = p.get("jump_strength", -14)
-
+        self.jump_strength = p.get("jump_strength", -14)
         self.pogo_strength = p.get("pogo_strength", -10)
         self.max_speed = p.get("max_speed", 10)
         self.speed = p.get("speed", 3)
@@ -85,8 +80,14 @@ class Player(PhysicsEntity):
         self.wind_force_x = 0
         self.wind_force_y = 0
         self.on_ice = False
-
         self.respawn_on_touch = False
+
+        #CHARMS
+        self.equipped_charms = {}
+        self.range_bonus = 0
+        self.no_kb = False
+        self.health_bonus = 0
+        self.refresh_charms()
 
         # SONS
         self.attack_sounds = [
@@ -331,27 +332,23 @@ class Player(PhysicsEntity):
                     self.attack_rect = pygame.Rect(0, 0, 0, 0)                
 
                 else:
-                    long_range = equipped_charms and equipped_charms.get("attack_long_range", False)
-                    range_bonus = 40 if long_range else 0  # +40px si charm équipé
-
-
                     if self.attack_direction == "UP":
-                        h = 70 + range_bonus
+                        h = 70 + self.range_bonus
                         self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.top - h, 50, h)
 
 
                     elif self.attack_direction == "DOWN":
-                        h = 70 + range_bonus
+                        h = 70 + self.range_bonus
                         self.attack_rect = pygame.Rect(self.rect.centerx - 20, self.rect.bottom, 50, h)
 
 
                     elif self.attack_direction == "RIGHT":
-                        w = 70 + range_bonus
+                        w = 70 + self.range_bonus
                         self.attack_rect = pygame.Rect(self.rect.right, self.rect.centery - 20, w, 50)
 
 
                     elif self.attack_direction == "LEFT":
-                        w = 70 + range_bonus
+                        w = 70 + self.range_bonus
                         self.attack_rect = pygame.Rect(self.rect.left - w, self.rect.centery - 20, w, 50)
             
             # INVINCIBILITE
@@ -366,6 +363,15 @@ class Player(PhysicsEntity):
         else:
             self.acceleration.x = 0 # Ne pas permettre au joueur de se déplacer pendant le stun
             self.animate() # Forcer l'idle pendant le stun
+
+    def refresh_charms(self) :
+        self.equipped_charms = get_player_equipped_charms()
+    
+        self.speed = 4 if self.equipped_charms.get("speed_boost") else 3
+        self.jump_strength = -14 * 1.2 if self.equipped_charms.get("jump_boost") else -14
+        self.range_bonus = 40 if self.equipped_charms.get("attack_long_range") else 0
+        self.no_kb = self.equipped_charms.get("no_knockback")
+        self.health_bonus = 2 if self.equipped_charms.get("life_boost") else 0
 
     def press_jump(self):
         self.is_sitting = False # Si joueur assis et saute il se leve
@@ -450,7 +456,7 @@ class Player(PhysicsEntity):
             self.velocity.y = self.pogo_strength # Rebondir vers le haut après une attaque vers le bas
             self.double_jump.reset()
         else :
-            if not get_player_equipped_charms().get("no_knockback", False):
+            if self.no_kb:
                 if self.attack_direction == "UP": # Pour avoir un léger ressenti sans écraser le joeur au sol
                     if self.velocity.y < 0:
                         self.velocity.y *= 0.5
