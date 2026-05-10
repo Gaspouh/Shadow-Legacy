@@ -40,8 +40,8 @@ home_screen(fenetre)
 
 #Map
 MAP_PATH_TO_NAME = {v: k for k, v in MAP_PATHS.items()} # ça permet d'inverser le dico en gardant clé:valeur
-current_map_name, current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
-#current_map_name, current_map_path = "hollow_earth", MAP_PATHS["hollow_earth"] # --- IGNORE --- pour les tests, spawn direct au village
+#current_map_name, current_map_path = get_saved_map()  # recupère la map actuelle depuis la save
+current_map_name, current_map_path = "hollow_earth", MAP_PATHS["hollow_earth"] # --- IGNORE --- pour les tests, spawn direct au village
 map_manager = Map_Manager(fenetre)
 map_manager.load_map(os.path.join(Chemin_absolu, "Graphics", current_map_name, current_map_path)) # charge la map actuelle
 layers = create_parallax_layers(os.path.join(Chemin_absolu, "Graphics", current_map_name), nb_layers=map_manager.nb_parallax_layers, fenetre=game_fenetre) # créer les layers de parallax pour la map actuelle
@@ -71,9 +71,16 @@ liste_entites = map_manager.spawn_entities(fenetre, MAP_RECT)
 repndu_visible = ... # defini dans la boucle. optimisation du rendu pour blit dans la caméra
 chunks = chunck_zone(platforms)
 
+# Forgeron
+forgeron_instance = None
+for npc in pnj:
+    if isinstance(npc, Forgeron):
+        forgeron_instance = npc
+        break
+
 #Joueur
 player = Player(100, 100, fenetre)
-spawn_point, cadavre_data = charger(player, checkpoints, current_map_name)  # charge la save si elle existe, sinon spawn par défaut + le cadavre
+spawn_point, cadavre_data = charger(player, checkpoints, current_map_name, forgeron_instance)  # charge la save si elle existe, sinon spawn par défaut + le cadavre
 player.position = pygame.math.Vector2(spawn_point.x, spawn_point.y)  # position du joueur maj à partir du spawn point
 player.rect.midbottom = player.position # pareil avec la hitbox
 
@@ -81,9 +88,6 @@ cadavre = None
 if cadavre_data and cadavre_data["map"] == current_map_name:
     cadavre = Cadavre(cadavre_data["x"], cadavre_data["y"], cadavre_data["orbs"], current_map_name)
 last_pos = (100, 100)   # derniere fois que le joueur a touché le sol
-
-#Boss
-
 
 # UI
 ui_reposer = pygame.image.load("Assets/Images/UI_'Pressez_Z'.png").convert_alpha()
@@ -389,7 +393,7 @@ while continuer:
                         cp.activated = True
                         player.health = player.max_health
                         spawn_point = pygame.math.Vector2(cp.rect.topleft)
-                        sauvegarder(player, checkpoints, current_map_name, index_last_checkpoint=i)
+                        sauvegarder(player, checkpoints, current_map_name, forgeron_instance, index_last_checkpoint=i, cadavre=cadavre) # sauvegarder 
                         set_spawn_sound.play()
                 
                 # si le joueur est deja assis, on peu ouvrir l'inventaire avec E
@@ -439,6 +443,11 @@ while continuer:
                 doors = map_manager.doors
                 objects = map_manager.objets
                 pnj = map_manager.pnj
+                forgeron_instance = None
+                for npc in pnj:
+                    if isinstance(npc, Forgeron):
+                        forgeron_instance = npc
+                        break
                 entities_to_spawn = map_manager.entities_to_spawn
                 # charger cadavre
                 if cadavre_data and cadavre_data["map"] == current_map_name:
@@ -561,12 +570,14 @@ while continuer:
                 elem.hit = True # Pour éviter que le même projectile touche plusieurs fois
                 hitstop_duration, shake_amount = player.take_damage(elem.attack_data, elem.rect, elem)# Appliquer les dégâts et le recul au joueur
                 hitstop_until = pygame.time.get_ticks() + hitstop_duration # Activer le hitstop
+        
+
 
     # Gestion de mort
     else:
         cadavre = Cadavre(last_pos[0], last_pos[1], Monnaie.orbs, current_map_name)   # créer le  cadavrte a la dernire pos
         Monnaie.orbs = 0
-        sauvegarder(player, checkpoints, current_map_name, index_last_checkpoint=None, cadavre=cadavre) # sauvegarder la position du cadavre
+        sauvegarder(player, checkpoints, current_map_name, forgeron_instance, index_last_checkpoint=None, cadavre=cadavre) # sauvegarder la position du cadavre
 
         death_sound.play()
         debut_mort = pygame.time.get_ticks()

@@ -39,8 +39,8 @@ class Demon_King(Boss):
         self.sprite_inverted = True
         self.friction = -0.4
         
-        self.pv_demon = 500
-        self.pv_demon_max = 500
+        self.pv_demon = 300
+        self.pv_demon_max = 300
         self.transformed = False
         self.phase_en_attente = None
 

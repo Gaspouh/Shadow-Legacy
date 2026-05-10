@@ -2,6 +2,7 @@ from Visual.sprite_sheet import VerticalAnimation , Animation
 import pygame
 from Visual.interface import charms_market
 from World.objets import Monnaie
+from Core.save import sauvegarder
 
 class NPC_Logic():
     IDLE = "idle"
@@ -209,7 +210,6 @@ class Forgeron(NPC_Logic, Animation):
         height = 58
         marge = 0
         ligne= 0
-        self.upgrade_done = 0
         self.upgrade_cost = 1
         self.orb_cost = 100
 
@@ -244,8 +244,8 @@ class Forgeron(NPC_Logic, Animation):
         player.minerais -= self.upgrade_cost
         Monnaie.orbs -= self.orb_cost
 
-        player.attack += 1 # Améliore l'attaque du joueur
-        self.upgrade_done += 1 # Incrémente le nombre d'améliorations effectuées
+        player.attack += 5 # Améliore l'attaque du joueur
         self.upgrade_cost += 1 # Augmente le coût de la prochaine amélioration
         self.orb_cost += 50 # Augmente le coût en pièce de la prochaine amélioration
         self.start_dialogue(["Ton arme a été améliorée , tu es maintenant plus fort contre les ennemis !"], dialogue_type="normal") # Dialogue de confirmation de l'amélioration
+        

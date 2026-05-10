@@ -33,7 +33,7 @@ class Gravelion(Boss):
             (arene_rect.right - marge_x, hauteur_air)
         ]
         self.arene_rect = arene_rect
-        super().__init__(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 4, 400, 100, 0, 0, 500, 1,\
+        super().__init__(fenetre, x, y, "Assets/Boss/Gravelion/Gravelion_sprite_sheet.png", 4, 400, 100, 0, 0, 300, 1,\
                         {"damage": 1, "knockback_x": 80, "knockback_y": -5}, tp_points, stagger_threshold=150, scale=1)
 
         self.arene_rect = arene_rect
