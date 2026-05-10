@@ -21,7 +21,7 @@ MAP_PATHS = {
     "hollow_earth": "hollow_earth.tmx",
     "parcours": "Parcours.tmx",
     "parcours": "Parcours_2.tmx",
-    "mines": "final_boss.tmxindustrialgravelion_arene",
+    "mines": "final_boss.tmx"
 }
 
 TMX_TO_FOLDER = {
@@ -32,7 +32,7 @@ TMX_TO_FOLDER = {
     "Parcours.tmx": "forest",
     "Parcours_2.tmx": "forest",
     "forest.tmx": "forest",
-    "gravelion_arene.tmx": "cave",
+    "min_boss_arene.tmx": "cave",
     "hollow_earth.tmx": "hollow_earth",
     "final_boss.tmx": "mines",
     "gravelion_arene": "industrial",
@@ -169,7 +169,7 @@ def sauvegarder(
                 data_spawn = json.load(f)
             main_spawn = data_spawn.get("main_spawn")
         if main_spawn is None:
-            main_spawn = {"x": spawn.x, "y": spawn.y, "map": MAP_PATHS[map_name]}
+            main_spawn = {"x": spawn.x, "y": spawn.y, "map": map_name}
 
     if os.path.exists(
         SAVE_FILE

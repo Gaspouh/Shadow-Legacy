@@ -464,7 +464,7 @@
   <object id="36" x="4884.56" y="641.034" width="126.166" height="61.3337">
    <properties>
     <property name="obj_type" value="door"/>
-    <property name="target_map" value="cave/gravelion_arene.tmx"/>
+    <property name="target_map" value="cave/min_boss_arene.tmx"/>
     <property name="target_spawn" value="left"/>
    </properties>
    <capsule/>
