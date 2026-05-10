@@ -125,6 +125,19 @@ def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None, cadav
     safe_map_name = map_name.lower() if map_name else "swamp"
     tmx_file = MAP_PATHS.get(safe_map_name, MAP_PATHS["swamp"])
 
+    # obtenir le spawn "global" (toutes map confondues)
+    if index_last_checkpoint is not None:
+        main_spawn = {"x": spawn.x, "y": spawn.y, "map": map_name}
+    else:
+        main_spawn = None
+        if os.path.exists(SAVE_FILE):
+            with open(SAVE_FILE, "r") as f:
+                data_spawn = json.load(f)
+            main_spawn = data_spawn.get("main_spawn")
+        if main_spawn is None:
+            main_spawn = {"x": spawn.x, "y": spawn.y, "map": MAP_PATHS[map_name]}
+
+
     if os.path.exists(SAVE_FILE): # pour ne pas écraser les objets ramassés, on vérifie d'abord ce qui est déjà dans le json
         with open(SAVE_FILE, "r") as f:
             old_data = json.load(f)
@@ -173,6 +186,9 @@ def sauvegarder(player, checkpoints, map_name, index_last_checkpoint=None, cadav
         
         # objets ramassés
         "taken_objects": taken_objects,
+
+        # spawn global
+        "main_spawn": main_spawn,
 
         "cadavre": {
             "map": cadavre.map_name,
@@ -229,21 +245,16 @@ def charger(player, checkpoints, map):
         # quand y'aura d'autres abilities
 
     # Checkpoints
-    for i, cp in enumerate(checkpoints):
-        if i < len(data["checkpoints"]):
-            cp.activated = data["checkpoints"][i]["activated"]
+    main_spawn = data.get("main_spawn")
+    if main_spawn:
+        spawn_point = pygame.math.Vector2(main_spawn["x"], main_spawn["y"])
+        spawn_map = main_spawn.get("map")
+    else:
+        spawn_point = get_spawn_from_checkpoints(checkpoints, map)
+        spawn_map = map
 
-    last_checkpoint_index = data.get("last_checkpoint")
-    if last_checkpoint_index is not None and last_checkpoint_index < len(checkpoints):
-        # Renvoie le dernier banc avec la pos des coordonnées et le cadavre
-        return pygame.math.Vector2(checkpoints[last_checkpoint_index].rect.x, checkpoints[last_checkpoint_index].rect.y), data.get("cadavre")
-
-    # On recalcule depuis les checkpoints rechargés (pour etre sur)
-    spawn_point = get_spawn_from_checkpoints(checkpoints, map)
-
-    # Cadavre
     cadavre_data = data.get("cadavre")
-    return spawn_point, cadavre_data
+    return spawn_point, cadavre_data, spawn_map
 
 def supprimer_sauvegarde():
     """Supprime la sauvegarde pour une nouvelle game par exemple"""

@@ -151,7 +151,7 @@ def menu(fenetre, player, checkpoints, current_map_name):
 
 
 def sit_on_bench(fenetre, player):
-    """ Drag and drop : Ouvre l'inventaire lorsque le joueur est assis sur un banc + gestion des charms equippés et drag (max 3). Systeme de slot en gros."""        
+    """ Drag and drop : Ouvre l'inventaire lorsque le joueur est assis sur un banc + gestion des charms equippés et drag (max 4). Systeme de slot en gros."""        
     open_inventory = True
     with open(SAVE_FILE, "r") as f:
         data = json.load(f)
@@ -264,7 +264,7 @@ def sit_on_bench(fenetre, player):
                 if charm_selected:
                     # si charms selectionné et dans la zone equipperment des charms (drag and drop)
                     if equip_charms_rect.collidepoint(mouse_pos) and charm_selected["name"] not in [i["name"] for i in charms_equiper]: # i pour verifier que le charm appartient pas deja a ceux equipés
-                        if len(charms_equiper) < 2:    # maximum 3 charms équipés
+                        if len(charms_equiper) < 4:    # maximum 4 charms équipés
                             charm_selected["rect"].topleft = (equip_charms_rect.x +20+len(charms_equiper) *(charm_selected["img"].get_width() + 20), equip_charms_rect.y + 20)
                             charms_equiper.append(charm_selected)
                             charms_afficher.remove(charm_selected)  # remplace le charm
