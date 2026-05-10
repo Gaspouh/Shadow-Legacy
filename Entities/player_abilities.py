@@ -1,10 +1,48 @@
 import pygame
-from Core.save import load_config, get_player_equipped_charms
+from Core.save import load_config, get_player_equipped_charms, get_player_unlocked_abilities, unlock_ability
 from Entities.ennemi import Projectile
+
+class Ability(pygame.sprite.Sprite):
+    KEYS = {
+        "dash" : "Maj Gauche",
+        "double_jump" : "Espace dans les airs"
+    }
+
+    def __init__ (self, x, y, width, height, ability_name, name):
+        self.name = name
+        self.ability_name = ability_name
+        self.text_timer = 0
+        self.collected = get_player_unlocked_abilities()[ability_name]
+        self.image = pygame.image.load("Assets\Images\Ability.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (width, height))
+        self.rect = self.image.get_rect(topleft=(x, y))
+
+    def update(self, player_rect, player):
+        if not self.collected and self.rect.colliderect(player_rect):
+            unlock_ability(self.ability_name)
+            getattr(player, self.ability_name).unlocked = True  #mettre ability.unlocked à True
+            self.collected = True
+            self.text_timer = pygame.time.get_ticks()
+
+    def draw(self, game_fenetre, camera):
+        if not self.collected:
+            game_fenetre.blit(self.image, camera.apply(self.rect))
+
+    def draw_text(self, game_fenetre):
+        if not self.text_timer or pygame.time.get_ticks() - self.text_timer > 3500:
+            return
+        font = pygame.font.SysFont("Arial", 25, bold=True)
+        text = font.render(f"{self.name} débloqué  —  [{self.KEYS[self.ability_name]}] pour l'utiliser", True, (255, 255, 255)) 
+        text_x = game_fenetre.get_width() // 2 - text.get_width() // 2
+        text_y = game_fenetre.get_height() // 2 - text.get_height() // 2
+        cadre = pygame.Surface((text.get_width() + 20, text.get_height() + 20), pygame.SRCALPHA)
+        cadre.fill((0, 0, 0, 150)) #Noir avec Opacité de 150
+        game_fenetre.blit(cadre, (text_x - 10, text_y - 10)) #Centrer le cadre
+        game_fenetre.blit(text, (text_x, text_y))
 
 class Dash:
     def __init__(self, cfg={}): #cfg signifie "configuration"
-        self.unlocked = True # Permet de débloquer le dash plus tard dans le jeu
+        self.unlocked = False # Permet de débloquer le dash plus tard dans le jeu
 
         cfg_dash = cfg if cfg else load_config()["abilities"]["dash"]
 
@@ -63,7 +101,7 @@ class Dash:
 
 class Double_jump:
     def __init__(self, cfg={}):
-        self.unlocked = True # Permet de débloquer le double saut plus tard dans le jeu
+        self.unlocked = False # Permet de débloquer le double saut plus tard dans le jeu
 
         cfg_dj = cfg if cfg else load_config()["abilities"]["double_jump"]
 
@@ -81,8 +119,15 @@ class Double_jump:
 class sort:
     def __init__(self):
         self.cost = 33 # Coût en sang pour utiliser le sort
+        self.damage = 3
         
     def use(self, player, projectiles):
+        if get_player_equipped_charms().get("spell_master") :
+            self.cost = 22
+            self.damage = 5
+        else :
+            self.cost = 33
+            self.damage = 3
         if player.sang >= self.cost: # Vérifie que le joueur a assez de sang pour utiliser le sort
             player.sang -= self.cost # Consomme du sang
             direction = player.direction
@@ -90,7 +135,7 @@ class sort:
             y = player.rect.centery - 20 # pour éviter la collision avec le sol
             target_x = x + (direction * 1000)  # tire loin devant
             target_y = y
-            projectile = Projectile(x, y, target_x, target_y, 15, 80, 80, 3, image=pygame.image.load('Assets/Images/sort.png').convert_alpha())
+            projectile = Projectile(x, y, target_x, target_y, 15, 80, 80, self.damage, image=pygame.image.load('Assets/Images/sort.png').convert_alpha())
             projectiles.append(projectile)
             return True
         return False
@@ -100,7 +145,7 @@ class soin:
         self.cost = 33 # Coût en sang pour utiliser le soin
         self.heal_amount = 1 # Quantité de santé restaurée par le soin
         self.clock = 0 # Horloge pour gérer le cooldown du soin
-        self.cooldown = 0 # Cooldown du soin en millisecondes
+        self.cooldown = 1000 # Cooldown du soin en millisecondes
         self.last_heal_time = -5000 # Temps du dernier soin
         self.is_healing = False # pour indiquer si le soin est en cours d'utilisation
         self.timer_soin = 0 # Timer pour gérer la durée du soin
@@ -109,7 +154,9 @@ class soin:
     def use(self, player):
         now = pygame.time.get_ticks()
         if get_player_equipped_charms().get("fast_heal", False):
-            self.timer_soin
+            self.timer_soin = 1200
+        else :
+            self.timer_soin = 2000
         if player.sang >= self.cost and player.health < player.max_health and now - self.last_heal_time >= self.cooldown: # Vérifie que le joueur a assez de sang et n'est pas déjà à pleine santé
             self.is_healing = True
             self.timer_soin = now # Démarre le timer du soin

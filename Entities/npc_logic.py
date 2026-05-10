@@ -205,9 +205,9 @@ class Forgeron(NPC_Logic, Animation):
     def __init__(self, fenetre, x, y):
         sprite_sheet = 'Assets/Npc/forgeron.png'
         nb_frames = 9
-        width = 75
+        width = 63
         height = 58
-        marge = 0
+        marge = 7
         ligne= 0
         self.upgrade_done = 0
         self.upgrade_cost = 1

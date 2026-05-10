@@ -37,7 +37,10 @@
         "x": 569.0,
         "y": 575.0
     },
-    "abilities": {},
+    "abilities": {
+        "dash": false,
+        "double_jump": false
+    },
     "checkpoints": [
         {
             "activated": false,

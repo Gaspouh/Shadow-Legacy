@@ -62,6 +62,7 @@ spawnpoints = map_manager.spawnpoints
 doors = map_manager.doors
 entities_to_spawn = map_manager.entities_to_spawn
 pnj= map_manager.pnj
+abilities = map_manager.abilities
 
 special_surfaces = [sp.surface for sp in special_platforms if sp.surface is not None]
 
@@ -96,7 +97,7 @@ death_sound = pygame.mixer.Sound("Assets/Sounds/elden-ring-death.mp3")
 death_sound.set_volume(0.7)
 
 #Attributs
-hearts = [Coeur(fenetre, 100 + i*110, 35) for i in range(player.max_health)]
+hearts = [Coeur(fenetre, 100 + i*110, 35) for i in range(player.max_health + player.health_bonus)]
 monnaie = Monnaie(fenetre, 200, 200)
 fade = Fade(GAME_WIDTH, GAME_HEIGHT)
 door_collided = None
@@ -285,9 +286,14 @@ while continuer:
                         else:
                             player.attack_data["damage"] = player.attack
                         
+                        if get_player_equipped_charms().get("more_blood", False):
+                            bonus = 1.3
+                        else :
+                            bonus = 1
+
                         e.receive_hit(player.attack_data, player.rect, player) # Appliquer les effets de recul à l'ennemi 
                         
-                        player.sang = min(player.sang_max, player.sang + 11)
+                        player.sang = min(player.sang_max, player.sang + int(11*bonus))
                         player.attack_feedback(e)
                     
                         hitstop_until = now + 50 # Activer le hitstop pendant 50ms
@@ -367,6 +373,12 @@ while continuer:
                 bot.update(player.rect, player, event, e_proches=None)
                 bot.draw(game_fenetre, camera)
 
+            for ab in abilities:
+                ab.update(player.rect, player)
+                ab.draw(game_fenetre, camera)
+
+            print(player.position)
+
         # Checkpoints/bancs
         for i, cp in enumerate(checkpoints):
             # On calcule la position a l'écran
@@ -386,14 +398,16 @@ while continuer:
                     # Au lieu de juste "if 'Z' pressed" qui appuierai 60 fois/s :
                     if pygame.key.get_pressed()[pygame.K_z]:
                         player.is_sitting = True
+                        player.refresh_charms()
                         cp.activated = True
-                        player.health = player.max_health
+                        player.health = player.max_health + player.health_bonus
                         spawn_point = pygame.math.Vector2(cp.rect.topleft)
                         sauvegarder(player, checkpoints, current_map_name, index_last_checkpoint=i)
                         set_spawn_sound.play()
                 
                 # si le joueur est deja assis, on peu ouvrir l'inventaire avec E
                 else:
+                    player.refresh_charms()
                     if pygame.key.get_pressed()[pygame.K_e]:
                         sit_on_bench(fenetre, player)
 
@@ -439,6 +453,7 @@ while continuer:
                 doors = map_manager.doors
                 objects = map_manager.objets
                 pnj = map_manager.pnj
+                abilities = map_manager.abilities
                 entities_to_spawn = map_manager.entities_to_spawn
                 # charger cadavre
                 if cadavre_data and cadavre_data["map"] == current_map_name:
@@ -524,9 +539,12 @@ while continuer:
         for heart in hearts:
             game_fenetre.blit(heart.image, heart.rect) # Les cœurs sont fixes à l'écran, pas besoin d'appliquer le décalage de la caméra
         
-        if len(hearts) < player.max_health:
+        if len(hearts) < player.max_health + player.health_bonus:
             i = len(hearts)
             hearts.append(Coeur(fenetre, 100 + i*110, 35))
+        # Suppression si charm retiré
+        elif len(hearts) > player.max_health + player.health_bonus:
+            hearts.pop()
 
         for e in liste_entites:
             if pygame.key.get_pressed()[pygame.K_a]:
@@ -608,6 +626,8 @@ while continuer:
     if not pause or not new_game:
         fenetre.blit(pygame.transform.scale(game_fenetre, (GAME_WIDTH, GAME_HEIGHT)), (0, 0))
         fade.update(fenetre)
+        for ab in abilities:
+            ab.draw_text(fenetre)
         pygame.display.update()
     clock.tick(60)
 pygame.quit()

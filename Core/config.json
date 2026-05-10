@@ -39,7 +39,7 @@
         "fast_heal": null,
         "more_blood": null,
         "speed_boost": null,
-        "life_boost": null,
+        "life_boost": null, 
         "spell_master": null
     },
     "chunks" : 4
