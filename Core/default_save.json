@@ -11,12 +11,26 @@
         "found_charms": {
             "attack_long_range": false,
             "attack_speed": false,
-            "jump_boost": false
+            "jump_boost": false,
+            "no_knockback": false,
+            "more_coin": false,
+            "fast_heal": false,
+            "more_blood": false,
+            "speed_boost": false,
+            "life_boost": false,
+            "spell_master": false
         },
         "equipped_charms": {
             "attack_long_range": false,
             "attack_speed": false,
-            "jump_boost": false
+            "jump_boost": false,
+            "no_knockback": false,
+            "more_coin": false,
+            "fast_heal": false,
+            "more_blood": false,
+            "speed_boost": false,
+            "life_boost": false,
+            "spell_master": false
         }
     },
     "spawn_point": {

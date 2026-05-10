@@ -332,7 +332,7 @@ class Player(PhysicsEntity):
 
                 else:
                     long_range = equipped_charms and equipped_charms.get("attack_long_range", False)
-                    range_bonus = 50 if long_range else 0  # +50px si charm équipé
+                    range_bonus = 40 if long_range else 0  # +40px si charm équipé
 
 
                     if self.attack_direction == "UP":
@@ -442,24 +442,25 @@ class Player(PhysicsEntity):
         if not target.apply_knockback:
             return
         
-        if hasattr(target, "is_ghost"):
+        if hasattr(target, "is_ghost"): #Pour boss final pdt changement de phase
             if target.is_ghost:
                 return
         
         if self.attack_direction == "DOWN": 
             self.velocity.y = self.pogo_strength # Rebondir vers le haut après une attaque vers le bas
             self.double_jump.reset()
-        
-        elif self.attack_direction == "UP": # Pour avoir un léger ressenti sans écraser le joeur au sol
-            if self.velocity.y < 0:
-                self.velocity.y *= 0.5
         else :
-            if self.direction == 1: # Reculer vers la droite
-                self.velocity.x = -self.attack_knockback_x
-            else: # Reculer vers la gauche
-                self.velocity.x = self.attack_knockback_x
+            if not get_player_equipped_charms().get("no_knockback", False):
+                if self.attack_direction == "UP": # Pour avoir un léger ressenti sans écraser le joeur au sol
+                    if self.velocity.y < 0:
+                        self.velocity.y *= 0.5
+                else :
+                    if self.direction == 1: # Reculer vers la droite
+                        self.velocity.x = -self.attack_knockback_x
+                    else: # Reculer vers la gauche
+                        self.velocity.x = self.attack_knockback_x
 
-            self.velocity.y = self.attack_knockback_y
+                    self.velocity.y = self.attack_knockback_y
 
     
     def take_damage(self, attack_data, source_rect, source, fade=None):

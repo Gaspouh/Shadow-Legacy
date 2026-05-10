@@ -169,7 +169,7 @@ class Gordon1_NPC(NPC_Logic, VerticalAnimation):
 
         super().__init__(fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, colonne, scale=1, arrival_dialogue=self.arrival_dialogue, leave_dialogue=self.leave_dialogue)
         self.sell_charms = {
-            "attack_speed": {"price": 100, "image": "Assets/charms/attack_speed.png"}
+            "more_coin": {"price": 100, "image": "Assets/charms/attack_speed.png"}
         }
         self.market_seller = charms_market  # appel de la fonction des charms
 

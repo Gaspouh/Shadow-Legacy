@@ -275,7 +275,15 @@ def charms_images():
     charms_assets = {
         "attack_long_range" : path + "/attack_long_range.png",
         "attack_speed" : path + "/attack_speed.png",
-        "jump_boost" : path + "/jump_boost.png"
+        "jump_boost" : path + "/jump_boost.png",
+        "no_knockback": path + "/attack_long_range.png",
+        "more_coin": path + "/more_coin.png",
+        "fast_heal": path + "/fast_heal.png",
+        "more_blood": path + "/more_blood.png",
+        "speed_boost": path + "/speed_boost.png",
+        "life_boost": path + "/life_boost.png",
+        "spell_master": path + "/spell_master.png"
+        
     }
 
     """

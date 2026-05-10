@@ -27,8 +27,8 @@ class Demon_King(Boss):
     def __init__(self, fenetre,x, y, arene_rect):
         marge_x = 300
         tp_points = [
-            (arene_rect.left + marge_x, arene_rect.bottom),
-            (arene_rect.right - marge_x, arene_rect.bottom),
+            (arene_rect.left + marge_x, arene_rect.bottom - 150),
+            (arene_rect.right - marge_x, arene_rect.bottom - 150),
             (arene_rect.centerx, arene_rect.bottom)
         ]
         super().__init__(fenetre, x, y, "Assets/Boss/Demon_King/slime_idle.png", 6, 64, 64, 0, 0, 100, 2,\
@@ -289,6 +289,7 @@ class Demon_King(Boss):
         self.update_anim(once=True)
         if self.anim_over() and elapsed > 500:
             self.alive = False
+            print("oui")
 
     def update_attack(self, elapsed, player_rect):
         if self.current_attack == self.ATK_CLEAVE:
@@ -311,7 +312,7 @@ class Demon_King(Boss):
         progression = int((elapsed / 800) * 255)
         self.intensity = max(0, 255 - progression)
 
-        if elapsed > 2000:
+        if elapsed > 2500:
             self.intensity = 0
             self.appliquer_phase(self.phase_en_attente)
             self.enter_state(self.REAPPEARING)

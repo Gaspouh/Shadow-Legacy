@@ -66,7 +66,11 @@ class Monnaie:
 
     @staticmethod   # permet de rendre global
     def add_orbs(amount):
-        Monnaie.orbs += amount
+        from Core.save import get_player_equipped_charms
+        if get_player_equipped_charms().get("more_coin", False):
+            Monnaie.orbs += amount * 1.3
+        else :
+            Monnaie.orbs += amount
 
     def draw(self, fenetre):
         self.rect = self.image.get_rect(topright=(fenetre.get_width() - 50, 50))

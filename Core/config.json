@@ -9,7 +9,7 @@
         "max_speed": 10,
         "speed": 2.5,
 
-        "attack": 1,
+        "attack": 10,
         "attack_cooldown": 350,
         "attack_duration": 240,
         "attack_knockback_x": 80,
@@ -18,7 +18,7 @@
 
         "invincibility_duration": 2000,
 
-        "max_charms" : 2
+        "max_charms" : 3
     },
     "abilities": {
         "dash": {
@@ -33,7 +33,14 @@
     "charms_collection": {
         "attack_long_range": null,
         "attack_speed": null,
-        "jump_boost": null
+        "jump_boost": null,
+        "no_knockback": null,
+        "more_coin": null,
+        "fast_heal": null,
+        "more_blood": null,
+        "speed_boost": null,
+        "life_boost": null,
+        "spell_master": null
     },
     "chunks" : 4
 }

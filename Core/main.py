@@ -27,8 +27,8 @@ pygame.init()
 info_ecran = pygame.display.Info()
 
 # Configs
-GAME_WIDTH, GAME_HEIGHT = info_ecran.current_w, info_ecran.current_h
-fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.RESIZABLE | pygame.DOUBLEBUF, vsync=1) 
+GAME_WIDTH, GAME_HEIGHT = 1920, 1080
+fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.DOUBLEBUF, vsync=1) 
 pygame.display.set_caption("Shadow Legacy") # Définir le titre de la fenêtre
 
 zoom = 1.5 # zoom

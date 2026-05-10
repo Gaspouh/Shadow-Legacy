@@ -1,5 +1,5 @@
 import pygame
-from Core.save import load_config
+from Core.save import load_config, get_player_equipped_charms
 from Entities.ennemi import Projectile
 
 class Dash:
@@ -97,10 +97,10 @@ class sort:
 
 class soin:
     def __init__(self):
-        self.cost = 44 # Coût en sang pour utiliser le soin
+        self.cost = 33 # Coût en sang pour utiliser le soin
         self.heal_amount = 1 # Quantité de santé restaurée par le soin
         self.clock = 0 # Horloge pour gérer le cooldown du soin
-        self.cooldown = 1000 # Cooldown du soin en millisecondes
+        self.cooldown = 0 # Cooldown du soin en millisecondes
         self.last_heal_time = -5000 # Temps du dernier soin
         self.is_healing = False # pour indiquer si le soin est en cours d'utilisation
         self.timer_soin = 0 # Timer pour gérer la durée du soin
@@ -108,6 +108,8 @@ class soin:
         
     def use(self, player):
         now = pygame.time.get_ticks()
+        if get_player_equipped_charms().get("fast_heal", False):
+            self.timer_soin
         if player.sang >= self.cost and player.health < player.max_health and now - self.last_heal_time >= self.cooldown: # Vérifie que le joueur a assez de sang et n'est pas déjà à pleine santé
             self.is_healing = True
             self.timer_soin = now # Démarre le timer du soin
