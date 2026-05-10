@@ -20,15 +20,27 @@ class Camera:
         self.camera = pygame.Rect(0, 0, self.zoom_w, self.zoom_h)
 
     def apply(self, entity_rect):
+        """Applique la physique et met à jour la position et la vitesse de l'entité, en gérant collisions et frottements.
+        Entrées: entity_rect.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         return entity_rect.move(self.camera.topleft)
 
     def update_map_size(self, map_width, map_height):
+        """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
+        Entrées: map_width, map_height.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.map_width = map_width
         self.map_height = map_height
         self.camera.x = 0
         self.camera.y = 0
 
     def update(self, target, shake_amount=0):
+        """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
+        Entrées: target, shake_amount.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         target_x = -target.rect.centerx + self.zoom_w // 2
         target_y = -target.rect.centery + self.zoom_h // 2
 
@@ -58,6 +70,10 @@ class Background_effect:
 
     def effect(self, fenetre, camera):
         # On multiplie par la profondeur et elle est entre 0 et 1, 1 c'est la meme vitesse et 0 c'est immobile (quand la distance tend vers l'infini + Application de la "formule du tiling" classique pour faire du parallax. repete l'image au max pour couvrir tout l'écran en gros
+        """Dessine de l'entité à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        Entrées: fenetre, camera.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         offset_x = (
             camera.camera.x * self.profondeur
         ) % self.image_width  # là le modulo permet repeter l'image à l'infini
@@ -79,6 +95,10 @@ class Background_effect:
 
 
 def create_parallax_layers(map_path, nb_layers, fenetre):
+    """Fait apparaître de l'entité dans le monde et initialise ses paramètres (position, durée, dégâts).
+    Entrées: map_path, nb_layers, fenetre.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     profondeurs = [(i / nb_layers) * 0.5 for i in range(1, nb_layers + 1)]
     layers = []
     for i, p in enumerate(profondeurs):
@@ -88,6 +108,10 @@ def create_parallax_layers(map_path, nb_layers, fenetre):
 
 
 def draw_parallax(fenetre, camera, layers):
+    """Dessine de l'entité à l'écran en tenant compte de la caméra, de la position et de l'animation.
+    Entrées: fenetre, camera, layers.
+    Sortie: Aucune valeur renvoyée (None).
+    """
     for layer in layers:
         layer.effect(fenetre, camera)
 
@@ -128,6 +152,10 @@ for i in range(16):
 
 
 def background_luciole(game_fenetre, offset_x, offset_y, now):
+    """Dessine de l'entité à l'écran en tenant compte de la caméra, de la position et de l'animation.
+    Entrées: game_fenetre, offset_x, offset_y, now.
+    Sortie: Aucune valeur renvoyée (None).
+    """
     game_fenetre.fill((8, 8, 18))  # rempli l'écran en sombre
     longeur = game_fenetre.get_width()  # longueur map
     hauteur = game_fenetre.get_height()  # hauteur map
@@ -159,6 +187,10 @@ def background_luciole(game_fenetre, offset_x, offset_y, now):
 
 def draw_luciole(surface, x, y, luciole, now):
     # Calculer le niveau de brillance
+    """Dessine de l'entité à l'écran en tenant compte de la caméra, de la position et de l'animation.
+    Entrées: surface, x, y, luciole, now.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     brillance = 0.5 + 0.5 * math.sin(
         luciole["phase"] + now * luciole["vitesse_scintillement"]
     )  # variation régulière avec la fonction sinus
@@ -194,6 +226,10 @@ def draw_luciole(surface, x, y, luciole, now):
 
 
 def intro(fenetre):
+    """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
+    Entrées: fenetre.
+    Sortie: Aucune valeur renvoyée (None).
+    """
     clock = pygame.time.Clock()
     font = pygame.font.Font("Assets/Font/Cinzel.ttf", 40)
     texte = [

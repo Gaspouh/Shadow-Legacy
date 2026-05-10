@@ -18,12 +18,20 @@ class Particle:
         )  # Tons rougeâtres
 
     def update(self):
+        """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
+        Entrées: aucune.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.x += self.vx
         self.y += self.vy
         self.vy += 0.1  # Ajout de gravité
         self.life -= 1
 
     def draw(self, surface, camera):
+        """Dessine de l'entité à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        Entrées: surface, camera.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         if self.life > 0:
             # rétrécit plus lentement
             size = max(1, int(self.life / 3))
@@ -52,6 +60,10 @@ class Fade:
         self.wait_start = None
 
     def start(self, state, speed, wait=0):
+        """Exécute la logique de la fonction start liée à de l'entité, modifiant l'état ou produisant une action spécifique.
+        Entrées: state, speed, wait.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.state = state
         self.speed = speed
         self.wait = wait
@@ -62,6 +74,10 @@ class Fade:
             self.intensity = 255  # Commence dans le transparent pour passer au noir
 
     def update(self, fenetre):
+        """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
+        Entrées: fenetre.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         if self.state is not None:
             if self.state == "out":
                 self.intensity = min(255, self.intensity + self.speed)
@@ -92,11 +108,19 @@ class HealParticle:
         self.vx = random.randint(-1, 1)
 
     def update(self):
+        """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
+        Entrées: aucune.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.x += self.vx
         self.y += self.vy
         self.life -= 1
 
     def draw(self, surface, camera):
+        """Dessine de l'entité à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        Entrées: surface, camera.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         alpha = int(255 * (self.life / self.max_life))
         s = pygame.Surface((self.size * 2, self.size * 2), pygame.SRCALPHA)
         pygame.draw.circle(s, (255, 255, 255, alpha), (self.size, self.size), self.size)

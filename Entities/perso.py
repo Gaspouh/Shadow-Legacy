@@ -174,6 +174,10 @@ class Player(PhysicsEntity):
     # foret de if pour chaque anims
     def animate(self):
         # dash
+        """Calcule et retourne la frame correcte suivant la direction et l'état du joueur pour l'affichage.
+        Entrées: aucune.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         if self.is_stunned:
             self.current_animation = self.anim_idle
         elif self.dash.in_use and self.direction == 1:
@@ -220,6 +224,10 @@ class Player(PhysicsEntity):
             self.image = pygame.transform.scale(frame_surface, (115, 115))
 
     def update(self, platforms):
+        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        Entrées: platforms.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         now = pygame.time.get_ticks()
         equipped_charms = get_player_equipped_charms()
 
@@ -380,6 +388,10 @@ class Player(PhysicsEntity):
             self.animate()  # Forcer l'idle pendant le stun
 
     def refresh_charms(self):
+        """Gère l'achat d'un charme: vérifie le coût, met à jour les ressources et enregistre la découverte dans la sauvegarde.
+        Entrées: aucune.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.equipped_charms = get_player_equipped_charms()
 
         self.speed = 4 if self.equipped_charms.get("speed_boost") else 3
@@ -389,6 +401,10 @@ class Player(PhysicsEntity):
         self.health_bonus = 2 if self.equipped_charms.get("life_boost") else 0
 
     def press_jump(self):
+        """Exécute la logique de la fonction press_jump liée à du joueur, modifiant l'état ou produisant une action spécifique.
+        Entrées: aucune.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.is_sitting = False  # Si joueur assis et saute il se leve
         now = pygame.time.get_ticks()
 
@@ -399,11 +415,19 @@ class Player(PhysicsEntity):
             self.quicksand_sink = max(0, self.quicksand_sink - 10)
 
     def press_dash(self):
+        """Exécute la logique de la fonction press_dash liée à du joueur, modifiant l'état ou produisant une action spécifique.
+        Entrées: aucune.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         if self.is_sitting:
             return  # Joueur ne peut pas dash sur un banc
         self.dash.start_dash(self)
 
     def execute_jump(self, jump_type="simple"):
+        """Exécute la logique de la fonction execute_jump liée à du joueur, modifiant l'état ou produisant une action spécifique.
+        Entrées: jump_type.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.on_ground = False
         self.is_jumping = True
 
@@ -419,12 +443,20 @@ class Player(PhysicsEntity):
         self.jump_buffer_timer = -1000
 
     def stop_jump(self):
+        """Exécute la logique de la fonction stop_jump liée à du joueur, modifiant l'état ou produisant une action spécifique.
+        Entrées: aucune.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         if self.is_jumping and self.velocity.y < 0:
             self.velocity.y = 0
             self.is_jumping = False
 
     # GESTION DE L'ATTAQUE
     def press_attack(self):
+        """Gère la réception des dégâts du joueur en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
+        Entrées: aucune.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         now = pygame.time.get_ticks()
         if not self.is_attacking and now - self.last_attack_time >= self.attack_cooldown:
             keys = pygame.key.get_pressed()
@@ -460,6 +492,10 @@ class Player(PhysicsEntity):
 
     def attack_feedback(self, target):
 
+        """Calcule et retourne la frame correcte suivant la direction et l'état du joueur pour l'affichage.
+        Entrées: target.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         if not target.apply_knockback:
             return
 
@@ -484,6 +520,10 @@ class Player(PhysicsEntity):
                     self.velocity.y = self.attack_knockback_y
 
     def take_damage(self, attack_data, source_rect, source, fade=None):
+        """Gère la réception des dégâts du joueur en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
+        Entrées: attack_data, source_rect, source, fade.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         now = pygame.time.get_ticks()
 
         if self.invincible and not source.ignore_invincibility:

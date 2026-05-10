@@ -83,6 +83,10 @@ class Map_Manager:
         self.fenetre = fenetre
 
     def load_map(self, path):
+        """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de la carte.
+        Entrées: path.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         tmx_data = pytmx.load_pygame((path), pixelalpha=True)
 
         self.map_width = tmx_data.width * TILE_SIZE
@@ -107,6 +111,10 @@ class Map_Manager:
         self.nb_parallax_layers = len([fichier for fichier in os.listdir(background_folder) if fichier != "0.png"])
 
     def spawn_entities(self, fenetre, map_rect):
+        """Applique la physique et met à jour la position et la vitesse de la carte, en gérant collisions et frottements.
+        Entrées: fenetre, map_rect.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         (
             araignee,
             volant,
@@ -151,11 +159,19 @@ class Map_Manager:
         return liste_entites
 
     def get_spawn(self, name):
+        """Calcule et retourne le point de spawn à utiliser pour de la carte selon les checkpoints actifs.
+        Entrées: name.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         spawn = self.spawnpoints.get(name)
         return spawn
 
 
 def create_map(tmx_data, fenetre):
+    """Fait apparaître de la carte dans le monde et initialise ses paramètres (position, durée, dégâts).
+    Entrées: tmx_data, fenetre.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     platforms = []
     special_platforms = []
     traps = []
@@ -307,6 +323,10 @@ def create_map(tmx_data, fenetre):
 
 
 def chunck_zone(platforms):
+    """Exécute la logique de la fonction chunck_zone liée à de la carte, modifiant l'état ou produisant une action spécifique.
+    Entrées: platforms.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     zone = {}
     for i in platforms:
         x = i.rect.x // (TILE_SIZE * RENDU_CHUNCK)
@@ -321,6 +341,10 @@ def chunck_zone(platforms):
 
 
 def platforme_la_plus_proche(zone, rect):
+    """Exécute la logique de la fonction platforme_la_plus_proche liée à de la carte, modifiant l'état ou produisant une action spécifique.
+    Entrées: zone, rect.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     x = rect.centerx // (TILE_SIZE * RENDU_CHUNCK)
     y = rect.centery // (TILE_SIZE * RENDU_CHUNCK)
     proche = []

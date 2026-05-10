@@ -21,6 +21,10 @@ class Ability(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
 
     def update(self, player_rect, player):
+        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        Entrées: player_rect, player.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         if not self.collected and self.rect.colliderect(player_rect):
             unlock_ability(self.ability_name)
             getattr(player, self.ability_name).unlocked = True  # mettre ability.unlocked à True
@@ -28,10 +32,18 @@ class Ability(pygame.sprite.Sprite):
             self.text_timer = pygame.time.get_ticks()
 
     def draw(self, game_fenetre, camera):
+        """Dessine du joueur à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        Entrées: game_fenetre, camera.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         if not self.collected:
             game_fenetre.blit(self.image, camera.apply(self.rect))
 
     def draw_text(self, game_fenetre):
+        """Dessine du joueur à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        Entrées: game_fenetre.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         if not self.text_timer or pygame.time.get_ticks() - self.text_timer > 3500:
             return
         font = pygame.font.SysFont("Arial", 25, bold=True)
@@ -64,6 +76,10 @@ class Dash:
         self.dash_invincible = False  # Flag pour savoir si l'invincibilité vient du dash
 
     def start_dash(self, player):
+        """Vérifie si un son peut être joué selon le cooldown et le temps écoulé pour éviter les répétitions.
+        Entrées: player.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         now = pygame.time.get_ticks()
 
         if not self.unlocked:  # empeche d'executer le dash avant son obtention
@@ -87,6 +103,10 @@ class Dash:
         return False
 
     def update(self, player):
+        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        Entrées: player.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         if self.in_use:
             now = pygame.time.get_ticks()
             if now - self.dash_timer > self.duree:
@@ -124,9 +144,17 @@ class Double_jump:
         self.used = False
 
     def reset(self):  # Appelé quand le joueur touche le sol ou fait un pogo
+        """Réinitialise du joueur à son état de départ en restaurant position, santé et vitesses.
+        Entrées: aucune.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.used = False
 
     def can_execute(self, player):
+        """Exécute la logique de la fonction can_execute liée à du joueur, modifiant l'état ou produisant une action spécifique.
+        Entrées: player.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         if self.unlocked and not self.used and not player.on_ground:
             return True
         return False
@@ -138,6 +166,10 @@ class sort:
         self.damage = 3
 
     def use(self, player, projectiles):
+        """Gère la réception des dégâts du joueur en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
+        Entrées: player, projectiles.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         if get_player_equipped_charms().get("spell_master"):
             self.cost = 22
             self.damage = 5
@@ -179,6 +211,10 @@ class soin:
         self.duree_soin = 2000  # Durée pendant laquelle le joueur est étourdi après avoir utilisé le soin
 
     def use(self, player):
+        """Exécute la logique de la fonction use liée à du joueur, modifiant l'état ou produisant une action spécifique.
+        Entrées: player.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         now = pygame.time.get_ticks()
         if get_player_equipped_charms().get("fast_heal", False):
             self.timer_soin = 1200
@@ -195,6 +231,10 @@ class soin:
             player.stun_duration = 3000  # Le joueur est étourdi après avoir utilisé le soin
 
     def update(self, player):
+        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        Entrées: player.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         if not self.is_healing:
             return
 

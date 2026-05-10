@@ -64,7 +64,10 @@ DEFAULT_SPAWNS = {
 
 
 def load_config():
-    """Charge les stats de base depuis config.json"""
+    """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de l'entité.
+    Entrées: aucune.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     if not os.path.exists(CONFIG_FILE):
         return None
     with open(CONFIG_FILE, "r") as f:
@@ -72,7 +75,10 @@ def load_config():
 
 
 def get_saved_map():
-    """prend juste la map sauvegardée et son nom pour apres charger la bonne map"""
+    """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de l'entité.
+    Entrées: aucune.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     if not os.path.exists(SAVE_FILE):
         return MAP_NAME[0], MAP_PATHS[MAP_NAME[0]]  # fallback swamp
 
@@ -94,6 +100,10 @@ def get_saved_map():
 
 
 def get_spawn_from_checkpoints(checkpoints, map_path):
+    """Calcule et retourne le point de spawn à utiliser pour de l'entité selon les checkpoints actifs.
+    Entrées: checkpoints, map_path.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     dernier_checkpoint_actif = None
     for cp in checkpoints:
         if cp.activated:
@@ -107,7 +117,10 @@ def get_spawn_from_checkpoints(checkpoints, map_path):
 
 
 def get_player_equipped_charms():
-    """Retourne les charms équipés du joueur"""
+    """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de l'entité.
+    Entrées: aucune.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     if not os.path.exists(SAVE_FILE):
         return None
 
@@ -118,7 +131,10 @@ def get_player_equipped_charms():
 
 
 def get_player_found_charms():
-    """Retourne les charms équipés du joueur"""
+    """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de l'entité.
+    Entrées: aucune.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     if not os.path.exists(SAVE_FILE):
         return None
 
@@ -129,6 +145,10 @@ def get_player_found_charms():
 
 
 def get_player_unlocked_abilities():
+    """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de l'entité.
+    Entrées: aucune.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     if not os.path.exists(SAVE_FILE):
         return {"dash": False, "double_jump": False}
     with open(SAVE_FILE, "r") as f:
@@ -137,6 +157,10 @@ def get_player_unlocked_abilities():
 
 
 def unlock_ability(ability_name):
+    """Exécute la logique de la fonction unlock_ability liée à de l'entité, modifiant l'état ou produisant une action spécifique.
+    Entrées: ability_name.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     if not os.path.exists(SAVE_FILE):
         return
     with open(SAVE_FILE, "r") as f:
@@ -155,6 +179,10 @@ def sauvegarder(
     cadavre=None,
 ):
     # Sauvegarder l'état du jeu dans un fichier json
+    """Sauvegarde l'état courant lié à de l'entité (player, checkpoints, objets) dans le fichier de sauvegarde.
+    Entrées: player, checkpoints, map_name, forgeron_instance, index_last_checkpoint, cadavre.
+    Sortie: Aucune valeur renvoyée (None).
+    """
     spawn = get_spawn_from_checkpoints(checkpoints, map_name)
     safe_map_name = map_name.lower() if map_name else "swamp"
     tmx_file = MAP_PATHS.get(safe_map_name, MAP_PATHS["swamp"])
@@ -239,7 +267,10 @@ def sauvegarder(
 
 
 def charger(player, checkpoints, map, Forgeron=None):
-    """Pour load le json et mettre à jour les données du joueur"""
+    """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de l'entité.
+    Entrées: player, checkpoints, map, Forgeron.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
 
     if not os.path.exists(SAVE_FILE):
         return pygame.math.Vector2(
@@ -299,13 +330,19 @@ def charger(player, checkpoints, map, Forgeron=None):
 
 
 def supprimer_sauvegarde():
-    """Supprime la sauvegarde pour une nouvelle game par exemple"""
+    """Sauvegarde l'état courant lié à de l'entité (player, checkpoints, objets) dans le fichier de sauvegarde.
+    Entrées: aucune.
+    Sortie: Aucune valeur renvoyée (None).
+    """
     if os.path.exists(SAVE_FILE):
         os.remove(SAVE_FILE)
 
 
 def save_backup():
-    """Permet de créer un save.json si le fichier n'existe pas"""
+    """Sauvegarde l'état courant lié à de l'entité (player, checkpoints, objets) dans le fichier de sauvegarde.
+    Entrées: aucune.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     if not os.path.exists(SAVE_FILE):
         try:
             with open(DEFAULT_SAVE, "r") as f_default:
@@ -320,7 +357,10 @@ def save_backup():
 
 
 def charms_images():
-    """Image associée à chaque charme"""
+    """Gère l'achat d'un charme: vérifie le coût, met à jour les ressources et enregistre la découverte dans la sauvegarde.
+    Entrées: aucune.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
 
     path = "Assets/charms"
     charms_assets = {
@@ -346,7 +386,10 @@ def charms_images():
 
 
 def get_chunks_params():
-    """prend les parametres de chunk"""
+    """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de l'entité.
+    Entrées: aucune.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     if not os.path.exists(CONFIG_FILE):
         return None
     with open(CONFIG_FILE, "r") as f:
@@ -355,7 +398,10 @@ def get_chunks_params():
 
 
 def buy_charm(charm_name, price):
-    """gestion de charms, dans save pour gestion plus facile du json"""
+    """Gère l'achat d'un charme: vérifie le coût, met à jour les ressources et enregistre la découverte dans la sauvegarde.
+    Entrées: charm_name, price.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
 
     buy_sound = pygame.mixer.Sound("Assets/sounds/buy_item.mp3")
     buy_sound.set_volume(0.5)

@@ -68,6 +68,10 @@ class Rectangular_Obstacle:
         self.force_y = 0
 
     def update(self):
+        """Met à jour les animations de la carte, avance les frames et gère les transitions entre animations.
+        Entrées: aucune.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         if self.animation:
             self.image = self.animation.gestion_animation()
 

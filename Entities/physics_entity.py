@@ -20,6 +20,10 @@ class PhysicsEntity:
 
     def apply_physics(self):
 
+        """Applique la physique et met à jour la position et la vitesse de l'entité, en gérant collisions et frottements.
+        Entrées: aucune.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.acceleration.x = 0
         self.acceleration.y = 0
 
@@ -41,6 +45,10 @@ class PhysicsEntity:
     def move_horizontal(self, platforms):
 
         # Déplacement entité
+        """Applique la physique et met à jour la position et la vitesse de l'entité, en gérant collisions et frottements.
+        Entrées: platforms.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.position.x += self.velocity.x + 0.5 * self.acceleration.x
         self.rect.centerx = self.position.x
 
@@ -59,6 +67,10 @@ class PhysicsEntity:
     def move_vertical(self, platforms):
 
         # Déplacement entité
+        """Applique la physique et met à jour la position et la vitesse de l'entité, en gérant collisions et frottements.
+        Entrées: platforms.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.position.y += self.velocity.y + 0.5 * self.acceleration.y
         self.rect.bottom = self.position.y
 
@@ -78,6 +90,10 @@ class PhysicsEntity:
 
     def physics_update(self, platforms):
 
+        """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
+        Entrées: platforms.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.apply_physics()
         self.move_horizontal(platforms)
         self.move_vertical(platforms)

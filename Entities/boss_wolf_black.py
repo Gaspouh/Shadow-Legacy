@@ -91,6 +91,10 @@ class Black_Wolf(Boss):
 
     def joueur_detecte(self, player_rect):
         # zone moins large sur x
+        """Exécute la logique de la fonction joueur_detecte liée à d'un boss, modifiant l'état ou produisant une action spécifique.
+        Entrées: player_rect.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         dx = abs(player_rect.centerx - self.rect.centerx) * 1.35
         dy = abs(player_rect.centery - self.rect.centery)
         r = self.trigger_actif
@@ -98,6 +102,10 @@ class Black_Wolf(Boss):
 
     def update_trigger(self, player_rect, now):
         # savoir si le joueur est dans le trigger
+        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        Entrées: player_rect, now.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         if self.trigger_actif == self.trigger_large:
             if self.joueur_detecte(player_rect):
                 self.last_seen_time = now
@@ -110,6 +118,10 @@ class Black_Wolf(Boss):
                     self.enter_state(self.NOT_TRIGGERED)
 
     def zone_attaque(self):
+        """Calcule et retourne la frame correcte suivant la direction et l'état d'un boss pour l'affichage.
+        Entrées: aucune.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         if self.direction == 1:
             return pygame.Rect(
                 self.rect.right,
@@ -126,9 +138,17 @@ class Black_Wolf(Boss):
         )
 
     def joueur_dans_attack(self, player_rect):
+        """Exécute la logique de la fonction joueur_dans_attack liée à d'un boss, modifiant l'état ou produisant une action spécifique.
+        Entrées: player_rect.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         return self.zone_attaque().colliderect(player_rect)
 
     def receive_hit(self, attack_data, source_rect, source):
+        """Gère la réception des dégâts d'un boss en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
+        Entrées: attack_data, source_rect, source.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         if not self.alive or self.is_shielded:
             return
         self.pv_ennemi -= attack_data["damage"]
@@ -145,7 +165,10 @@ class Black_Wolf(Boss):
                 self.enter_state(self.DYING)
 
     def update(self, player_rect, player, platforms=[]):
-        """fonction update main du blackwolf"""
+        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        Entrées: player_rect, player, platforms.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         now = pygame.time.get_ticks()
         elapsed = now - self.state_timer
 
@@ -180,6 +203,10 @@ class Black_Wolf(Boss):
 
     def update_patrol(self, now):
         # simuler des "rondes"
+        """Met à jour les animations d'un boss, avance les frames et gère les transitions entre animations.
+        Entrées: now.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.current_anim = "walk"
         self.velocity.x = 1.5 * self.patrol_dir
         self.direction = self.patrol_dir
@@ -191,6 +218,10 @@ class Black_Wolf(Boss):
         self.update_anim()
 
     def update_idle(self, elapsed, player_rect, now):
+        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        Entrées: elapsed, player_rect, now.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         self.face_player(player_rect)
         d_x = abs(player_rect.centerx - self.rect.centerx)
 
@@ -227,6 +258,10 @@ class Black_Wolf(Boss):
         self.update_anim()
 
     def update_attack(self, elapsed, player_rect, player):
+        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        Entrées: elapsed, player_rect, player.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.current_anim = self.current_attack
 
         if self.current_attack == "run_attack":
@@ -273,6 +308,10 @@ class Black_Wolf(Boss):
 
     # gesiton de mort (et la reward)
     def mort(self):
+        """Exécute la logique de la fonction mort liée à d'un boss, modifiant l'état ou produisant une action spécifique.
+        Entrées: aucune.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         if not self.alive:
             if not self.orbs_added:
                 Monnaie.add_orbs(self.orbs_value)
@@ -281,6 +320,10 @@ class Black_Wolf(Boss):
         return False
 
     def update_dying(self, elapsed):
+        """Met à jour les animations d'un boss, avance les frames et gère les transitions entre animations.
+        Entrées: elapsed.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.current_anim = "death"
         self.update_anim(once=True)
 
@@ -292,6 +335,10 @@ class Black_Wolf(Boss):
 
     # affichage
     def draw(self, fenetre, camera):
+        """Dessine d'un boss à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        Entrées: fenetre, camera.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         if not self.alive:
             return
         cam_rect = camera.apply(self.rect)

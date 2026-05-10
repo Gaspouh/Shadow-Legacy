@@ -42,6 +42,10 @@ class Animation:
 
     def gestion_animation(self):
         # Mettre à jour l'index de la frame pour l'animation
+        """Met à jour les animations de l'entité, avance les frames et gère les transitions entre animations.
+        Entrées: aucune.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         self.index_image += self.vitesse_animation
         if self.index_image >= len(self.frames_droite):
             # Réinitialiser l'index pour recommencer l'animation
@@ -50,6 +54,10 @@ class Animation:
         return self.image
 
     def gestion_animation_once(self):
+        """Calcule et retourne la frame correcte suivant la direction et l'état de l'entité pour l'affichage.
+        Entrées: aucune.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         self.index_image += self.vitesse_animation
 
         if self.index_image >= len(self.frames_droite) - 1:
@@ -107,6 +115,10 @@ class VerticalAnimation:
         self.vitesse_animation = 0.1
 
     def gestion_animation(self):
+        """Calcule et retourne la frame correcte suivant la direction et l'état de l'entité pour l'affichage.
+        Entrées: aucune.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
         self.index_image += self.vitesse_animation
         if self.index_image >= len(self.frames_droite):
             self.index_image = 0.0
@@ -114,11 +126,17 @@ class VerticalAnimation:
         return self.index_image
 
     def start_animation(self):
-        """Lance l'animation"""
+        """Exécute la logique de la fonction start_animation liée à de l'entité, modifiant l'état ou produisant une action spécifique.
+        Entrées: aucune.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.is_playing = True
 
     def stop_animation(self, reset_frame=True):
-        """Arrête l'animation"""
+        """Calcule et retourne la frame correcte suivant la direction et l'état de l'entité pour l'affichage.
+        Entrées: reset_frame.
+        Sortie: Aucune valeur renvoyée (None).
+        """
         self.is_playing = False
         if reset_frame:
             self.index_image = 0.0

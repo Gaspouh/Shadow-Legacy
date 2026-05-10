@@ -15,7 +15,10 @@ over_sound = pygame.mixer.Sound("Assets/Sounds/over_button.mp3")
 
 
 def effet_bouton(image, rect, over_state):
-    """Effet d'animation quand la souris passe sur un bouton (colidepoint), plus pratique en fonction pour utiliser dans home_screen"""
+    """Exécute la logique de la fonction effet_bouton liée à de l'entité, modifiant l'état ou produisant une action spécifique.
+    Entrées: image, rect, over_state.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     mouse_pos = pygame.mouse.get_pos()
     mouse_hover = rect.collidepoint(mouse_pos)
     # il faut créer une nouvelle image pour pas écraser celle de base
@@ -33,7 +36,10 @@ def effet_bouton(image, rect, over_state):
 
 
 def home_screen(fenetre):
-    """Affiche l'écran d'accueil du jeu avec les options de démarrage, de chargement et de sortie."""
+    """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
+    Entrées: fenetre.
+    Sortie: Aucune valeur renvoyée (None).
+    """
     running = True
     over_reprendre = False
     over_quitter = False
@@ -113,6 +119,10 @@ def home_screen(fenetre):
 
 
 def menu(fenetre, player, checkpoints, current_map_name):
+    """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+    Entrées: fenetre, player, checkpoints, current_map_name.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
     pause = True
     # Afficher le menu
     noir_transparent = pygame.Surface((fenetre.get_width(), fenetre.get_height()))
@@ -190,7 +200,10 @@ def menu(fenetre, player, checkpoints, current_map_name):
 
 
 def sit_on_bench(fenetre, player):
-    """Drag and drop : Ouvre l'inventaire lorsque le joueur est assis sur un banc + gestion des charms equippés et drag (max 4). Systeme de slot en gros."""
+    """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+    Entrées: fenetre, player.
+    Sortie: Aucune valeur renvoyée (None).
+    """
     open_inventory = True
     with open(SAVE_FILE, "r") as f:
         data = json.load(f)
@@ -376,7 +389,10 @@ def sit_on_bench(fenetre, player):
 
 
 def annonce_text(text, duration=1200):
-    """pour print facilement un message a l'ecran"""
+    """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
+    Entrées: text, duration.
+    Sortie: Aucune valeur renvoyée (None).
+    """
     fenetre = pygame.display.get_surface()
     font = pygame.font.SysFont("canela", 60)
     text_surface = font.render(text, True, (255, 0, 0))  # rouge
@@ -387,7 +403,10 @@ def annonce_text(text, duration=1200):
 
 
 def charms_market(fenetre, sell_charms):
-    """UI d'un marché de charms, pour npc par ex"""
+    """Dessine de l'entité à l'écran en tenant compte de la caméra, de la position et de l'animation.
+    Entrées: fenetre, sell_charms.
+    Sortie: Retourne une valeur si applicable, sinon None.
+    """
 
     """                     Exemple de charms a vendre
     sell_charms = {
