@@ -5,6 +5,7 @@ from Core.save import (
     SAVE_FILE,
     supprimer_sauvegarde,
     buy_charm,
+    save_backup
 )
 import os
 import json
@@ -98,6 +99,7 @@ def home_screen(fenetre):
                         pygame.time.delay(320)
                         # Supprimer les données de sauvegarde existantes pour une nouvelle partie
                         supprimer_sauvegarde()
+                        save_backup()                        
                         running = False  # Supprime la save + Passe au boucle du main pour lancer une game
 
         # Affichage des éléements
