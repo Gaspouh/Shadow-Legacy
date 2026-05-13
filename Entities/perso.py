@@ -401,9 +401,9 @@ class Player(PhysicsEntity):
         self.health_bonus = 2 if self.equipped_charms.get("life_boost") else 0
 
     def press_jump(self):
-        """Exécute la logique de la fonction press_jump liée à du joueur, modifiant l'état ou produisant une action spécifique.
+        """ déclenche le saut du joueur en fonction de son état actuel (au sol, en l'air, dans du sable mouvant, etc.) et gère les timers associés pour le coyote time et le jump buffer.
         Entrées: aucune.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: Aucune valeur renvoyée 
         """
         self.is_sitting = False  # Si joueur assis et saute il se leve
         now = pygame.time.get_ticks()
@@ -415,7 +415,7 @@ class Player(PhysicsEntity):
             self.quicksand_sink = max(0, self.quicksand_sink - 10)
 
     def press_dash(self):
-        """Exécute la logique de la fonction press_dash liée à du joueur, modifiant l'état ou produisant une action spécifique.
+        """Déclenche le dash du joueur en fonction de son état actuel et gère les timers associés pour le dash.
         Entrées: aucune.
         Sortie: Retourne une valeur si applicable, sinon None.
         """
@@ -424,7 +424,7 @@ class Player(PhysicsEntity):
         self.dash.start_dash(self)
 
     def execute_jump(self, jump_type="simple"):
-        """Exécute la logique de la fonction execute_jump liée à du joueur, modifiant l'état ou produisant une action spécifique.
+        """déclenche le saut du joueur en fonction de son état actuel (au sol, en l'air, dans du sable mouvant, etc.) et gère les timers associés pour le coyote time et le jump buffer.
         Entrées: jump_type.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -453,7 +453,7 @@ class Player(PhysicsEntity):
 
     # GESTION DE L'ATTAQUE
     def press_attack(self):
-        """Gère la réception des dégâts du joueur en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
+        """ lance une attaque dans la direction indiquée par les entrées du joueur, en vérifiant les conditions de cooldown et en appliquant les effets de l'attaque (dégâts, knockback, etc.) sur les ennemis touchés.
         Entrées: aucune.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -522,7 +522,7 @@ class Player(PhysicsEntity):
     def take_damage(self, attack_data, source_rect, source, fade=None):
         """Gère la réception des dégâts du joueur en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
         Entrées: attack_data, source_rect, source, fade.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: Retourne une valeur si applicable
         """
         now = pygame.time.get_ticks()
 

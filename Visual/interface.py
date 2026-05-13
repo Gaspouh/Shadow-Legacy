@@ -16,7 +16,7 @@ over_sound = pygame.mixer.Sound("Assets/Sounds/over_button.mp3")
 
 
 def effet_bouton(image, rect, over_state):
-    """Exécute la logique de la fonction effet_bouton liée à de l'entité, modifiant l'état ou produisant une action spécifique.
+    """Exécute la logique de l'effet de survol d'un bouton, en agrandissant l'image du bouton et en jouant un son lorsque la souris survole le bouton.
     Entrées: image, rect, over_state.
     Sortie: Retourne une valeur si applicable, sinon None.
     """
@@ -37,7 +37,7 @@ def effet_bouton(image, rect, over_state):
 
 
 def home_screen(fenetre):
-    """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
+    """Affiche l'écran d'accueil du jeu avec des options pour reprendre, quitter ou commencer une nouvelle partie, et gère les interactions avec ces options.
     Entrées: fenetre.
     Sortie: Aucune valeur renvoyée (None).
     """
@@ -202,7 +202,7 @@ def menu(fenetre, player, checkpoints, current_map_name):
 
 
 def sit_on_bench(fenetre, player):
-    """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+    """Affiche l'interface d'inventaire du joueur lorsqu'il est assis sur un banc, permettant au joueur de voir les charmes trouvés et équipés, ainsi que les réceptacles et minerais collectés, et de gérer l'équipement des charmes via une interface de glisser-déposer.
     Entrées: fenetre, player.
     Sortie: Aucune valeur renvoyée (None).
     """
@@ -391,7 +391,7 @@ def sit_on_bench(fenetre, player):
 
 
 def annonce_text(text, duration=1200):
-    """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
+    """Affiche un message d'annonce sur l'écran pendant une durée donnée.
     Entrées: text, duration.
     Sortie: Aucune valeur renvoyée (None).
     """
@@ -405,7 +405,7 @@ def annonce_text(text, duration=1200):
 
 
 def charms_market(fenetre, sell_charms):
-    """Dessine de l'entité à l'écran en tenant compte de la caméra, de la position et de l'animation.
+    """Affiche l'interface du marché de charmes, permettant au joueur de voir les charmes disponibles à la vente avec leurs prix, et de cliquer pour acheter des charmes si le joueur a suffisamment d'orbes.
     Entrées: fenetre, sell_charms.
     Sortie: Retourne une valeur si applicable, sinon None.
     """

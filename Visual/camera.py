@@ -20,14 +20,14 @@ class Camera:
         self.camera = pygame.Rect(0, 0, self.zoom_w, self.zoom_h)
 
     def apply(self, entity_rect):
-        """Applique la physique et met à jour la position et la vitesse de l'entité, en gérant collisions et frottements.
+        """Applique la transformation de la caméra à une entité, en ajustant sa position en fonction de la position actuelle de la caméra.
         Entrées: entity_rect.
         Sortie: Retourne une valeur si applicable, sinon None.
         """
         return entity_rect.move(self.camera.topleft)
 
     def update_map_size(self, map_width, map_height):
-        """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
+        """Met à jour la taille de la carte pour ajuster les limites de déplacement de la caméra en fonction de la nouvelle taille de la carte.
         Entrées: map_width, map_height.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -37,7 +37,7 @@ class Camera:
         self.camera.y = 0
 
     def update(self, target, shake_amount=0):
-        """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
+        """Met à jour la position de la caméra  en appliquant un lissage pour un mouvement plus fluide, et en limitant le déplacement de la caméra pour ne pas montrer les zones hors limites de la carte. Optionnellement, applique un effet de tremblement de la caméra en ajoutant une quantité aléatoire à la position de la caméra.
         Entrées: target, shake_amount.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -95,7 +95,7 @@ class Background_effect:
 
 
 def create_parallax_layers(map_path, nb_layers, fenetre):
-    """Fait apparaître de l'entité dans le monde et initialise ses paramètres (position, durée, dégâts).
+    """Crée les couches de parallax en chargeant les images de fond à partir du chemin spécifié, en calculant la profondeur de chaque couche en fonction du nombre total de couches, et en instanciant des objets Background_effect pour chaque couche.
     Entrées: map_path, nb_layers, fenetre.
     Sortie: Retourne une valeur si applicable, sinon None.
     """
@@ -108,7 +108,7 @@ def create_parallax_layers(map_path, nb_layers, fenetre):
 
 
 def draw_parallax(fenetre, camera, layers):
-    """Dessine de l'entité à l'écran en tenant compte de la caméra, de la position et de l'animation.
+    """Dessine les couches de parallax à l'écran en appelant la méthode effect de chaque couche, en passant la fenêtre et la caméra comme arguments.
     Entrées: fenetre, camera, layers.
     Sortie: Aucune valeur renvoyée (None).
     """
@@ -152,7 +152,7 @@ for i in range(16):
 
 
 def background_luciole(game_fenetre, offset_x, offset_y, now):
-    """Dessine de l'entité à l'écran en tenant compte de la caméra, de la position et de l'animation.
+    """Dessine les lucioles à l'écran en mettant à jour leur position et leur animation, en tenant compte de la position de la caméra pour ne dessiner que les lucioles proches de la caméra.
     Entrées: game_fenetre, offset_x, offset_y, now.
     Sortie: Aucune valeur renvoyée (None).
     """
@@ -187,7 +187,7 @@ def background_luciole(game_fenetre, offset_x, offset_y, now):
 
 def draw_luciole(surface, x, y, luciole, now):
     # Calculer le niveau de brillance
-    """Dessine de l'entité à l'écran en tenant compte de la caméra, de la position et de l'animation.
+    """Dessine une luciole à l'écran en fonction de sa position, de sa couleur et de son animation de scintillement, en utilisant des cercles pour représenter le halo lumineux et le noyau de la luciole.
     Entrées: surface, x, y, luciole, now.
     Sortie: Retourne une valeur si applicable, sinon None.
     """
@@ -226,7 +226,7 @@ def draw_luciole(surface, x, y, luciole, now):
 
 
 def intro(fenetre):
-    """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
+    """Affiche une introduction 
     Entrées: fenetre.
     Sortie: Aucune valeur renvoyée (None).
     """
