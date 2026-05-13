@@ -1,6 +1,5 @@
 import pygame
 
-
 def reset(player, liste_ennemis, hearts, spawn_point):
     # Fonction de réinitialisation du jeu après la mort du joueur
     """Réinitialise de l'entité à son état de départ en restaurant position, santé et vitesses.

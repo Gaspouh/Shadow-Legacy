@@ -42,9 +42,9 @@ class NPC_Logic:
         self.fenetre = fenetre
 
     def player_in_dialogue(self, player_rect):
-        """Exécute la logique de la fonction player_in_dialogue liée à d'un PNJ, modifiant l'état ou produisant une action spécifique.
+        """Vérifie si le joueur est dans la zone de dialogue.
         Entrées: player_rect.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: Retourne True si le joueur est dans la zone de dialogue et que le dialogue n'a pas encore été déclenché, sinon False.
         """
         if self.dialogue_zone.colliderect(player_rect):
             if not self.dialogue_triggered:
@@ -101,9 +101,9 @@ class NPC_Logic:
         screen.blit(text_surface, text_rect)
 
     def update(self, player_rect, player=None, event=None, e_proches=None):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        """ Met à jour l'état du PNJ 
         Entrées: player_rect, player, event, e_proches.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: Retourne une valeur si applicable
         """
         if self.dialogue_zone.colliderect(player_rect):
             if not self.dialogue_triggered:
@@ -122,7 +122,7 @@ class NPC_Logic:
             if (
                 self.dialogue_type == "upgrade"
             ):  # Si on est dans le dialogue d'upgrade, on attend que le joueur clique sur une des options
-                if hasattr(self, "rect_oui") and self.rect_oui.collidepoint(mouse_pos):  # si la souris pass sur oui
+                if hasattr(self, "rect_oui") and self.rect_oui.collidepoint(mouse_pos):  # si la souris passe sur oui
                     self.confirm_upgrade(player)  # on lance l'amélioration
                     return
                 elif hasattr(self, "rect_non") and self.rect_non.collidepoint(mouse_pos):  # si la souris passe sur non
@@ -152,9 +152,9 @@ class NPC_Logic:
 
     def draw(self, screen, camera=None):
         # Avancer l'animation idle
-        """Dessine d'un PNJ à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        """Dessine d'un PNJ et des bulles de dialogue à l'écran en tenant compte de la caméra, de la position et de l'animation.
         Entrées: screen, camera.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: Aucune valeur renvoyée 
         """
         self.gestion_animation()
 
@@ -322,7 +322,7 @@ class Forgeron(NPC_Logic, Animation):
     def dialogue_equipement(self):
         # lance le dialogue d'amélioration
 
-        """Exécute la logique de la fonction dialogue_equipement liée à d'un PNJ, modifiant l'état ou produisant une action spécifique.
+        """lance le dialogue d'amélioration pour le forgeron, affichant les coûts et demandant au joueur s'il souhaite procéder à l'amélioration.
         Entrées: aucune.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -337,7 +337,7 @@ class Forgeron(NPC_Logic, Animation):
         self.start_dialogue(self.upgrade_dialogue, dialogue_type="upgrade")
 
     def confirm_upgrade(self, player):
-        """Exécute la logique de la fonction confirm_upgrade liée à d'un PNJ, modifiant l'état ou produisant une action spécifique.
+        """ Confirme l'amélioration de l'équipement du joueur en vérifiant les ressources, en appliquant l'amélioration et en lançant le dialogue de confirmation ou de refus.
         Entrées: player.
         Sortie: Aucune valeur renvoyée (None).
         """

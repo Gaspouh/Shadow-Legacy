@@ -113,7 +113,7 @@ class Monnaie:
         fenetre.blit(self.image, self.rect)
 
 
-class Receptacle(pygame.sprite.Sprite):
+class Receptacle():
     def __init__(self, x, y):
         super().__init__()
         self.taken = False
@@ -286,6 +286,15 @@ class Sac_logic:
 
         else:
             self.hit = False  # pour pas attaquer a chaque frame
+   
+    def draw_big(self, game_fenetre, player):
+        """Dessine de la carte à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        Entrées: game_fenetre, player.
+        Sortie: Aucune valeur renvoyée (None).
+        """
+        pass
+
+
 
     def draw(self, fenetre, camera=None):
         """Dessine à l'écran
