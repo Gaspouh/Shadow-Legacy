@@ -63,16 +63,16 @@ class Ennemi(Animation, PhysicsEntity):
     def orienter_sprite(self):
         """Dessine d'un ennemi à l'écran en tenant compte de la caméra, de la position et de l'animation.
         Entrées: aucune.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: Retourne l'orientation du sprite, sinon None.
         """
         if self.direction == 1:  # Afficher la bonne frame en fonction de la direction
             return self.frames_droite[int(self.index_image)]
         return self.frames_gauche[int(self.index_image)]
 
     def dans_trigger(self, player_rect, trigger_range):
-        """Exécute la logique de la fonction dans_trigger liée à d'un ennemi, modifiant l'état ou produisant une action spécifique.
+        """Exécute la logique de la fonction dans_trigger liée à d'un ennemi, vérifie la proximité avec le joueur.
         Entrées: player_rect, trigger_range.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: Retourne True si le joueur est dans le trigger, sinon False.
         """
         trigger = pygame.Rect(
             self.rect.centerx - trigger_range,
@@ -83,9 +83,9 @@ class Ennemi(Animation, PhysicsEntity):
         return trigger.colliderect(player_rect)
 
     def receive_hit(self, attack_data, source_rect, source):
-        """Gère la réception des dégâts d'un ennemi en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
+        """Gère la réception des dégâts d'un ennemi en appliquant les effets selon les attributs de la source (dégâts, recul).
         Entrées: attack_data, source_rect, source.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: Retourne les degats reçus, sinon None.
         """
         # ne pas infliger de dégats si il est mort ou invincible
         if not self.alive or self.is_shielded:
@@ -123,9 +123,9 @@ class Ennemi(Animation, PhysicsEntity):
             self.alive = False
 
     def mort(self):
-        """Calcule et retourne la frame correcte suivant la direction et l'état d'un ennemi pour l'affichage.
+        """Calcule et retourne la frame correcte suivant la direction et l'état d'un ennemi pour l'affichage mort.
         Entrées: aucune.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: Retourne True si l'animation de mort est terminée, sinon False.
         """
         fin = False
         if not self.alive and not self.dead:
@@ -208,9 +208,9 @@ class Projectile:
         self.angle = math.degrees(math.atan2(-self.velocity.y, self.velocity.x))
 
     def update(self, platforms, limite_rect):
-        """Met à jour l'état d'un ennemi en appliquant la logique temporelle, collisions et transitions d'état.
+        """Met à jour l'état du projectile en appliquant la logique temporelle, collisions et transitions d'état.
         Entrées: platforms, limite_rect.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: Retourne True si le projectile doit être supprimé, sinon False.
         """
         if self.use_gravity:
             self.velocity.y += self.gravity
@@ -224,23 +224,23 @@ class Projectile:
             return True  # Indiquer que le projectile doit être supprimé
 
     def lifetime_expired(self):
-        """Exécute la logique de la fonction lifetime_expired liée à d'un ennemi, modifiant l'état ou produisant une action spécifique.
+        """Traite la logique de l'expiration de la durée de vie d'un projectile, vérifie si le temps écoulé dépasse la durée définie.
         Entrées: aucune.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: Retourne True si le temps est écoulé, sinon False.
         """
         return pygame.time.get_ticks() - self.birth_time > self.lifetime
 
     def out_of_bounds(self, limite_rect):
-        """Exécute la logique de la fonction out_of_bounds liée à d'un ennemi, modifiant l'état ou produisant une action spécifique.
+        """Vérifie si le projectile est sorti des limites définies, indiquant qu'il doit être supprimé.
         Entrées: limite_rect.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: Retourne True si le projectile est sorti des limites, sinon False.
         """
         return not limite_rect.colliderect(self.rect)
 
     def disappear_on_contact(self, platforms):
-        """Exécute la logique de la fonction disappear_on_contact liée à d'un ennemi, modifiant l'état ou produisant une action spécifique.
+        """Vérifie les collisions du projectile avec les plateformes et détermine s'il doit disparaître au contact.
         Entrées: platforms.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: Retourne True si le projectile doit disparaître au contact, sinon False.
         """
         if self.should_disappear_on_contact:
             for platform in platforms:
@@ -249,14 +249,13 @@ class Projectile:
         return False
 
     def draw(self, fenetre, camera):
-        """Dessine d'un ennemi à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        """Dessine d'un projectile à l'écran en tenant compte de la caméra, de la position et de l'animation.
         Entrées: fenetre, camera.
         Sortie: Aucune valeur renvoyée (None).
         """
         rotated_image = pygame.transform.rotate(self.image, self.angle)
         new_rect = rotated_image.get_rect(center=camera.apply(self.rect).center)
         fenetre.blit(rotated_image, new_rect)
-
 
 class AttackZone:
     def __init__(self, x, y, width, height, attack_data, image, duration):
@@ -277,9 +276,8 @@ class AttackZone:
             self.image = pygame.Surface((width, height), pygame.SRCALPHA)
 
     def lifetime_expired(self):
-        """Exécute la logique de la fonction lifetime_expired liée à d'un ennemi, modifiant l'état ou produisant une action spécifique.
-        Entrées: aucune.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Traite la logique de l'expiration de la durée de vie d'une hitbox d'attaque, vérifie si le temps écoulé dépasse la durée définie.
+        Sortie: Retourne True si le temps est écoulé, sinon False.
         """
         return pygame.time.get_ticks() - self.birth_time > self.duration
 
@@ -294,23 +292,7 @@ class AttackZone:
 
 
 class Patrouilleur(Ennemi):
-    def __init__(
-        self,
-        fenetre,
-        x,
-        y,
-        sprite_sheet,
-        nb_frames,
-        width,
-        height,
-        marge,
-        ligne,
-        pv_max,
-        vitesse,
-        attack_data,
-        scale,
-        reward=2,
-    ):
+    def __init__(self, fenetre, x, y, sprite_sheet, nb_frames, width, height, marge, ligne, pv_max, vitesse, attack_data,scale,reward=2,):
         super().__init__(
             fenetre,
             x,
@@ -333,11 +315,11 @@ class Patrouilleur(Ennemi):
         self.capteur_on_ground = False
 
     def patrouille(self, platforms):
-        # réinitialiser capteurs à chaque boucle
-        """Met à jour les animations d'un ennemi, avance les frames et gère les transitions entre animations.
+        """Gère la logique de patrouille d'un ennemi en utilisant des capteurs pour détecter les murs et les plateformes, et en changeant de direction en conséquence.
         Entrées: platforms.
         Sortie: Aucune valeur renvoyée (None).
         """
+        # réinitialiser capteurs à chaque boucle
         self.mur = False
         self.capteur_on_ground = False
 
@@ -412,9 +394,9 @@ class Araignee(Patrouilleur):
         self.death_sound_played = False
 
     def mort(self):
-        """Exécute la logique de la fonction mort liée à d'un ennemi, modifiant l'état ou produisant une action spécifique.
+        """ joue le son de mort une fois et exécute la logique de la fonction mort liée à d'un ennemi
         Entrées: aucune.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: appelle la fonction mort de la classe parente Ennemi 
         """
         if not self.death_sound_played:
             self.death_sound.play()
@@ -451,9 +433,9 @@ class Volant(Ennemi):
         self.death_sound_played = False
 
     def poursuite(self, player_rect, platforms):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        """Gère la logique de poursuite d'un ennemi volant en calculant la direction vers le joueur et en appliquant une vitesse constante pour se diriger vers lui.
         Entrées: player_rect, platforms.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: Aucune valeur renvoyée 
         """
         Animation.gestion_animation(self)
         if (
@@ -486,9 +468,9 @@ class Volant(Ennemi):
             self.physics_update(platforms)
 
     def mort(self):
-        """Exécute la logique de la fonction mort liée à d'un ennemi, modifiant l'état ou produisant une action spécifique.
+        """ joue le son de mort une fois et exécute la logique de la fonction mort liée à d'un ennemi
         Entrées: aucune.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: appelle la fonction mort de la classe parente Ennemi 
         """
         if not self.death_sound_played:
             self.death_sound.play()
@@ -533,21 +515,19 @@ class Tourelle(Ennemi):
         self.shoot_sound_played = False
 
     def get_angle_vers_joueur(self, player_rect):
-        """Récupère et retourne des données depuis la sauvegarde ou la configuration pour d'un ennemi.
+        """Calcule l'angle entre la tourelle et le joueur pour orienter le tir.
         Entrées: player_rect.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: Retourne l'angle en degrés entre la tourelle et le joueur pour orienter le tir.
         """
         dx = player_rect.centerx - self.rect.centerx  # composante x du vecteur entre la tourelle et le joueur
         dy = player_rect.centery - self.rect.centery  # composante y du vecteur entre la tourelle et le joueur
         return math.degrees(math.atan2(-dy, dx))  # Calculer l'angle entre la tourelle et le joueur pour orienter le tir
 
-    def update(
-        self, player_rect, player, platforms
-    ):  # j'ai ajouté platform en argument juste pour etre cohérent avec la physique des boss
+    def update(self, player_rect, player, platforms):  
 
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        """Met à jour l'état de la tourelle en gérant la rotation vers le joueur, le tir et les animations associées.
         Entrées: player_rect, player, platforms.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: Aucune valeur renvoyée 
         """
         if self.coldown > 0:
             self.coldown -= 1
@@ -572,9 +552,9 @@ class Tourelle(Ennemi):
         self.rect = self.image.get_rect(center=self.rect.center)
 
     def rotation_vers_joueur(self, player_rect):
-        """Exécute la logique de la fonction rotation_vers_joueur liée à d'un ennemi, modifiant l'état ou produisant une action spécifique.
+        """Gère la rotation de la tourelle pour qu'elle s'oriente vers le joueur, en calculant l'angle cible et en ajustant l'angle actuel de manière fluide.
         Entrées: player_rect.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: Aucune valeur renvoyée
         """
         angle_cible = self.get_angle_vers_joueur(player_rect)
 
@@ -594,9 +574,9 @@ class Tourelle(Ennemi):
         self.angle %= 360
 
     def tir(self, player_rect, tir_tourelle):
-        """Gère la réception des dégâts d'un ennemi en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
+        """Gère la logique de tir de la tourelle en vérifiant les conditions de tir (proximité, cooldown, orientation) et en créant un projectile dirigé vers le joueur.
         Entrées: player_rect, tir_tourelle.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: Aucune valeur renvoyée 
         """
         if self.dans_trigger(player_rect, trigger_range=300) and self.coldown == 0 and self.oriente:
             self.shooting = True
@@ -624,7 +604,7 @@ class Tourelle(Ennemi):
 class Fighter(Ennemi):
     def __init__(self, fenetre, x, y):
 
-        # On applique les caractéristique de l'ennemi débutant a la tourelle
+        # On applique les caractéristique de l'ennemi débutant 
         super().__init__(
             fenetre,
             x,
@@ -649,9 +629,9 @@ class Fighter(Ennemi):
         self.can_receive_knockback = False
 
     def mouvement(self, player_rect, player, platforms):
-        """Gère la réception des dégâts d'un ennemi en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
+        """Met à jour l'état du fighter en gérant la logique de poursuite, d'attaque et de réaction aux collisions, en fonction de la position du joueur et des plateformes.
         Entrées: player_rect, player, platforms.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: Aucune valeur renvoyée 
         """
         Animation.gestion_animation(self)
         # Afficher la bonne frame en fonction de la direction (orientation perso)
@@ -708,9 +688,9 @@ class Fighter(Ennemi):
             self.hitbox = None  # Supprimer la hitbox après la durée de l'attaque
 
     def attaque(self):
-        """Calcule et retourne la frame correcte suivant la direction et l'état d'un ennemi pour l'affichage.
+        """Gère la logique d'attaque du fighter en vérifiant les conditions d'attaque (proximité, cooldown) et en créant une hitbox d'attaque pour infliger des dégâts au joueur.
         Entrées: aucune.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: Retourne la hitbox d'attaque si une attaque est initiée, sinon None.
         """
         if self.attacking:
             return
@@ -814,9 +794,9 @@ class Chargeur(Ennemi):
         self.physics_update(platforms)
 
     def mort(self):
-        """Exécute la logique de la fonction mort liée à d'un ennemi, modifiant l'état ou produisant une action spécifique.
+        """ joue le son de mort une fois et exécute la logique de la fonction mort liée à d'un ennemi
         Entrées: aucune.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: appelle la fonction mort de la classe parente Ennemi 
         """
         if not self.death_sound_played:
             self.death_sound.play()
