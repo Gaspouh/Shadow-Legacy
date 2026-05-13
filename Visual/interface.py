@@ -121,9 +121,9 @@ def home_screen(fenetre):
 
 
 def menu(fenetre, player, checkpoints, current_map_name):
-    """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+    """ dessine le menu pause à l'écran, gère les interactions avec les boutons du menu et exécute les actions correspondantes (reprendre, options, quitter).
     Entrées: fenetre, player, checkpoints, current_map_name.
-    Sortie: Retourne une valeur si applicable, sinon None.
+    Sortie: retourner l'action choisie par le joueur
     """
     pause = True
     # Afficher le menu

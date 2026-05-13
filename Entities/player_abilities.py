@@ -21,7 +21,7 @@ class Ability(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
 
     def update(self, player_rect, player):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        """Met à jour les capacités du joueur en vérifiant les collisions avec les objets de capacité, en débloquant les capacités correspondantes et en gérant les timers pour l'affichage des messages de déblocage.
         Entrées: player_rect, player.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -32,7 +32,7 @@ class Ability(pygame.sprite.Sprite):
             self.text_timer = pygame.time.get_ticks()
 
     def draw(self, game_fenetre, camera):
-        """Dessine du joueur à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        """Dessine l'objet de capacité à l'écran en tenant compte de la caméra et de la position.
         Entrées: game_fenetre, camera.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -40,7 +40,7 @@ class Ability(pygame.sprite.Sprite):
             game_fenetre.blit(self.image, camera.apply(self.rect))
 
     def draw_text(self, game_fenetre):
-        """Dessine du joueur à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        """Affiche un message de déblocage de capacité à l'écran pendant une durée limitée après que le joueur a collecté la capacité.
         Entrées: game_fenetre.
         Sortie: Retourne une valeur si applicable, sinon None.
         """
@@ -144,14 +144,14 @@ class Double_jump:
         self.used = False
 
     def reset(self):  # Appelé quand le joueur touche le sol ou fait un pogo
-        """Réinitialise du joueur à son état de départ en restaurant position, santé et vitesses.
+        """Réinitialise l'état du double saut pour permettre au joueur de l'utiliser à nouveau après avoir touché le sol ou effectué un pogo.
         Entrées: aucune.
         Sortie: Aucune valeur renvoyée (None).
         """
         self.used = False
 
     def can_execute(self, player):
-        """Exécute la logique de la fonction can_execute liée à du joueur, modifiant l'état ou produisant une action spécifique.
+        """Vérifie si le double saut peut être exécuté en fonction de son état de déblocage, de son utilisation précédente et de la position du joueur (doit être en l'air).
         Entrées: player.
         Sortie: Retourne une valeur si applicable, sinon None.
         """
@@ -166,9 +166,9 @@ class sort:
         self.damage = 3
 
     def use(self, player, projectiles):
-        """Gère la réception des dégâts du joueur en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
+        """ lance le sort du joueur en vérifiant les ressources, en créant un projectile et en le lançant dans la direction du joueur.
         Entrées: player, projectiles.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: renvoie si le sort a été lancé avec succès (True) ou non (False).
         """
         if get_player_equipped_charms().get("spell_master"):
             self.cost = 22
@@ -210,9 +210,9 @@ class soin:
         self.duree_soin = 2000  # Durée pendant laquelle le joueur est étourdi après avoir utilisé le soin
 
     def use(self, player):
-        """Exécute la logique de la fonction use liée à du joueur, modifiant l'état ou produisant une action spécifique.
+        """Exécute le soin du joueur en vérifiant les ressources, en appliquant le soin après un délai et en étourdissant le joueur pendant la durée du cooldown du soin.
         Entrées: player.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: Aucune valeur renvoyée 
         """
         now = pygame.time.get_ticks()
         if get_player_equipped_charms().get("fast_heal", False):
@@ -230,9 +230,9 @@ class soin:
             player.stun_duration = self.duree_soin # Le joueur est étourdi après avoir utilisé le soin
 
     def update(self, player):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        """Met à jour  le soin du joueur en vérifiant si le soin est en cours, si le cooldown est écoulé, en appliquant le soin et en gérant l'état d'étourdissement du joueur.
         Entrées: player.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: None.
         """
         if not self.is_healing:
             return
