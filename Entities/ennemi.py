@@ -84,8 +84,10 @@ class Ennemi(Animation, PhysicsEntity):
 
     def receive_hit(self, attack_data, source_rect, source):
         """Gère la réception des dégâts d'un ennemi en appliquant les effets selon les attributs de la source (dégâts, recul).
-        Entrées: attack_data, source_rect, source.
-        Sortie: Retourne les degats reçus, sinon None.
+        Entrées: dictionnaire attack_data, 
+                    surface source_rect, 
+                    objet source.
+        Sortie: rien
         """
         # ne pas infliger de dégats si il est mort ou invincible
         if not self.alive or self.is_shielded:
@@ -208,9 +210,10 @@ class Projectile:
         self.angle = math.degrees(math.atan2(-self.velocity.y, self.velocity.x))
 
     def update(self, platforms, limite_rect):
-        """Met à jour l'état du projectile en appliquant la logique temporelle, collisions et transitions d'état.
-        Entrées: platforms, limite_rect.
-        Sortie: Retourne True si le projectile doit être supprimé, sinon False.
+        """Met à jour l'état du projectile en appliquant la logique temporelle, collisions et angle du sprite.
+        Entrées: liste platforms, 
+                    Surface limite_rect.
+        Sortie: Renvoie True si le projectile doit être supprimé, sinon False.
         """
         if self.use_gravity:
             self.velocity.y += self.gravity
@@ -224,23 +227,23 @@ class Projectile:
             return True  # Indiquer que le projectile doit être supprimé
 
     def lifetime_expired(self):
-        """Traite la logique de l'expiration de la durée de vie d'un projectile, vérifie si le temps écoulé dépasse la durée définie.
+        """Vérifie si le temps écoulé dépasse la durée définie.
         Entrées: aucune.
-        Sortie: Retourne True si le temps est écoulé, sinon False.
+        Sortie: bool True si la durée de vie est dépassée, sinon False.
         """
         return pygame.time.get_ticks() - self.birth_time > self.lifetime
 
     def out_of_bounds(self, limite_rect):
-        """Vérifie si le projectile est sorti des limites définies, indiquant qu'il doit être supprimé.
-        Entrées: limite_rect.
-        Sortie: Retourne True si le projectile est sorti des limites, sinon False.
+        """Vérifie si le projectile est sorti des limites définies.
+        Entrées: Surface limite_rect.
+        Sortie: bool True si le projectile est sorti des limites, sinon False.
         """
         return not limite_rect.colliderect(self.rect)
 
     def disappear_on_contact(self, platforms):
-        """Vérifie les collisions du projectile avec les plateformes et détermine s'il doit disparaître au contact.
-        Entrées: platforms.
-        Sortie: Retourne True si le projectile doit disparaître au contact, sinon False.
+        """Vérifie si le projectile est entrée en collision avec des plateformes.
+        Entrées: liste platforms.
+        Sortie: bool True si le projectile doit disparaître au contact, sinon False.
         """
         if self.should_disappear_on_contact:
             for platform in platforms:
@@ -249,12 +252,13 @@ class Projectile:
         return False
 
     def draw(self, fenetre, camera):
-        """Dessine d'un projectile à l'écran en tenant compte de la caméra, de la position et de l'animation.
-        Entrées: fenetre, camera.
-        Sortie: Aucune valeur renvoyée (None).
+        """Dessine l'image du projectile sur la fenetre de jeu en tenant compte de la caméra, de la rotation du sprite et du centrage d'hitbox.
+        Entrées: Surface fenetre, 
+                objet camera.
+        Sortie: rien.
         """
         rotated_image = pygame.transform.rotate(self.image, self.angle)
-        new_rect = rotated_image.get_rect(center=camera.apply(self.rect).center)
+        new_rect = rotated_image.get_rect(center=camera.apply(self.rect).center) # Pour centrer la hitbox sur la nouvelle image
         fenetre.blit(rotated_image, new_rect)
 
 class AttackZone:
@@ -276,18 +280,18 @@ class AttackZone:
             self.image = pygame.Surface((width, height), pygame.SRCALPHA)
 
     def lifetime_expired(self):
-        """Traite la logique de l'expiration de la durée de vie d'une hitbox d'attaque, vérifie si le temps écoulé dépasse la durée définie.
-        Sortie: Retourne True si le temps est écoulé, sinon False.
+        """Vérifie si le temps écoulé dépasse la durée définie.
+        Entrées: aucune.
+        Sortie: bool True si la durée de vie est dépassée, sinon False.
         """
         return pygame.time.get_ticks() - self.birth_time > self.duration
 
     def draw(self, fenetre, camera):
-        """Dessine d'un ennemi à l'écran en tenant compte de la caméra, de la position et de l'animation.
-        Entrées: fenetre, camera.
-        Sortie: Aucune valeur renvoyée (None).
+        """Dessine l'image de la zone d'attaque sur la fenetre de jeu en tenant compte de la caméra.
+        Entrées: Surface fenetre, 
+                objet camera.
+        Sortie: rien.
         """
-        if pygame.key.get_pressed()[pygame.K_a]:
-            pygame.draw.rect(fenetre, (255, 0, 0), camera.apply(self.rect), 2)
         fenetre.blit(self.image, camera.apply(self.rect))
 
 

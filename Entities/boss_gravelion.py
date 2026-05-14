@@ -195,16 +195,16 @@ class Gravelion(Boss):
         self.position = pygame.math.Vector2(self.rect.centerx, self.rect.bottom)
 
     def is_on_ground(self):
-        """Exécute la logique de la fonction is_on_ground liée à d'un boss, modifiant l'état ou produisant une action spécifique.
-        Entrées: aucune.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Vérifie si le boss est actuellement sur le sol.
+        Entrées: Aucune.
+        Sortie: Booléen indiquant si le boss est au sol.
         """
         return self.current_tp_index in [self.SOL_GAUCHE, self.SOL_DROIT]
 
     def choose_attack(self, player_rect):
-        """Exécute la logique de la fonction choose_attack liée à d'un boss, modifiant l'état ou produisant une action spécifique.
-        Entrées: player_rect.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Choisit l'attaque à exécuter en fonction de la distance au joueur et de la phase.
+        Entrées: Rect player_rect.
+        Sortie: str - nom de l'attaque choisie.
         """
         distance = abs(player_rect.centerx - self.rect.centerx)
 
@@ -220,17 +220,17 @@ class Gravelion(Boss):
 
     # Contre-attaque cocon
     def hit_while_shielded(self):
-        """Exécute la logique de la fonction hit_while_shielded liée à d'un boss, modifiant l'état ou produisant une action spécifique.
-        Entrées: aucune.
-        Sortie: Aucune valeur renvoyée (None).
+        """Active la contre-attaque du cocon lorsque le boss est frappé dans son bouclier.
+        Entrées: Aucune.
+        Sortie: Aucune.
         """
         self.cocon_punish = True
 
     # Update principal du boss
     def update(self, player_rect, player, platforms):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
-        Entrées: player_rect, player, platforms.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour l'état et les animations du boss en fonction de son état courant.
+        Entrées: Rect player_rect, objet player, liste platforms.
+        Sortie: Aucune.
         """
         now = pygame.time.get_ticks()
         elapsed = now - self.state_timer
@@ -267,9 +267,9 @@ class Gravelion(Boss):
     # ETATS
 
     def update_idle(self, elapsed, player_rect):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
-        Entrées: elapsed, player_rect.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour l'état IDLE du boss et passe à l'attaque après la durée spécifiée.
+        Entrées: int elapsed, Rect player_rect.
+        Sortie: Aucune.
         """
         self.current_anim = "idle"
         if elapsed >= self.speed(self.idle_duration):
@@ -281,18 +281,18 @@ class Gravelion(Boss):
                 self.enter_state(self.ATTACKING)
 
     def update_dying(self, elapsed):
-        """Met à jour les animations d'un boss, avance les frames et gère les transitions entre animations.
-        Entrées: elapsed.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour l'animation de mort et désactive le boss à la fin de l'animation.
+        Entrées: int elapsed.
+        Sortie: Aucune.
         """
         self.current_anim = "death"
         if self.anim_over() and elapsed > 500:
             self.alive = False
 
     def update_transition(self):
-        """Met à jour les animations d'un boss, avance les frames et gère les transitions entre animations.
-        Entrées: aucune.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour la transition de phase et augmente la difficulté du boss.
+        Entrées: Aucune.
+        Sortie: Aucune.
         """
         self.current_anim = "transition"
         self.velocity = pygame.math.Vector2(0, 0)
@@ -305,9 +305,9 @@ class Gravelion(Boss):
             self.enter_state(self.TELEPORTING)
 
     def update_attack(self, elapsed, player_rect):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
-        Entrées: elapsed, player_rect.
-        Sortie: Aucune valeur renvoyée (None).
+        """Gère l'exécution de l'attaque courante choisie.
+        Entrées: int elapsed, Rect player_rect.
+        Sortie: Aucune.
         """
         if self.current_attack == self.ATK_MELEE:
             self.attack_melee(elapsed)
@@ -318,9 +318,9 @@ class Gravelion(Boss):
             self.attack_laser(elapsed, head)
 
     def update_cocon(self, elapsed, player_rect, player):
-        """Gère la réception des dégâts d'un boss en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
-        Entrées: elapsed, player_rect, player.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Gère l'état de bouclier du cocon et la contre-attaque si frappé.
+        Entrées: int elapsed, Rect player_rect, objet player.
+        Sortie: Aucune.
         """
         self.current_anim = "cocon"
         self.is_shielded = True  # Pour ne pas prendre de dégats pendant le cocon
@@ -344,9 +344,9 @@ class Gravelion(Boss):
 
     # ATTAQUES
     def attack_melee(self, elapsed):
-        """Gère la réception des dégâts d'un boss en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
-        Entrées: elapsed.
-        Sortie: Aucune valeur renvoyée (None).
+        """Lance une attaque au corps à corps avec une onde de choc.
+        Entrées: int elapsed.
+        Sortie: Aucune.
         """
         self.current_anim = "melee"
         charge = self.speed(600)
@@ -378,9 +378,9 @@ class Gravelion(Boss):
             self.enter_state(self.TELEPORTING)
 
     def attack_arm(self, elapsed, player_rect):
-        """Gère la réception des dégâts d'un boss en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
-        Entrées: elapsed, player_rect.
-        Sortie: Aucune valeur renvoyée (None).
+        """Lance un projectile de bras en direction du joueur.
+        Entrées: int elapsed, Rect player_rect.
+        Sortie: Aucune.
         """
         self.current_anim = "arm"
         charge = self.speed(500)
@@ -405,9 +405,9 @@ class Gravelion(Boss):
             self.enter_state(self.TELEPORTING)
 
     def attack_laser(self, elapsed, head):
-        """Gère la réception des dégâts d'un boss en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
-        Entrées: elapsed, head.
-        Sortie: Aucune valeur renvoyée (None).
+        """Lance un laser vertical qui se déplace latéralement.
+        Entrées: int elapsed, Vector2 head.
+        Sortie: Aucune.
         """
         self.current_anim = "laser_charge"
         charge = self.speed(1000)
@@ -439,9 +439,9 @@ class Gravelion(Boss):
                 self.enter_state(self.TELEPORTING)
 
     def draw(self, fenetre, camera):
-        """Dessine d'un boss à l'écran en tenant compte de la caméra, de la position et de l'animation.
-        Entrées: fenetre, camera.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Affiche le boss et ses éléments d'attaque à l'écran en tenant compte de la caméra.
+        Entrées: Surface fenetre, objet camera.
+        Sortie: Aucune.
         """
         if not self.alive:
             return

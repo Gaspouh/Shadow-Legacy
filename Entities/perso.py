@@ -224,7 +224,7 @@ class Player(PhysicsEntity):
 
     def update(self, platforms):
         """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
-        Entrées: platforms.
+        Entrées: liste platforms.
         Sortie: Aucune valeur renvoyée (None).
         """
         now = pygame.time.get_ticks()
@@ -385,9 +385,9 @@ class Player(PhysicsEntity):
             self.animate()  # Forcer l'idle pendant le stun
 
     def refresh_charms(self):
-        """Gère l'achat d'un charme: vérifie le coût, met à jour les ressources et enregistre la découverte dans la sauvegarde.
-        Entrées: aucune.
-        Sortie: Aucune valeur renvoyée (None).
+        """Recupère les charmes équippés par le joueur et lui applique leurs effets
+        Entrée: Aucune
+        Sortie: Aucune
         """
         self.equipped_charms = get_player_equipped_charms()
 
@@ -398,32 +398,23 @@ class Player(PhysicsEntity):
         self.health_bonus = 2 if self.equipped_charms.get("life_boost") else 0
 
     def press_jump(self):
-        """ déclenche le saut du joueur en fonction de son état actuel (au sol, en l'air, dans du sable mouvant, etc.) et gère les timers associés pour le coyote time et le jump buffer.
-        Entrées: aucune.
-        Sortie: Aucune valeur renvoyée 
+        """déclenche le saut du joueur en fonction de son état actuel (au sol, sur un banc, dans du sable mouvant) et gère le timer du jump buffer.
+        Entrée: aucune.
+        Sortie: Aucune 
         """
         self.is_sitting = False  # Si joueur assis et saute il se leve
         now = pygame.time.get_ticks()
 
-        self.jump_buffer_timer = pygame.time.get_ticks()  # Enregistrer le moment où le bouton de saut est préssé
+        self.jump_buffer_timer = now  # Enregistrer le moment où le bouton de saut est préssé
 
         if self.in_quicksand:
             self.position.y -= 10
             self.quicksand_sink = max(0, self.quicksand_sink - 10)
 
-    def press_dash(self):
-        """Déclenche le dash du joueur en fonction de son état actuel et gère les timers associés pour le dash.
-        Entrées: aucune.
-        Sortie: Retourne une valeur si applicable, sinon None.
-        """
-        if self.is_sitting:
-            return  # Joueur ne peut pas dash sur un banc
-        self.dash.start_dash(self)
-
     def execute_jump(self, jump_type="simple"):
-        """déclenche le saut du joueur en fonction de son état actuel (au sol, en l'air, dans du sable mouvant, etc.) et gère les timers associés pour le coyote time et le jump buffer.
-        Entrées: jump_type.
-        Sortie: Aucune valeur renvoyée (None).
+        """déclenche le saut du joueur en fonction de son état actuel (au sol, en l'air, dans du sable mouvant, etc.), du type de saut (simple, double) et gère les timers associés pour le coyote time et le jump buffer.
+        Entrée: string jump_type.
+        Sortie: aucune
         """
         self.on_ground = False
         self.is_jumping = True
@@ -440,18 +431,18 @@ class Player(PhysicsEntity):
         self.jump_buffer_timer = -1000
 
     def stop_jump(self):
-        """Exécute la logique de la fonction stop_jump liée à du joueur, modifiant l'état ou produisant une action spécifique.
+        """Exécute la logique de la fonction stop_jump liée à du joueur si le joeur est dans la montée de son saut
         Entrées: aucune.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: aucune.
         """
         if self.is_jumping and self.velocity.y < 0:
             self.velocity.y = 0
             self.is_jumping = False
 
     def press_dash(self):
-        """Exécute la logique de la fonction press_dash liée à du joueur, modifiant l'état ou produisant une action spécifique.
-        Entrées: aucune.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Déclenche le dash du joueur en fonction de son état actuel et gère les timers associés pour le dash.
+        Entrées: Rien.
+        Sortie: Rien
         """
         if self.is_sitting:
             return  # Joueur ne peut pas dash sur un banc
@@ -459,9 +450,9 @@ class Player(PhysicsEntity):
 
     # GESTION DE L'ATTAQUE
     def press_attack(self):
-        """ lance une attaque dans la direction indiquée par les entrées du joueur, en vérifiant les conditions de cooldown et en appliquant les effets de l'attaque (dégâts, knockback, etc.) sur les ennemis touchés.
-        Entrées: aucune.
-        Sortie: Aucune valeur renvoyée (None).
+        """ lance une attaque dans la direction indiquée par les entrées du joueur, en vérifiant les conditions de cooldown, d'ennemis deja touchés, et le si coup est critique
+        Entrée: aucune.
+        Sortie: rien non plus.
         """
         now = pygame.time.get_ticks()
         if not self.is_attacking and now - self.last_attack_time >= self.attack_cooldown:
@@ -498,8 +489,8 @@ class Player(PhysicsEntity):
 
     def attack_feedback(self, target):
 
-        """Calcule et retourne la frame correcte suivant la direction et l'état du joueur pour l'affichage.
-        Entrées: target.
+        """Calcule et applique les effets de l'attaque du joueur sur lui-même (recul, pogo)
+        Entrées: objet target.
         Sortie: Retourne une valeur si applicable, sinon None.
         """
         if not target.apply_knockback:
@@ -527,8 +518,11 @@ class Player(PhysicsEntity):
 
     def take_damage(self, attack_data, source_rect, source, fade=None):
         """Gère la réception des dégâts du joueur en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
-        Entrées: attack_data, source_rect, source, fade.
-        Sortie: Retourne une valeur si applicable
+        Entrées: dictionnaire attack_data,
+                    Surface source_rect, 
+                    objet source, 
+                    booléen fade.
+        Sortie: integers hitstop_duration, shake_amount
         """
         now = pygame.time.get_ticks()
 

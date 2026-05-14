@@ -73,10 +73,9 @@ class Boss(Ennemi):
         self.current_anim = "idle"
 
     def receive_hit(self, attack_data, source_rect, source):
-
-        """Gère la réception des dégâts d'un boss en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
-        Entrées: attack_data, source_rect, source.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Gère la réception des dégâts du boss et ses états associés (stagger, phase, mort).
+        Entrées: dict attack_data, Rect source_rect, objet source.
+        Sortie: Aucune.
         """
         if not self.alive:
             return
@@ -101,20 +100,12 @@ class Boss(Ennemi):
         if self.pv_ennemi <= 0 and self.state != self.DYING:
             self.enter_state(self.DYING)
 
-    def hit_while_shielded(self):
-        # Comportement spécifique lorsqu'il est touché avec un bouclier actif propre a chaque boss donc à redéfinir dans chaque classe de boss
-        """ gere le comportement spécifique lorsqu'un boss est touché avec un bouclier actif, modifiant potentiellement l'état du boss ou produisant une action spécifique.
-        Entrées: aucune.
-        Sortie: Aucune valeur renvoyée (None).
-        """
-        pass
-
     # Gestion des états
 
     def enter_state(self, new_state):
-        """ Change l'état d'un boss et réinitialise les timers et flags associés à ce nouvel état.
-        Entrées: new_state.
-        Sortie: Aucune valeur renvoyée (None).
+        """Change l'état du boss et réinitialise les animations et timers.
+        Entrées: str new_state.
+        Sortie: Aucune.
         """
         self.state = new_state
         self.state_timer = pygame.time.get_ticks()
@@ -124,9 +115,9 @@ class Boss(Ennemi):
             self.anims[self.current_anim].fin = False  # Réinitialiser le flag de fin d'animation
 
     def face_player(self, player_rect):
-        """Calcule et retourne la frame correcte suivant la direction et l'état d'un boss pour l'affichage.
-        Entrées: player_rect.
-        Sortie: Aucune valeur renvoyée (None).
+        """Oriente le boss en direction du joueur.
+        Entrées: Rect player_rect.
+        Sortie: Aucune.
         """
         if player_rect.centerx > self.rect.centerx:
             self.direction = 1
@@ -134,9 +125,9 @@ class Boss(Ennemi):
             self.direction = -1
 
     def teleport(self, index):
-        """Téléporte d'un boss à une position cible et ajuste sa hitbox / état si nécessaire.
-        Entrées: index.
-        Sortie: Aucune valeur renvoyée (None).
+        """Téléporte le boss au point de téléportation spécifié.
+        Entrées: int index.
+        Sortie: Aucune.
         """
         x, y = self.tp_points[index]
         self.rect.midbottom = (x, y)
@@ -145,9 +136,9 @@ class Boss(Ennemi):
         self.velocity = pygame.math.Vector2(0, 0)
 
     def teleport_random(self):
-        """Téléporte d'un boss à une position cible et ajuste sa hitbox / état si nécessaire.
-        Entrées: aucune.
-        Sortie: Aucune valeur renvoyée (None).
+        """Téléporte le boss à un point aléatoire en évitant le point courant.
+        Entrées: Aucune.
+        Sortie: Aucune.
         """
         indices = list(range(len(self.tp_points)))
         if self.current_tp_index in indices:
@@ -157,9 +148,9 @@ class Boss(Ennemi):
     # Animation
 
     def update_anim(self, once=False):
-        """Met à jour les animations d'un boss, avance les frames et gère les transitions entre animations.
-        Entrées: once.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour l'animation courante du boss selon sa direction.
+        Entrées: bool once.
+        Sortie: Aucune.
         """
         anim = self.anims[self.current_anim]
 
@@ -176,19 +167,19 @@ class Boss(Ennemi):
             self.image = anim.frames_gauche[index]
 
     def anim_over(self):
-        """Vérifie si l'animation actuelle d'un boss est terminée, ce qui peut être utilisé pour déclencher des transitions d'état ou des actions spécifiques à la fin de l'animation.
-        Entrées: aucune.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Vérifie si l'animation courante est terminée.
+        Entrées: Aucune.
+        Sortie: Booléen indiquant si l'animation est terminée.
         """
         anim = self.anims[self.current_anim]
         return anim.fin
 
     def speed(self, valeur_base, is_proj=False):
-        # Augmente la vitesse de déplacement et d'animation en fonction de la phase
-        """Ajuste la vitesse de déplacement et d'animation d'un boss en fonction de sa phase actuelle, avec des multiplicateurs spécifiques pour les projectiles si nécessaire.
-        Entrées: valeur_base, is_proj.
-        Sortie: Retourne une valeur si applicable
+        """Applique un multiplicateur de vitesse en fonction de la phase du boss.
+        Entrées: float valeur_base, bool is_proj.
+        Sortie: float - vitesse modifiée.
         """
+        # Augmente la vitesse de déplacement et d'animation en fonction de la phase
         if self.phase == 1:
             return valeur_base
         else:
@@ -197,9 +188,9 @@ class Boss(Ennemi):
             return valeur_base / 1.3
 
     def scale_all_anims_speed(self, factor):
-        """Ajuste la vitesse d'animation d'un boss en fonction de sa phase actuelle
-        Entrées: factor.
-        Sortie: Aucune valeur renvoyée
+        """Multiplie la vitesse d'animation de toutes les animations par un facteur.
+        Entrées: float factor.
+        Sortie: Aucune.
         """
         for anims in self.anims.values():
             anims.vitesse_animation *= factor
@@ -207,9 +198,9 @@ class Boss(Ennemi):
     # Spawn et gestion des hitboxs
 
     def spawn_attack_zone(self, x, y, width, height, attack_data, image, duration):
-        """Fait apparaître une hitbox d'attaque pour un boss avec des propriétés spécifiques (dégâts, durée, etc.) et l'ajoute à la liste des hitboxs actives.
-        Entrées: x, y, width, height, attack_data, image, duration.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Crée une zone d'attaque et l'ajoute à la liste des hitboxs.
+        Entrées: int x, int y, int width, int height, dict attack_data, Surface image, int duration.
+        Sortie: objet AttackZone.
         """
         zone = AttackZone(x, y, width, height, attack_data, image, duration)
         self.hitboxs.append(zone)
@@ -230,9 +221,9 @@ class Boss(Ennemi):
         lifetime=3000,
         should_disappear_on_contact=True,
     ):
-        """Gère la réception des dégâts d'un boss en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
-        Entrées: target_x, target_y, speed, width, height, damage, offset_x, offset_y, image, gravity, lifetime, should_disappear_on_contact.
-        Sortie: Aucune valeur renvoyée (None).
+        """Crée un projectile lancé par le boss et l'ajoute à la liste des hitboxs.
+        Entrées: int target_x, int target_y, float speed, int width, int height, int damage, int offset_x, int offset_y, Surface image, float gravity, int lifetime, bool should_disappear_on_contact.
+        Sortie: Aucune.
         """
         projectile = Projectile(
             self.rect.centerx + offset_x,
@@ -251,9 +242,9 @@ class Boss(Ennemi):
         self.hitboxs.append(projectile)
 
     def update_hitbox(self, platforms, limite_rect):
-        """Met à jour les hitboxs actives d'un boss, en gérant les collisions avec les plateformes et les limites de l'arène, et en supprimant les hitboxs expirées ou détruites.
-        Entrées: platforms, limite_rect.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour et nettoie la liste des zones d'attaque et projectiles du boss.
+        Entrées: liste platforms, Rect limite_rect.
+        Sortie: Aucune.
         """
         for elem in self.hitboxs[:]:
             if hasattr(elem, "update"):
@@ -266,9 +257,9 @@ class Boss(Ennemi):
     # Etats génériques
 
     def update_stagger(self, elapsed, platforms):
-        """Met à jour les animations d'un boss, avance les frames et gère les transitions entre animations.
-        Entrées: elapsed, platforms.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour l'état de stagger du boss et retour à l'idle.
+        Entrées: int elapsed, liste platforms.
+        Sortie: Aucune.
         """
         for platform in platforms:
             if self.rect.colliderect(platform.rect):
@@ -284,9 +275,9 @@ class Boss(Ennemi):
             self.touch_ground = False
 
     def update_teleport(self, elapsed, player_rect):
-        """Met à jour l'état d'un boss en appliquant la logique temporelle, collisions et transitions d'état.
-        Entrées: elapsed, player_rect.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour l'état de téléportation du boss.
+        Entrées: int elapsed, Rect player_rect.
+        Sortie: Aucune.
         """
         self.current_anim = "glowing"
         if elapsed >= 600:
@@ -485,7 +476,7 @@ class Golem(Boss):
         )
 
     def _joueur_dans_attack(self, player_rect):
-        """Vérifie si le joueur est dans la zone d'attaque d'un boss.
+        """Exécute la logique de la fonction _joueur_dans_attack liée à d'un boss, modifiant l'état ou produisant une action spécifique.
         Entrées: player_rect.
         Sortie: Retourne une valeur si applicable, sinon None.
         """
@@ -507,7 +498,7 @@ class Golem(Boss):
             self.image = anim.frames_droite[idx] if self.direction == 1 else anim.frames_gauche[idx]
 
     def update(self, player_rect, player, platforms=[]):
-        """Met à jour l'état d'un boss en appliquant la logique temporelle, collisions et transitions d'état.
+        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
         Entrées: player_rect, player, platforms.
         Sortie: Retourne une valeur si applicable, sinon None.
         """
@@ -546,7 +537,7 @@ class Golem(Boss):
 
     def update_idle(self, elapsed, player_rect):
         # Idle
-        """ la logique de l'état d'idle d'un boss, où il peut se déplacer ou attaquer en fonction de la position du joueur et des timers d'attaque.
+        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
         Entrées: elapsed, player_rect.
         Sortie: Retourne une valeur si applicable, sinon None.
         """
@@ -569,7 +560,7 @@ class Golem(Boss):
         self._update_anim(key)
 
     def update_attack(self, elapsed, player_rect, player):
-        """Met à jour l'état d'attaque d'un boss en appliquant la logique temporelle, collisions et transitions d'état, ainsi que les effets de l'attaque sur le joueur si celui-ci est touché.
+        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
         Entrées: elapsed, player_rect, player.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -601,7 +592,7 @@ class Golem(Boss):
 
     def update_dying(self, elapsed):
         # meurt
-        """Exécute la logique de l'état de mort d'un boss, en jouant l'animation de mort et en gérant les effets de la mort (disparition du sprite, récompenses pour le joueur, etc.).
+        """Met à jour l'état d'un boss en appliquant la logique temporelle, collisions et transitions d'état.
         Entrées: elapsed.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -612,7 +603,7 @@ class Golem(Boss):
             self.death_sound_played = True
 
     def mort(self):
-        """Exécute la logique de la fonction mort liée à d'un boss, modifiant l'état 
+        """Exécute la logique de la fonction mort liée à d'un boss, modifiant l'état ou produisant une action spécifique.
         Entrées: aucune.
         Sortie: Retourne une valeur si applicable, sinon None.
         """
@@ -627,6 +618,6 @@ class Golem(Boss):
         if not self.alive:
             return
 
-        # Technique pour aligner le sprite avec la hitbox
+        # Technique pour aligner le spirte avec la hitbox
         visual_rect = self.image.get_rect(midbottom=(self.rect.centerx, self.rect.bottom + 25))
         fenetre.blit(self.image, camera.apply(visual_rect))

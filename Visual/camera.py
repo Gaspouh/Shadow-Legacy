@@ -8,7 +8,6 @@ Chemin_absolu = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 class Camera:
     def __init__(self, width, height, map_width, map_height, zoom=2):
-        """Ajout d'un zoom pour faire des effets plus tard et controler la caméra"""
         self.zoom = zoom
         self.zoom_w = int(width / zoom)
         self.zoom_h = int(height / zoom)
@@ -20,16 +19,16 @@ class Camera:
         self.camera = pygame.Rect(0, 0, self.zoom_w, self.zoom_h)
 
     def apply(self, entity_rect):
-        """Applique la transformation de la caméra à une entité, en ajustant sa position en fonction de la position actuelle de la caméra.
-        Entrées: entity_rect.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Applique le déplacement de la caméra au rectangle d'une entité.
+        Entrées: Rect entity_rect.
+        Sortie: Rect entity_rect (après déplacement)
         """
         return entity_rect.move(self.camera.topleft)
 
     def update_map_size(self, map_width, map_height):
-        """Met à jour la taille de la carte pour ajuster les limites de déplacement de la caméra en fonction de la nouvelle taille de la carte.
-        Entrées: map_width, map_height.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour la taille de la carte et réinitialise la position de la caméra.
+        Entrées: int map_width, int map_height.
+        Sortie: Aucune.
         """
         self.map_width = map_width
         self.map_height = map_height
@@ -37,9 +36,9 @@ class Camera:
         self.camera.y = 0
 
     def update(self, target, shake_amount=0):
-        """Met à jour la position de la caméra  en appliquant un lissage pour un mouvement plus fluide, et en limitant le déplacement de la caméra pour ne pas montrer les zones hors limites de la carte. Optionnellement, applique un effet de tremblement de la caméra en ajoutant une quantité aléatoire à la position de la caméra.
-        Entrées: target, shake_amount.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour la position de la caméra pour suivre la cible avec lissage, ne pas dépasser les limites et effet de tremblement
+        Entrées: objet target, int shake_amount.
+        Sortie: Aucune.
         """
         target_x = -target.rect.centerx + self.zoom_w // 2
         target_y = -target.rect.centery + self.zoom_h // 2

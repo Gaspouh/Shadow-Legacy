@@ -194,7 +194,7 @@ class Demon_King(Boss):
         }
 
         v = 60
-        speeds = {
+        speeds = { #valeurs déterminées apres plusieurs tests, divisé pour ralentir, multiplié pour accélérer
             "idle": 6 / v,
             "move": 8 / v,
             "transform": 32 / v / 3,
@@ -246,9 +246,9 @@ class Demon_King(Boss):
         self.enter_state(self.NOT_TRIGGERED)
 
     def can_play_sound(self, name):
-        """Vérifie si un son peut être joué selon le cooldown et le temps écoulé pour éviter les répétitions.
-        Entrées: name.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Vérifie si un son peut être joué selon son cooldown.
+        Entrées: str name.
+        Sortie: Booléen indiquant si le son peut être joué.
         """
         now = pygame.time.get_ticks()
         if now - self.last_sound > self.sounds_cooldown[name] * 1000:
@@ -258,11 +258,11 @@ class Demon_King(Boss):
 
     # Override de speed() et receive_hit pour le boss final ayant 3 et non 2 phases
     def speed(self, valeur, is_proj=False):
-        # Augmente la vitesse de déplacement et d'animation en fonction de la phase
-        """Exécute la logique de la fonction speed liée à d'un boss, modifiant l'état ou produisant une action spécifique.
-        Entrées: valeur, is_proj.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Applique un multiplicateur de vitesse en fonction de la phase du boss (3 phases).
+        Entrées: float valeur, bool is_proj.
+        Sortie: float - vitesse modifiée.
         """
+        # Augmente la vitesse de déplacement et d'animation en fonction de la phase
         if self.phase == 1:
             return valeur
         elif self.phase == 2:
@@ -275,9 +275,9 @@ class Demon_King(Boss):
             return valeur / facteur
 
     def receive_hit(self, attack_data, source_rect, source):
-        """Gère la réception des dégâts d'un boss en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
-        Entrées: attack_data, source_rect, source.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Gère la réception des dégâts du boss (slime ou démon) et ses transitions de phase.
+        Entrées: dict attack_data, Rect source_rect, objet source.
+        Sortie: Aucune.
         """
         if not self.alive:
             return
@@ -318,9 +318,9 @@ class Demon_King(Boss):
 
     # Attaques
     def choose_attack(self, player_rect):
-        """Exécute la logique de la fonction choose_attack liée à d'un boss, modifiant l'état ou produisant une action spécifique.
-        Entrées: player_rect.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Sélectionne l'attaque à exécuter en fonction de la distance au joueur et de la phase.
+        Entrées: Rect player_rect.
+        Sortie: str - nom de l'attaque choisie.
         """
         distance = abs(player_rect.centerx - self.rect.centerx)
 
@@ -341,9 +341,9 @@ class Demon_King(Boss):
 
     # Update général
     def update(self, player_rect, player, platforms):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
-        Entrées: player_rect, player, platforms.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour l'état du boss selon sa forme (slime ou démon) et ses animations.
+        Entrées: Rect player_rect, objet player, liste platforms.
+        Sortie: Aucune.
         """
         now = pygame.time.get_ticks()
         elapsed = now - self.state_timer
@@ -366,9 +366,9 @@ class Demon_King(Boss):
 
     # Update slime
     def update_slime(self, player_rect, platforms):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
-        Entrées: player_rect, platforms.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour l'état du boss sous sa forme slime.
+        Entrées: Rect player_rect, liste platforms.
+        Sortie: Aucune.
         """
         if self.state == self.NOT_TRIGGERED:
             if self.dans_trigger(player_rect, 500):
@@ -403,9 +403,9 @@ class Demon_King(Boss):
         self.physics_update(platforms)
 
     def update_demon(self, elapsed, player_rect, platforms):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
-        Entrées: elapsed, player_rect, platforms.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour l'état du boss sous sa forme roi démon selon l'état courant.
+        Entrées: int elapsed, Rect player_rect, liste platforms.
+        Sortie: Aucune.
         """
         if self.state == self.IDLE:
             self.update_idle(elapsed, player_rect)
@@ -439,9 +439,9 @@ class Demon_King(Boss):
         # ETATS
 
     def update_idle(self, elapsed, player_rect):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
-        Entrées: elapsed, player_rect.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour l'état IDLE et transition vers attaque selon la distance et le temps écoulé.
+        Entrées: int elapsed, Rect player_rect.
+        Sortie: Aucune.
         """
         self.current_anim = "demon_walk"
         self.face_player(player_rect)
@@ -455,9 +455,9 @@ class Demon_King(Boss):
             self.enter_state(self.ATTACKING)
 
     def update_dying(self, elapsed):
-        """Met à jour les animations d'un boss, avance les frames et gère les transitions entre animations.
-        Entrées: elapsed.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour l'animation de mort et désactive le boss à la fin de l'animation.
+        Entrées: int elapsed.
+        Sortie: Aucune.
         """
         self.anims["death"].vitesse_animation = 0.1
         self.current_anim = "death"
@@ -469,9 +469,9 @@ class Demon_King(Boss):
             self.alive = False
 
     def update_attack(self, elapsed, player_rect):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
-        Entrées: elapsed, player_rect.
-        Sortie: Aucune valeur renvoyée (None).
+        """Dirige vers l'attaque actuelle en fonction du type choisi.
+        Entrées: int elapsed, Rect player_rect.
+        Sortie: Aucune.
         """
         if self.current_attack == self.ATK_CLEAVE:
             self.attack_cleave(elapsed)
@@ -484,9 +484,9 @@ class Demon_King(Boss):
 
     # transitions avec Fade
     def update_disappearing(self, elapsed):
-        """Met à jour les animations d'un boss, avance les frames et gère les transitions entre animations.
-        Entrées: elapsed.
-        Sortie: Aucune valeur renvoyée (None).
+        """Gère la disparition progressive du boss lors d'une transition de phase.
+        Entrées: int elapsed.
+        Sortie: Aucune.
         """
         if self.once:
             self.transition_sound.play()
@@ -504,9 +504,9 @@ class Demon_King(Boss):
             self.once = True
 
     def update_reappearing(self, elapsed, player_rect):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
-        Entrées: elapsed, player_rect.
-        Sortie: Aucune valeur renvoyée (None).
+        """Gère la réapparition progressive du boss après une transition de phase.
+        Entrées: int elapsed, Rect player_rect.
+        Sortie: Aucune.
         """
         self.current_anim = "demon_idle"
         self.velocity.x = 0
@@ -521,9 +521,9 @@ class Demon_King(Boss):
             self.enter_state(self.IDLE)
 
     def appliquer_phase(self, nouvelle_phase):
-        """Exécute la logique de la fonction appliquer_phase liée à d'un boss, modifiant l'état ou produisant une action spécifique.
-        Entrées: nouvelle_phase.
-        Sortie: Aucune valeur renvoyée (None).
+        """Applique les modifications de la nouvelle phase (téléportation et augmentation de vitesse).
+        Entrées: int nouvelle_phase.
+        Sortie: Aucune.
         """
         self.phase = nouvelle_phase
         self.teleport_random()
@@ -536,9 +536,9 @@ class Demon_King(Boss):
 
     # attaques
     def attack_cleave(self, elapsed):
-        """Gère la réception des dégâts d'un boss en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
-        Entrées: elapsed.
-        Sortie: Aucune valeur renvoyée (None).
+        """Lance une attaque de coup d'épée avec zone d'impact.
+        Entrées: int elapsed.
+        Sortie: Aucune.
         """
         self.current_anim = "demon_cleave"
         charge = self.speed(530)
@@ -566,9 +566,9 @@ class Demon_King(Boss):
             self.enter_state(self.IDLE)
 
     def attack_smash(self, elapsed, player_rect):
-        """Gère la réception des dégâts d'un boss en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
-        Entrées: elapsed, player_rect.
-        Sortie: Aucune valeur renvoyée (None).
+        """Lance une attaque de coup d'écrasement avec saut et onde de choc en phase 3.
+        Entrées: int elapsed, Rect player_rect.
+        Sortie: Aucune.
         """
         self.current_anim = "demon_smash"
         charge = self.speed(400)
@@ -626,9 +626,9 @@ class Demon_King(Boss):
             self.enter_state(self.IDLE)
 
     def attack_fire_breath(self, elapsed):
-        """Gère la réception des dégâts d'un boss en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
-        Entrées: elapsed.
-        Sortie: Aucune valeur renvoyée (None).
+        """Lance un souffle de feu déscendant.
+        Entrées: int elapsed.
+        Sortie: Aucune.
         """
         self.current_anim = "demon_fire_breath"
         charge = self.speed(800)
@@ -668,9 +668,9 @@ class Demon_King(Boss):
                 self.enter_state(self.IDLE)
 
     def attack_cast_spell(self, elapsed):
-        """Gère la réception des dégâts d'un boss en appliquant les effets selon les attributs de la source (dégâts, type, recul, invincibilité, etc.).
-        Entrées: elapsed.
-        Sortie: Aucune valeur renvoyée (None).
+        """Lance une rafale de projectiles magiques (1 en phase 1, 3 en phase 2, 5 aléatoires en phase 3).
+        Entrées: int elapsed.
+        Sortie: Aucune.
         """
         charge = self.speed(1000)
         self.current_anim = "demon_cast_spell"
@@ -713,10 +713,10 @@ class Demon_King(Boss):
             if elapsed >= charge + self.speed(1200):
                 self.enter_state(self.IDLE)
 
-    def draw(self, fenetre, camera):  # Override de la méthode de Boss
-        """Dessine d'un boss à l'écran en tenant compte de la caméra, de la position et de l'animation.
-        Entrées: fenetre, camera.
-        Sortie: Retourne une valeur si applicable, sinon None.
+    def draw(self, fenetre, camera):
+        """Affiche le boss et ses éléments d'attaque avec gestion du fade lors des transitions.
+        Entrées: Surface fenetre, objet camera.
+        Sortie: Aucune.
         """
         if not self.alive:
             return

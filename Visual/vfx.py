@@ -60,9 +60,9 @@ class Fade:
         self.wait_start = None
 
     def start(self, state, speed, wait=0):
-        """Exécute la logique de la fonction start liée à de l'entité, modifiant l'état ou produisant une action spécifique.
-        Entrées: state, speed, wait.
-        Sortie: Aucune valeur renvoyée (None).
+        """Démarre un effet de fondu avec l'état, la vitesse et le délai spécifiés.
+        Entrées: str state ("in", "out", "wait"), int speed, int wait.
+        Sortie: Aucune.
         """
         self.state = state
         self.speed = speed
@@ -74,9 +74,9 @@ class Fade:
             self.intensity = 255  # Commence dans le transparent pour passer au noir
 
     def update(self, fenetre):
-        """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
-        Entrées: fenetre.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour l'effet de fondu et l'affiche sur la fenêtre.
+        Entrées: Surface fenetre.
+        Sortie: Aucune.
         """
         if self.state is not None:
             if self.state == "out":

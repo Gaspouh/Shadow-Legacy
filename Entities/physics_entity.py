@@ -20,9 +20,9 @@ class PhysicsEntity:
 
     def apply_physics(self):
 
-        """Applique la physique et met à jour la position et la vitesse de l'entité, en gérant collisions et frottements.
+        """Applique la physique (gravité) et met à jour la position et la vitesse de l'entité avec seuils
         Entrées: aucune.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: Rien
         """
         self.acceleration.x = 0
         self.acceleration.y = 0
@@ -45,9 +45,9 @@ class PhysicsEntity:
     def move_horizontal(self, platforms):
 
         # Déplacement entité
-        """Applique la physique et met à jour la position et la vitesse de l'entité, en gérant collisions et frottements.
-        Entrées: platforms.
-        Sortie: Aucune valeur renvoyée (None).
+        """Applique le déplacement et les collisons horizontales
+        Entrées: liste platforms.
+        Sortie: Aucune 
         """
         self.position.x += self.velocity.x + 0.5 * self.acceleration.x
         self.rect.centerx = self.position.x
@@ -67,9 +67,9 @@ class PhysicsEntity:
     def move_vertical(self, platforms):
 
         # Déplacement entité
-        """Applique la physique et met à jour la position et la vitesse de l'entité, en gérant collisions et frottements.
-        Entrées: platforms.
-        Sortie: Aucune valeur renvoyée (None).
+        """Applique le déplacement et les collisons verticales
+        Entrées: liste platforms.
+        Sortie: Aucune
         """
         self.position.y += self.velocity.y + 0.5 * self.acceleration.y
         self.rect.bottom = self.position.y
@@ -90,9 +90,9 @@ class PhysicsEntity:
 
     def physics_update(self, platforms):
 
-        """Met à jour l'état de l'entité en appliquant la logique temporelle, collisions et transitions d'état.
-        Entrées: platforms.
-        Sortie: Aucune valeur renvoyée (None).
+        """Appelle les 3 méthodes précédentes pour mettre à jour toute la physique en une incursion
+        Entrées: liste platforms.
+        Sortie: Rien
         """
         self.apply_physics()
         self.move_horizontal(platforms)

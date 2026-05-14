@@ -61,7 +61,6 @@ class Checkpoint(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
         self.activated = False  # devient True quand le joueur passe dessus
 
-        # pygame.draw.rect(self.image, (0, 255, 0), self.image.get_rect(), 2) # hitbox pour test du gameplay
 
 
 class SpawnPoint:  # L'endroit ou le joeur spawn apres un changement de salle
@@ -83,9 +82,9 @@ class Map_Manager:
         self.fenetre = fenetre
 
     def load_map(self, path):
-        """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de la carte.
-        Entrées: path.
-        Sortie: Aucune valeur renvoyée (None).
+        """Charge une carte depuis un fichier .tmx et initialise ses éléments.
+        Entrée: str path.
+        Sortie: Aucune.
         """
         tmx_data = pytmx.load_pygame((path), pixelalpha=True)
 
@@ -108,12 +107,13 @@ class Map_Manager:
 
         background_folder = os.path.join(os.path.dirname(path), "Background")
 
-        self.nb_parallax_layers = len([fichier for fichier in os.listdir(background_folder) if fichier != "0.png"])
+        self.nb_parallax_layers = len([fichier for fichier in os.listdir(background_folder) if fichier != "0.png"]) #le 0.png est l'image du background de base deja tout superposé
 
     def spawn_entities(self, fenetre, map_rect):
-        """Applique la physique et met à jour la position et la vitesse de la carte, en gérant collisions et frottements.
-        Entrées: fenetre, map_rect.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Fais spawn les entités (ennemis et boss) de la carte.
+        Entrées: Surface fenetre, 
+                    Rect map_rect.
+        Sortie: liste d'entités.
         """
         (
             araignee,
@@ -159,18 +159,19 @@ class Map_Manager:
         return liste_entites
 
     def get_spawn(self, name):
-        """Calcule et retourne le point de spawn à utiliser pour de la carte selon les checkpoints actifs.
-        Entrées: name.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Retourne le point d'apparition correspondant au nom donné.
+        Entrées: str name.
+        Sortie: objet SpawnPoint
         """
         spawn = self.spawnpoints.get(name)
         return spawn
 
 
 def create_map(tmx_data, fenetre):
-    """Fait apparaître de la carte dans le monde et initialise ses paramètres (position, durée, dégâts).
-    Entrées: tmx_data, fenetre.
-    Sortie: Retourne une valeur si applicable, sinon None.
+    """Parcourt les données TMX et crée tous les éléments de la carte.
+    Entrées: objet tmx_data, 
+                Surface fenetre.
+    Sortie: tuple (platforms, special_platforms, traps, decorations, checkpoints, spawnpoints, doors, entities_to_spawn, objets, pnj, abilities).
     """
     platforms = []
     special_platforms = []
@@ -243,7 +244,7 @@ def create_map(tmx_data, fenetre):
                 pass
 
             elif tile_type == "saw":
-                traps.append(Saw(pos_x, pos_y, TILE_SIZE // 2))
+                traps.append(Saw(pos_x, pos_y, TILE_SIZE // 2)) #Tile size//2 car il s'agit du rayon
 
     for obj in tmx_data.objects:
         obj_type = obj.properties.get("obj_type")

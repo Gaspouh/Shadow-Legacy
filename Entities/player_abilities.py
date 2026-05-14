@@ -21,9 +21,10 @@ class Ability(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
 
     def update(self, player_rect, player):
-        """Met à jour les capacités du joueur en vérifiant les collisions avec les objets de capacité, en débloquant les capacités correspondantes et en gérant les timers pour l'affichage des messages de déblocage.
-        Entrées: player_rect, player.
-        Sortie: Aucune valeur renvoyée (None).
+        """Vérifie si le joueur entre en collision avec l'objet d'abilité et le déverrouille si c'est le cas.
+        Entrées: Rect player_rect, 
+                    objet player.
+        Sortie: Aucune.
         """
         if not self.collected and self.rect.colliderect(player_rect):
             unlock_ability(self.ability_name)
@@ -32,17 +33,18 @@ class Ability(pygame.sprite.Sprite):
             self.text_timer = pygame.time.get_ticks()
 
     def draw(self, game_fenetre, camera):
-        """Dessine l'objet de capacité à l'écran en tenant compte de la caméra et de la position.
-        Entrées: game_fenetre, camera.
-        Sortie: Aucune valeur renvoyée (None).
+        """Affiche l'objet d'aptitude sur la fenetre de jeu si non collecté.
+        Entrées: Surface game_fenetre, 
+                    objet camera.
+        Sortie: Aucune.
         """
         if not self.collected:
             game_fenetre.blit(self.image, camera.apply(self.rect))
 
     def draw_text(self, game_fenetre):
-        """Affiche un message de déblocage de capacité à l'écran pendant une durée limitée après que le joueur a collecté la capacité.
-        Entrées: game_fenetre.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Affiche le texte de déblocage de l'aptitude sur l'écran pendant 3.5 secondes.
+        Entrées: Surface game_fenetre.
+        Sortie: Aucune.
         """
         if not self.text_timer or pygame.time.get_ticks() - self.text_timer > 3500:
             return
@@ -76,9 +78,9 @@ class Dash:
         self.dash_invincible = False  # Flag pour savoir si l'invincibilité vient du dash
 
     def start_dash(self, player):
-        """Vérifie si un son peut être joué selon le cooldown et le temps écoulé pour éviter les répétitions.
-        Entrées: player.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Initie un dash du joueur s'il est déverrouillé et le cooldown écoulé.
+        Entrées: objet player.
+        Sortie: Booléen indiquant si le dash a été déclenché.
         """
         now = pygame.time.get_ticks()
 
@@ -103,9 +105,9 @@ class Dash:
         return False
 
     def update(self, player):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
-        Entrées: player.
-        Sortie: Aucune valeur renvoyée (None).
+        """Met à jour l'état du dash et applique la vélocité appropriée au joueur.
+        Entrées: objet player.
+        Sortie: Aucune.
         """
         if self.in_use:
             now = pygame.time.get_ticks()
@@ -143,17 +145,17 @@ class Double_jump:
         self.strength = cfg_dj.get("strength", -12)
         self.used = False
 
-    def reset(self):  # Appelé quand le joueur touche le sol ou fait un pogo
-        """Réinitialise l'état du double saut pour permettre au joueur de l'utiliser à nouveau après avoir touché le sol ou effectué un pogo.
-        Entrées: aucune.
-        Sortie: Aucune valeur renvoyée (None).
+    def reset(self): # Appelé quand le joueur touche le sol ou fait un pogo
+        """Réinitialise le double saut pour permettre au joueur de l'utiliser à nouveau.
+        Entrées: Aucune.
+        Sortie: Aucune.
         """
         self.used = False
 
     def can_execute(self, player):
-        """Vérifie si le double saut peut être exécuté en fonction de son état de déblocage, de son utilisation précédente et de la position du joueur (doit être en l'air).
-        Entrées: player.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        """Vérifie si le joueur peut exécuter le double saut.
+        Entrées: objet player.
+        Sortie: Booléen indiquant si le double saut peut être exécuté.
         """
         if self.unlocked and not self.used and not player.on_ground:
             return True
