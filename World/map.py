@@ -225,10 +225,10 @@ def create_map(tmx_data, fenetre):
                 special_platforms.append(Special_Platform(pos_x, pos_y, image, effect="ice"))
 
             # Pièges
-            elif tile_type == "lava":  #'198, 69, 36) - 1
+            elif tile_type == "lava":  
                 traps.append(Lava(pos_x, pos_y, TILE_SIZE))
 
-            elif tile_type == "acid":  # (30, 110, 80) - 2
+            elif tile_type == "acid":  
                 traps.append(Acid(pos_x, pos_y, TILE_SIZE))
 
             elif tile_type == "thorns":

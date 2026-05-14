@@ -40,7 +40,6 @@ class Ennemi(Animation, PhysicsEntity):
 
         # Etat
         self.alive = True
-        self.reward = reward
         self.ignore_invincibility = False
         self.respawn_on_touch = False
         self.is_shielded = False
@@ -59,9 +58,10 @@ class Ennemi(Animation, PhysicsEntity):
         self.pv_ennemi = pv_max
         self.vitesse_deplacement = vitesse
         self.attack_data = attack_data
+        self.reward = reward
 
     def orienter_sprite(self):
-        """Dessine d'un ennemi à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        """Calcule et retourne la frame correcte suivant la direction d'un ennemi pour l'affichage.
         Entrées: aucune.
         Sortie: Retourne l'orientation du sprite, sinon None.
         """
@@ -70,7 +70,7 @@ class Ennemi(Animation, PhysicsEntity):
         return self.frames_gauche[int(self.index_image)]
 
     def dans_trigger(self, player_rect, trigger_range):
-        """Exécute la logique de la fonction dans_trigger liée à d'un ennemi, vérifie la proximité avec le joueur.
+        """Vérifie si le joueur est dans la zone de détection (trigger) d'un ennemi en créant un rectangle de détection autour de l'ennemi et en vérifiant la collision avec le rectangle du joueur.
         Entrées: player_rect, trigger_range.
         Sortie: Retourne True si le joueur est dans le trigger, sinon False.
         """

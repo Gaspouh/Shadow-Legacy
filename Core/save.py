@@ -22,7 +22,7 @@ MAP_PATHS = {
     "parcours": "Parcours.tmx",
     "parcours": "Parcours_2.tmx",
     "mines": "final_boss.tmx",
-    "industrial": "gravelion_arene"
+    "industrial": "gravelion_arene.tmx"
 }
 
 TMX_TO_FOLDER = {
@@ -68,7 +68,7 @@ DEFAULT_SPAWNS = {
 def load_config():
     """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de l'entité.
     Entrées: aucune.
-    Sortie: Retourne une valeur si applicable, sinon None.
+    Sortie: Retourne le dico du json
     """
     if not os.path.exists(CONFIG_FILE):
         return None
@@ -79,7 +79,7 @@ def load_config():
 def get_saved_map():
     """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de l'entité.
     Entrées: aucune.
-    Sortie: Retourne une valeur si applicable, sinon None.
+    Sortie: Renvoie les maps sauvegardées
     """
     if not os.path.exists(SAVE_FILE):
         return MAP_NAME[0], MAP_PATHS[MAP_NAME[0]]  # fallback swamp
@@ -121,7 +121,7 @@ def get_spawn_from_checkpoints(checkpoints, map_path):
 def get_player_equipped_charms():
     """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de l'entité.
     Entrées: aucune.
-    Sortie: Retourne une valeur si applicable, sinon None.
+    Sortie: Renvoie les charms équippé du joueur
     """
     if not os.path.exists(SAVE_FILE):
         return None
@@ -135,7 +135,7 @@ def get_player_equipped_charms():
 def get_player_found_charms():
     """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de l'entité.
     Entrées: aucune.
-    Sortie: Retourne une valeur si applicable, sinon None.
+    Sortie: meme chose mais pour les charms trouvés du joueur
     """
     if not os.path.exists(SAVE_FILE):
         return None
@@ -149,7 +149,7 @@ def get_player_found_charms():
 def get_player_unlocked_abilities():
     """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de l'entité.
     Entrées: aucune.
-    Sortie: Retourne une valeur si applicable, sinon None.
+    Sortie: pareil pour les abilités débloquée
     """
     if not os.path.exists(SAVE_FILE):
         return {"dash": False, "double_jump": False}
@@ -161,7 +161,7 @@ def get_player_unlocked_abilities():
 def unlock_ability(ability_name):
     """Exécute la logique de la fonction unlock_ability liée à de l'entité, modifiant l'état ou produisant une action spécifique.
     Entrées: ability_name.
-    Sortie: Retourne une valeur si applicable, sinon None.
+    Sortie: verifie la save
     """
     if not os.path.exists(SAVE_FILE):
         return
@@ -183,7 +183,7 @@ def sauvegarder(
     # Sauvegarder l'état du jeu dans un fichier json
     """Sauvegarde l'état courant lié à de l'entité (player, checkpoints, objets) dans le fichier de sauvegarde.
     Entrées: player, checkpoints, map_name, forgeron_instance, index_last_checkpoint, cadavre.
-    Sortie: Aucune valeur renvoyée (None).
+    Sortie: modifie le json
     """
     spawn = get_spawn_from_checkpoints(checkpoints, map_name)
     safe_map_name = map_name.lower() if map_name else "swamp"
@@ -390,7 +390,7 @@ def charms_images():
 def get_chunks_params():
     """Récupère et retourne des données depuis la sauvegarde ou la configuration pour de l'entité.
     Entrées: aucune.
-    Sortie: Retourne une valeur si applicable, sinon None.
+    Sortie: return dans config.json la valeur de chunk
     """
     if not os.path.exists(CONFIG_FILE):
         return None
@@ -402,7 +402,7 @@ def get_chunks_params():
 def buy_charm(charm_name, price):
     """Gère l'achat d'un charme: vérifie le coût, met à jour les ressources et enregistre la découverte dans la sauvegarde.
     Entrées: charm_name, price.
-    Sortie: Retourne une valeur si applicable, sinon None.
+    Sortie: modifie le nb d'orbs de Monnaie
     """
 
     buy_sound = pygame.mixer.Sound("Assets/sounds/buy_item.mp3")

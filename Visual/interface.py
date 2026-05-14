@@ -7,9 +7,8 @@ from Core.save import (
     buy_charm,
     save_backup
 )
-import os
 import json
-from World.objets import Receptacle, Monnaie
+from World.objets import Monnaie
 
 pygame.mixer.init()
 over_sound = pygame.mixer.Sound("Assets/Sounds/over_button.mp3")

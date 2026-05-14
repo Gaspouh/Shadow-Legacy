@@ -547,6 +547,6 @@
    </properties>
    <polygon points="0,0 37.2439,0 37.2439,24.2086 0,24.2086"/>
   </object>
-  <object id="51" name="Banc" gid="1627" x="5580.61" y="1298.17" width="14.7847" height="33"/>
+  <object id="51" name="Banc" gid="1627" x="5808.61" y="2058.17" width="14.7847" height="33"/>
  </objectgroup>
 </map>
