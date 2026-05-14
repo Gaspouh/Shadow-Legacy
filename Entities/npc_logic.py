@@ -44,7 +44,7 @@ class NPC_Logic:
     def player_in_dialogue(self, player_rect):
         """Vérifie si le joueur est dans la zone de dialogue.
         Entrées: player_rect.
-        Sortie: Retourne True si le joueur est dans la zone de dialogue et que le dialogue n'a pas encore été déclenché, sinon False.
+        Sortie: Retourne True si le joueur est dans la zone de dialogue et que le dialogue n'a pas encore été déclenché, sinon None.
         """
         if self.dialogue_zone.colliderect(player_rect):
             if not self.dialogue_triggered:
@@ -54,7 +54,7 @@ class NPC_Logic:
     def start_dialogue(self, dialogue_list, dialogue_type="normal"):
         """Exécute la logique de la fonction start_dialogue liée à d'un PNJ, modifiant l'état ou produisant une action spécifique.
         Entrées: dialogue_list, dialogue_type.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: modifie l'état du npc
         """
         self.current_dialogue_list = dialogue_list
         self.dialogue_index = 0
@@ -65,7 +65,7 @@ class NPC_Logic:
     def build_dialogue_bubble(self, screen, text, pos):
         """Dessine d'un PNJ à l'écran en tenant compte de la caméra, de la position et de l'animation.
         Entrées: screen, text, pos.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: dessine avec pygame
         """
         font = pygame.font.SysFont("Arial", 16, bold=True)
         # Gestion du padding et de la taille
@@ -103,7 +103,7 @@ class NPC_Logic:
     def update(self, player_rect, player=None, event=None, e_proches=None):
         """ Met à jour l'état du PNJ 
         Entrées: player_rect, player, event, e_proches.
-        Sortie: Retourne une valeur si applicable
+        Sortie: modifie l'état du npc
         """
         if self.dialogue_zone.colliderect(player_rect):
             if not self.dialogue_triggered:
@@ -154,7 +154,7 @@ class NPC_Logic:
         # Avancer l'animation idle
         """Dessine d'un PNJ et des bulles de dialogue à l'écran en tenant compte de la caméra, de la position et de l'animation.
         Entrées: screen, camera.
-        Sortie: Aucune valeur renvoyée 
+        Sortie: dessine dans la fenetre
         """
         self.gestion_animation()
 
@@ -324,7 +324,7 @@ class Forgeron(NPC_Logic, Animation):
 
         """lance le dialogue d'amélioration pour le forgeron, affichant les coûts et demandant au joueur s'il souhaite procéder à l'amélioration.
         Entrées: aucune.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: lance le dialogue
         """
         self.upgrade_dialogue = [
             "Je peux améliorer ton arme si tu me donnes "
@@ -339,7 +339,7 @@ class Forgeron(NPC_Logic, Animation):
     def confirm_upgrade(self, player):
         """ Confirme l'amélioration de l'équipement du joueur en vérifiant les ressources, en appliquant l'amélioration et en lançant le dialogue de confirmation ou de refus.
         Entrées: player.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: verifie si le joueur peut s'améliorer et modifie l'état
         """
         if (
             player.minerais >= self.upgrade_cost and Monnaie.orbs >= self.orb_cost
@@ -356,7 +356,7 @@ class Forgeron(NPC_Logic, Animation):
         # Retire les ressources du joueur
         """Exécute la logique de la fonction upgrade liée à d'un PNJ, modifiant l'état ou produisant une action spécifique.
         Entrées: player.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: joueur perd ses orbs et minerais et est amélioré
         """
         player.minerais -= self.upgrade_cost
         Monnaie.orbs -= self.orb_cost
