@@ -744,7 +744,7 @@ class Chargeur(Ennemi):
         self.death_sound_played = False
 
     def charge(self, player_rect, platforms):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        """Gère la logique de charge du chargeur en vérifiant la proximité avec le joueur, en initiant une charge après un temps de préparation, et en appliquant une vitesse élevée pendant la charge.
         Entrées: player_rect, platforms.
         Sortie: Aucune valeur renvoyée (None).
         """

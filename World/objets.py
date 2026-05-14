@@ -20,9 +20,9 @@ class Coeur(Animation):
     def update(self, current_player_health, heart_index):
 
         # on compare l'index du cœur avec la santé actuelle du joueur pour déterminer l'état du cœur
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        """Met à jour l'état du cœur en fonction de la santé actuelle du joueur, en jouant l'animation de mort si la santé diminue, et en affichant un cœur vide si le cœur est mort.
         Entrées: current_player_health, heart_index.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: Aucune valeur renvoyée 
         """
         if heart_index >= current_player_health and self.state == "ALIVE":
             # on enlève un cœur si la santé du joueur diminue
@@ -67,7 +67,7 @@ class Monnaie:
 
     @staticmethod  # permet de rendre global
     def add_orbs(amount, cadavre=False):
-        """Exécute la logique de la fonction add_orbs liée à de la carte, modifiant l'état ou produisant une action spécifique.
+        """Ajoute un certain nombre d'orbes à la monnaie du joueur, en appliquant un multiplicateur si le joueur a le charme "more_coin" équipé et que les orbes ne proviennent pas d'un cadavre.
         Entrées: amount, cadavre.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -79,7 +79,7 @@ class Monnaie:
             Monnaie.orbs += amount
 
     def draw(self, fenetre):
-        """Dessine de la carte à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        """Dessine à l'écran le nombre d'orbes du joueur avec un effet de brillance, en tenant compte de la position et de l'animation.
         Entrées: fenetre.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -113,7 +113,7 @@ class Monnaie:
         fenetre.blit(self.image, self.rect)
 
 
-class Receptacle(pygame.sprite.Sprite):
+class Receptacle():
     def __init__(self, x, y):
         super().__init__()
         self.taken = False
@@ -130,7 +130,7 @@ class Receptacle(pygame.sprite.Sprite):
 
     def update(self, player, objets, current_map_name, data):
         # Logique pour vérifier si le joueur est proche du réceptacle et peut le prendre
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        """Met à jour le réceptacle en vérifiant la collision avec le joueur pour permettre la collecte, et en mettant à jour l'état du réceptacle en conséquence.
         Entrées: player, objets, current_map_name, data.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -163,7 +163,7 @@ class Receptacle(pygame.sprite.Sprite):
             player.receptacles = 0  # Reset les réceptacles après avoir obtenu le cœur
 
     def draw_big(self, game_fenetre, player):
-        """Dessine de la carte à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        """Dessine en grand le réceptacle à l'écran pour indiquer qu'il a été pris, en tenant compte de la caméra, de la position et de l'animation.
         Entrées: game_fenetre, player.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -203,7 +203,7 @@ class Minerai(pygame.sprite.Sprite):
 
     def update(self, player, objets, current_map_name, data):
         # Logique pour vérifier si le joueur est proche du minerai et peut le prendre
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        """ met à jour les minerais en vérifiant la collision avec le joueur pour permettre la collecte, et en mettant à jour l'état du minerai en conséquence.
         Entrées: player, objets, current_map_name, data.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -223,9 +223,9 @@ class Minerai(pygame.sprite.Sprite):
                     json.dump(data, f, indent=4)
 
     def draw_big(self, game_fenetre, player):
-        """Dessine de la carte à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        """ Dessine en grand le minerai à l'écran pour indiquer qu'il a été pris, en tenant compte de la caméra, de la position et de l'animation.
         Entrées: game_fenetre, player.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: Aucune valeur renvoyée 
         """
         if self.taken:  # Affiche le minerai en grand pendant 2 secondes après l'avoir pris
             now = pygame.time.get_ticks()
@@ -286,7 +286,7 @@ class Sac_logic:
 
         else:
             self.hit = False  # pour pas attaquer a chaque frame
-
+   
     def draw_big(self, game_fenetre, player):
         """Dessine de la carte à l'écran en tenant compte de la caméra, de la position et de l'animation.
         Entrées: game_fenetre, player.
@@ -294,10 +294,12 @@ class Sac_logic:
         """
         pass
 
+
+
     def draw(self, fenetre, camera=None):
-        """Dessine de la carte à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        """Dessine à l'écran
         Entrées: fenetre, camera.
-        Sortie: Aucune valeur renvoyée (None).
+        Sortie: Aucune valeur renvoyée 
         """
         if self.alive:
             pos = camera.apply(self.rect) if camera else self.rect
@@ -329,7 +331,7 @@ class grand_sac(Sac_logic):
 
 
 class Cadavre:
-    """permet au  jouerr de recuperer ses orbes apres etre mort"""
+    """permet au  joueur de recuperer ses orbes apres etre mort"""
 
     def __init__(self, x, y, orbs, map_name):
         self.orbs = orbs
@@ -341,7 +343,7 @@ class Cadavre:
         self.map_name = map_name
 
     def update(self, player):
-        """Met à jour l'état du joueur (position, santé, capacités) en fonction des entrées, des collisions et du temps.
+        """Met à jour le cadavre en vérifiant la collision avec le joueur pour permettre la récupération des orbes, et en mettant à jour l'état du cadavre en conséquence.
         Entrées: player.
         Sortie: Aucune valeur renvoyée (None).
         """
@@ -361,9 +363,9 @@ class Cadavre:
                 json.dump(data, f, indent=4)
 
     def draw(self, screen, camera=None):
-        """Dessine de la carte à l'écran en tenant compte de la caméra, de la position et de l'animation.
+        """ Dessine le cadavre à l'écran en tenant compte de la caméra, de la position et de l'animation.
         Entrées: screen, camera.
-        Sortie: Retourne une valeur si applicable, sinon None.
+        Sortie: Aucune valeur renvoyée 
         """
         if not self.alive:
             return

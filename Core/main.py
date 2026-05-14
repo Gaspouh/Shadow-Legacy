@@ -3,6 +3,7 @@ import os
 import sys
 from random import randint
 
+# Add project root to path for imports
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
@@ -33,7 +34,7 @@ info_ecran = pygame.display.Info()
 
 # Configs
 GAME_WIDTH, GAME_HEIGHT = 1920, 1080
-fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.FULLSCREEN | pygame.DOUBLEBUF, vsync=1)
+fenetre = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.RESIZABLE | pygame.DOUBLEBUF, vsync=1)
 pygame.display.set_caption("Shadow Legacy")  # Définir le titre de la fenêtre
 
 zoom = 1.5  # zoom
