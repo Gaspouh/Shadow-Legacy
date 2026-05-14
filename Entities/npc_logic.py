@@ -2,8 +2,6 @@ from Visual.sprite_sheet import VerticalAnimation, Animation
 import pygame
 from Visual.interface import charms_market
 from World.objets import Monnaie
-from Core.save import sauvegarder
-
 
 class NPC_Logic:
     IDLE = "idle"

@@ -2,7 +2,6 @@ import math
 
 import pygame
 import random
-from Entities.ennemi import Ennemi
 from Entities.boss_logic import Boss
 from Visual.sprite_sheet import Animation
 

@@ -18,8 +18,7 @@ from Visual.camera import (
 )
 from Visual.vfx import particles, Particle, Fade, HealParticle, heal_particles
 from World.traps import *
-from World.objets import Coeur, Monnaie, Receptacle, Minerai, Cadavre
-from Entities.boss_gravelion import Gravelion
+from World.objets import Coeur, Monnaie, Cadavre
 from Core.save import *
 from Visual.interface import menu, sit_on_bench, home_screen, annonce_text
 from Core.reset import reset

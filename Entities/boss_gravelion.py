@@ -395,6 +395,9 @@ class Gravelion(Boss):
                 offset_x=self.direction * 60,
                 offset_y=-20,
                 image=pygame.image.load("Assets\Boss\Gravelion\Arm_projectile.png").convert_alpha(),
+                gravity=0.4,
+                lifetime=9999,
+                should_disappear_on_contact=False
             )
             self.atk_spawned = True
 

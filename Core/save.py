@@ -22,7 +22,7 @@ MAP_PATHS = {
     "parcours": "Parcours.tmx",
     "parcours": "Parcours_2.tmx",
     "mines": "final_boss.tmx",
-    "industrial": "gravelion_arene"
+    "industrial": "gravelion_arene.tmx"
 }
 
 TMX_TO_FOLDER = {

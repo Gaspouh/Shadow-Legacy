@@ -4,7 +4,6 @@ from Entities.player_abilities import Dash, Double_jump, sort, soin
 from Core.save import load_config, get_player_equipped_charms
 from Entities.physics_entity import PhysicsEntity
 from Visual.sprite_sheet import VerticalAnimation
-from Visual.vfx import Fade
 
 
 class Player(PhysicsEntity):
@@ -229,8 +228,6 @@ class Player(PhysicsEntity):
         Sortie: Aucune valeur renvoyée (None).
         """
         now = pygame.time.get_ticks()
-        equipped_charms = get_player_equipped_charms()
-
         if (
             self.on_ground and not self.in_quicksand and now - self.safe_position_timer > 500
         ):  # enregistrement du dernier sol safe (toutes les 500ms pour éviter les surcharge de données)
@@ -339,7 +336,7 @@ class Player(PhysicsEntity):
             can_jump = now - self.coyote_timer <= 150
             want_to_jump = now - self.jump_buffer_timer <= 150
 
-            if want_to_jump and self.quicksand_sink < 3:
+            if want_to_jump and self.quicksand_sink < 3: # < 3 pour permettre le saut une fois presque a la surface
                 if can_jump:
                     self.execute_jump(
                         jump_type="simple"
@@ -396,7 +393,7 @@ class Player(PhysicsEntity):
 
         self.speed = 4 if self.equipped_charms.get("speed_boost") else 3
         self.jump_strength = -14 * 1.2 if self.equipped_charms.get("jump_boost") else -14
-        self.range_bonus = 40 if self.equipped_charms.get("attack_long_range") else 0
+        self.range_bonus = 35 if self.equipped_charms.get("attack_long_range") else 0
         self.no_kb = self.equipped_charms.get("no_knockback")
         self.health_bonus = 2 if self.equipped_charms.get("life_boost") else 0
 
@@ -413,15 +410,6 @@ class Player(PhysicsEntity):
         if self.in_quicksand:
             self.position.y -= 10
             self.quicksand_sink = max(0, self.quicksand_sink - 10)
-
-    def press_dash(self):
-        """Exécute la logique de la fonction press_dash liée à du joueur, modifiant l'état ou produisant une action spécifique.
-        Entrées: aucune.
-        Sortie: Retourne une valeur si applicable, sinon None.
-        """
-        if self.is_sitting:
-            return  # Joueur ne peut pas dash sur un banc
-        self.dash.start_dash(self)
 
     def execute_jump(self, jump_type="simple"):
         """Exécute la logique de la fonction execute_jump liée à du joueur, modifiant l'état ou produisant une action spécifique.
@@ -450,6 +438,15 @@ class Player(PhysicsEntity):
         if self.is_jumping and self.velocity.y < 0:
             self.velocity.y = 0
             self.is_jumping = False
+
+    def press_dash(self):
+        """Exécute la logique de la fonction press_dash liée à du joueur, modifiant l'état ou produisant une action spécifique.
+        Entrées: aucune.
+        Sortie: Retourne une valeur si applicable, sinon None.
+        """
+        if self.is_sitting:
+            return  # Joueur ne peut pas dash sur un banc
+        self.dash.start_dash(self)
 
     # GESTION DE L'ATTAQUE
     def press_attack(self):

@@ -40,7 +40,6 @@ class Ennemi(Animation, PhysicsEntity):
 
         # Etat
         self.alive = True
-        self.reward = reward
         self.ignore_invincibility = False
         self.respawn_on_touch = False
         self.is_shielded = False
@@ -59,6 +58,7 @@ class Ennemi(Animation, PhysicsEntity):
         self.pv_ennemi = pv_max
         self.vitesse_deplacement = vitesse
         self.attack_data = attack_data
+        self.reward = reward
 
     def orienter_sprite(self):
         """Dessine d'un ennemi à l'écran en tenant compte de la caméra, de la position et de l'animation.
@@ -185,8 +185,8 @@ class Projectile:
 
         self.attack_data = {
             "damage": damage,
-            "knockback_x": self.velocity.x * 0.5,
-            "knockback_y": self.velocity.y * 0.5,
+            "knockback_x": self.velocity.x * 2,
+            "knockback_y": self.velocity.y * 2,
         }
 
         # Etat
@@ -210,7 +210,7 @@ class Projectile:
     def update(self, platforms, limite_rect):
         """Met à jour l'état du projectile en appliquant la logique temporelle, collisions et transitions d'état.
         Entrées: platforms, limite_rect.
-        Sortie: Retourne True si le projectile doit être supprimé, sinon False.
+        Sortie: Retourne True si le projectile doit être supprimé, sinon None.
         """
         if self.use_gravity:
             self.velocity.y += self.gravity
